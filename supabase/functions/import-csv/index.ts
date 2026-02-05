@@ -65,11 +65,49 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { table, csvData } = await req.json();
+    const { table, csvData, action } = await req.json();
 
-    if (!table || !csvData) {
+    if (!table) {
       return new Response(
-        JSON.stringify({ error: "Missing table or csvData" }),
+        JSON.stringify({ error: "Missing table" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Handle clear action
+    if (action === "clear") {
+      const validTables = ["lovable_prompts", "lovable_entities", "lovable_domains"];
+      if (!validTables.includes(table)) {
+        return new Response(
+          JSON.stringify({ error: `Unknown table: ${table}` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Delete in correct order due to foreign keys
+      if (table === "lovable_prompts") {
+        await supabase.from("lovable_domains").delete().neq("prompt_hash", "");
+        await supabase.from("lovable_entities").delete().neq("prompt_hash", "");
+      }
+      
+      const { error } = await supabase.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: `Cleared ${table}` }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!csvData) {
+      return new Response(
+        JSON.stringify({ error: "Missing csvData" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
