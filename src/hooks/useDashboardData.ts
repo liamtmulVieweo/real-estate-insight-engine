@@ -169,11 +169,11 @@ export function useDistinctMarkets() {
     queryFn: async (): Promise<string[]> => {
       const { data, error } = await supabase
         .from("lovable_prompts")
-        .select("market")
-        .not("market", "is", null);
+        .select("primary_market")
+        .not("primary_market", "is", null);
       
       if (error) throw error;
-      const markets = [...new Set((data || []).map(d => d.market).filter(Boolean))];
+      const markets = [...new Set((data || []).map(d => d.primary_market).filter(Boolean))];
       return markets.sort() as string[];
     },
   });
