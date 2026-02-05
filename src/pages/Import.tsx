@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Trash2 } from "lucide-react";
 
 type TableName = "lovable_prompts" | "lovable_entities" | "lovable_domains";
 
@@ -10,6 +11,33 @@ const Import = () => {
   const [status, setStatus] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const clearTable = async (table: TableName) => {
+    if (!confirm(`Are you sure you want to delete ALL data from ${table}? This cannot be undone.`)) {
+      return;
+    }
+    
+    setIsLoading(true);
+    setProgress(50);
+    setStatus(`Clearing ${table}...`);
+
+    try {
+      const { error } = await supabase.functions.invoke("import-csv", {
+        body: { table, action: "clear" },
+      });
+
+      setProgress(100);
+      if (error) {
+        setStatus(`Error: ${error.message}`);
+      } else {
+        setStatus(`Successfully cleared all data from ${table}`);
+      }
+    } catch (err) {
+      setStatus(`Error: ${(err as Error).message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const importFromFile = async (table: TableName, filePath: string) => {
     setIsLoading(true);
@@ -108,8 +136,17 @@ const Import = () => {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Import lovable_entities</CardTitle>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => clearTable("lovable_entities")}
+              disabled={isLoading}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
           </CardHeader>
           <CardContent>
             <label className="block text-sm font-medium mb-2">Upload CSV file:</label>
@@ -123,8 +160,17 @@ const Import = () => {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Import lovable_domains</CardTitle>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => clearTable("lovable_domains")}
+              disabled={isLoading}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
           </CardHeader>
           <CardContent>
             <label className="block text-sm font-medium mb-2">Upload CSV file:</label>
