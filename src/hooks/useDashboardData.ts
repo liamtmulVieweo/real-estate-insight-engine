@@ -11,6 +11,33 @@ import type {
   MarketData,
 } from "@/types/dashboard";
 
+async function fetchAllRows<T>(
+  table: string,
+  select: string,
+  batchSize = 1000
+): Promise<T[]> {
+  const all: T[] = [];
+  let from = 0;
+
+  while (true) {
+    const to = from + batchSize - 1;
+    const { data, error } = await (supabase as any)
+      .from(table)
+      .select(select)
+      .range(from, to);
+
+    if (error) throw error;
+
+    const batch = (data || []) as T[];
+    all.push(...batch);
+
+    if (batch.length < batchSize) break;
+    from += batchSize;
+  }
+
+  return all;
+}
+
 export function useBrokerageList() {
   return useQuery({
     queryKey: ["brokerages"],
@@ -20,9 +47,9 @@ export function useBrokerageList() {
         .select("*")
         .order("total_mentions", { ascending: false })
         .limit(100);
-      
+
       if (error) throw error;
-      return (data || []).map(d => ({
+      return (data || []).map((d) => ({
         brokerage: d.brokerage || "",
         total_mentions: Number(d.total_mentions) || 0,
         unique_prompts: Number(d.unique_prompts) || 0,
@@ -40,7 +67,7 @@ export function useDashboardSummary(targetBrokerage: string, targetMarket?: stri
         target_brokerage: targetBrokerage,
         target_market: targetMarket || null,
       });
-      
+
       if (error) throw error;
       return data as unknown as DashboardSummary;
     },
@@ -56,7 +83,7 @@ export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: s
         target_brokerage: targetBrokerage,
         market_filter: marketFilter || null,
       });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -71,7 +98,7 @@ export function useMissedMarketOpportunities(targetBrokerage: string) {
       const { data, error } = await supabase.rpc("get_missed_market_opportunities", {
         target_brokerage: targetBrokerage,
       });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -86,7 +113,7 @@ export function useUnderIndexSegments(targetBrokerage: string) {
       const { data, error } = await supabase.rpc("get_underindex_segments", {
         target_brokerage: targetBrokerage,
       });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -114,9 +141,9 @@ export function usePromptIntelligence(filters: {
         page_limit: filters.limit || 20,
         page_offset: 0,
       });
-      
+
       if (error) throw error;
-      return (data || []).map(d => ({
+      return (data || []).map((d) => ({
         ...d,
         mentioned_entities: d.mentioned_entities as unknown as PromptIntelligence["mentioned_entities"],
       }));
@@ -131,7 +158,7 @@ export function useSourceAttribution(targetBrokerage: string) {
       const { data, error } = await supabase.rpc("get_source_attribution_comparison", {
         target_brokerage: targetBrokerage,
       });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -148,7 +175,7 @@ export function useMarketRankings(targetBrokerage: string) {
         .select("*")
         .eq("brokerage", targetBrokerage)
         .order("mentions", { ascending: false });
-      
+
       if (error) throw error;
       return (data || []).map((d, idx) => ({
         market: d.market || "",
@@ -165,17 +192,16 @@ export function useMarketRankings(targetBrokerage: string) {
 
 export function useDistinctMarkets() {
   return useQuery({
-    // Note: queryKey changed to force cache refresh after switching to primary_market
+    // paginated fetch avoids the 1000-row default cap
     queryKey: ["distinct-primary-markets"],
     queryFn: async (): Promise<string[]> => {
-      const { data, error } = await supabase
-        .from("lovable_prompts")
-        .select("primary_market")
-        .not("primary_market", "is", null);
-      
-      if (error) throw error;
-      const markets = [...new Set((data || []).map(d => d.primary_market).filter(Boolean))];
-      return markets.sort() as string[];
+      const rows = await fetchAllRows<{ primary_market: string | null }>(
+        "lovable_prompts",
+        "primary_market"
+      );
+
+      const markets = [...new Set(rows.map((r) => r.primary_market).filter(Boolean))];
+      return (markets as string[]).sort();
     },
   });
 }
@@ -184,14 +210,13 @@ export function useDistinctPropertyTypes() {
   return useQuery({
     queryKey: ["distinct-property-types"],
     queryFn: async (): Promise<string[]> => {
-      const { data, error } = await supabase
-        .from("lovable_prompts")
-        .select("property_type")
-        .not("property_type", "is", null);
-      
-      if (error) throw error;
-      const types = [...new Set((data || []).map(d => d.property_type).filter(Boolean))];
-      return types.sort() as string[];
+      const rows = await fetchAllRows<{ property_type: string | null }>(
+        "lovable_prompts",
+        "property_type"
+      );
+
+      const types = [...new Set(rows.map((r) => r.property_type).filter(Boolean))];
+      return (types as string[]).sort();
     },
   });
 }
@@ -200,14 +225,14 @@ export function useDistinctRoles() {
   return useQuery({
     queryKey: ["distinct-roles"],
     queryFn: async (): Promise<string[]> => {
-      const { data, error } = await supabase
-        .from("lovable_prompts")
-        .select("broker_role")
-        .not("broker_role", "is", null);
-      
-      if (error) throw error;
-      const roles = [...new Set((data || []).map(d => d.broker_role).filter(Boolean))];
-      return roles.sort() as string[];
+      const rows = await fetchAllRows<{ broker_role: string | null }>(
+        "lovable_prompts",
+        "broker_role"
+      );
+
+      const roles = [...new Set(rows.map((r) => r.broker_role).filter(Boolean))];
+      return (roles as string[]).sort();
     },
   });
 }
+
