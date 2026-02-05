@@ -165,7 +165,8 @@ export function useMarketRankings(targetBrokerage: string) {
 
 export function useDistinctMarkets() {
   return useQuery({
-    queryKey: ["distinct-markets"],
+    // Note: queryKey changed to force cache refresh after switching to primary_market
+    queryKey: ["distinct-primary-markets"],
     queryFn: async (): Promise<string[]> => {
       const { data, error } = await supabase
         .from("lovable_prompts")
