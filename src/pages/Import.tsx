@@ -113,10 +113,20 @@ const Import = () => {
         <h1 className="text-3xl font-bold">CSV Data Import</h1>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Import lovable_prompts</CardTitle>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => clearTable("lovable_prompts")}
+              disabled={isLoading}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Clear All
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">⚠️ Clearing prompts will also clear entities and domains (foreign keys)</p>
             <Button 
               onClick={() => importFromFile("lovable_prompts", "/data/lovable_prompts.csv")}
               disabled={isLoading}
