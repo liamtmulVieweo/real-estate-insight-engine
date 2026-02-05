@@ -90,7 +90,14 @@ Deno.serve(async (req) => {
         await supabase.from("lovable_entities").delete().neq("prompt_hash", "");
       }
       
-      const { error } = await supabase.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      // Use correct primary key column per table
+      let deleteResult;
+      if (table === "lovable_prompts") {
+        deleteResult = await supabase.from(table).delete().neq("prompt_hash", "");
+      } else {
+        deleteResult = await supabase.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      }
+      const { error } = deleteResult;
       
       if (error) {
         return new Response(
