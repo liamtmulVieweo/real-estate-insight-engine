@@ -108,8 +108,8 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                             style={{ width: `${item.percentile}%` }}
                           />
                         </div>
-                        <span className="text-xs font-medium w-10 text-right">
-                          {item.percentile.toFixed(0)}%
+                        <span className="text-xs font-medium w-12 text-right">
+                          {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
                         </span>
                       </div>
                     </td>
