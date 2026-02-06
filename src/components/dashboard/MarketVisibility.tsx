@@ -85,7 +85,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                 {topMarkets.map((item) => (
                   <tr key={item.market} className="border-b border-border/50 hover:bg-muted/30">
                     <td className="py-3 px-2 font-medium">{item.market}</td>
-                    <td className="py-3 px-2 text-right">{(item.marketSharePct * 100).toFixed(1)}%</td>
+                    <td className="py-3 px-2 text-right">{item.marketSharePct.toFixed(1)}%</td>
                     <td className="py-3 px-2 text-right">
                       <span className="font-semibold">#{item.rank}</span>
                       <span className="text-muted-foreground text-xs ml-1">
@@ -126,7 +126,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                 <XAxis type="number" />
                 <YAxis type="category" dataKey="market" width={75} tick={{ fontSize: 11 }} />
                 <Tooltip
-                  formatter={(value: number) => [`${(value * 100).toFixed(1)}%`, "Market Share"]}
+                  formatter={(value: number) => [`${value.toFixed(1)}%`, "Market Share"]}
                   contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))" }}
                 />
                 <Bar dataKey="marketSharePct" radius={[0, 4, 4, 0]}>
