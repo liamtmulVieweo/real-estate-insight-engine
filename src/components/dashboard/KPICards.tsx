@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   TrendingUp, 
   MapPin, 
+  Map,
   Award,
   AlertCircle,
   ArrowUpRight,
@@ -46,9 +47,16 @@ export function KPICards({ summary, isLoading, submarkets = [], submarketsLoadin
       color: "text-green-600 bg-green-100",
     },
     {
-      id: "markets",
+      id: "primary-markets",
+      label: "Markets Present",
+      value: summary?.primary_markets_present || 0,
+      icon: Map,
+      color: "text-blue-600 bg-blue-100",
+    },
+    {
+      id: "submarkets",
       label: "Submarkets Present",
-      value: summary?.markets_present || 0,
+      value: summary?.submarkets_present || 0,
       icon: MapPin,
       color: "text-purple-600 bg-purple-100",
       hoverContent: submarkets.length > 0 ? (
