@@ -244,3 +244,43 @@ export function useDistinctRoles() {
   });
 }
 
+export function useSubmarketsForBrokerage(targetBrokerage: string) {
+  return useQuery({
+    queryKey: ["submarkets-for-brokerage", targetBrokerage],
+    queryFn: async (): Promise<string[]> => {
+      const rows = await fetchAllRows<{
+        submarket: string | null;
+        brokerage: string | null;
+        name: string | null;
+      }>(
+        "lovable_entities",
+        "brokerage, name, prompt_hash"
+      );
+
+      // Get prompt hashes for this brokerage
+      const brokeragePromptHashes = new Set(
+        rows
+          .filter((r) => (r.brokerage || r.name) === targetBrokerage)
+          .map((r) => (r as any).prompt_hash)
+      );
+
+      // Now fetch submarkets for those prompts
+      const promptRows = await fetchAllRows<{
+        prompt_hash: string;
+        submarket: string | null;
+      }>("lovable_prompts", "prompt_hash, submarket");
+
+      const submarkets = [
+        ...new Set(
+          promptRows
+            .filter((p) => brokeragePromptHashes.has(p.prompt_hash) && p.submarket)
+            .map((p) => p.submarket)
+        ),
+      ];
+
+      return (submarkets as string[]).sort();
+    },
+    enabled: !!targetBrokerage,
+  });
+}
+
