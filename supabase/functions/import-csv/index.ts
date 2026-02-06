@@ -96,6 +96,32 @@ Deno.serve(async (req) => {
     // Use service role client for actual database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // ============= ADMIN ROLE CHECK =============
+    const { data: adminRole, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleError) {
+      console.error("Role check error:", roleError.message);
+      return new Response(
+        JSON.stringify({ error: "Failed to verify permissions" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!adminRole) {
+      console.warn(`User ${userId} attempted import without admin role`);
+      return new Response(
+        JSON.stringify({ error: "Forbidden: Admin access required" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Admin user ${userId} authorized for import operation`);
+
     const { table, csvData, action } = await req.json();
 
     if (!table) {
