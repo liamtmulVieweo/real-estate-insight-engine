@@ -166,6 +166,7 @@ Deno.serve(async (req) => {
 
       // For tables that reference lovable_prompts(prompt_hash), skip rows whose prompt_hash doesn't exist.
       // This avoids entire-batch failure due to FK constraints.
+      // We check in smaller sub-batches to avoid URL length limits on the .in() query.
       if (table === "lovable_entities" || table === "lovable_domains") {
         const hashes = Array.from(
           new Set(
@@ -176,24 +177,30 @@ Deno.serve(async (req) => {
         );
 
         if (hashes.length > 0) {
-          const { data: existing, error: existingErr } = await supabase
-            .from("lovable_prompts")
-            .select("prompt_hash")
-            .in("prompt_hash", hashes);
+          const existingSet = new Set<string>();
+          const hashCheckBatchSize = 50; // smaller batches to avoid URL length limits
 
-          if (existingErr) {
-            console.error(`FK precheck error (batch ${i / batchSize + 1}):`, existingErr.message);
-            errors.push(`FK precheck batch ${i / batchSize + 1}: ${existingErr.message}`);
-            // Fall back to attempting the insert; it may still work.
-          } else {
-            const existingSet = new Set((existing ?? []).map((r) => r.prompt_hash));
-            const filtered = rawBatch.filter((r) => {
-              const h = (r["prompt_hash"] as string | null) ?? "";
-              return existingSet.has(h);
-            });
-            skippedMissingPrompt += rawBatch.length - filtered.length;
-            batch = filtered;
+          for (let j = 0; j < hashes.length; j += hashCheckBatchSize) {
+            const hashChunk = hashes.slice(j, j + hashCheckBatchSize);
+            const { data: existing, error: existingErr } = await supabase
+              .from("lovable_prompts")
+              .select("prompt_hash")
+              .in("prompt_hash", hashChunk);
+
+            if (existingErr) {
+              console.error(`FK precheck error (batch ${i / batchSize + 1}, chunk ${j / hashCheckBatchSize + 1}):`, existingErr.message);
+              errors.push(`FK precheck batch ${i / batchSize + 1}: ${existingErr.message}`);
+            } else {
+              (existing ?? []).forEach((r) => existingSet.add(r.prompt_hash));
+            }
           }
+
+          const filtered = rawBatch.filter((r) => {
+            const h = (r["prompt_hash"] as string | null) ?? "";
+            return existingSet.has(h);
+          });
+          skippedMissingPrompt += rawBatch.length - filtered.length;
+          batch = filtered;
         }
 
         if (batch.length === 0) {
