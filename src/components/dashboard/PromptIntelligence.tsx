@@ -91,6 +91,22 @@ export function PromptIntelligence({ prompts, isLoading }: PromptIntelligencePro
                         <p className="font-medium">{prompt.broker_role || "N/A"}</p>
                       </div>
                     </div>
+                    {prompt.mentioned_entities && prompt.mentioned_entities.length > 0 && (
+                      <div className="mt-3">
+                        <span className="text-muted-foreground text-xs">Brokerages Mentioned</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {[...new Set(
+                            prompt.mentioned_entities
+                              .map((e) => e.brokerage || e.name)
+                              .filter(Boolean)
+                          )].map((brokerage) => (
+                            <Badge key={brokerage} variant="secondary" className="text-xs">
+                              {brokerage}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {prompt.source_domains && prompt.source_domains.length > 0 && (
                       <div className="mt-3">
                         <span className="text-muted-foreground text-xs">Sources</span>
