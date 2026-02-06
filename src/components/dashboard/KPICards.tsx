@@ -82,7 +82,6 @@ export function KPICards({ summary, isLoading, submarkets = [], submarketsLoadin
       id: "rank",
       label: "Market Rank",
       value: summary?.market_rank ? `#${summary.market_rank}` : "N/A",
-      subValue: summary?.percentile ? `Top ${100 - summary.percentile}%` : undefined,
       icon: Award,
       color: "text-amber-600 bg-amber-100",
     },
