@@ -72,11 +72,11 @@ export function MissedOpportunities({
           </CardContent>
         </Card>
 
-        {/* Under-Indexed Specialties */}
+        {/* Missing Specialties */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Under-Indexed Specialties</CardTitle>
-            <CardDescription>Property types and roles where you lag behind peers</CardDescription>
+            <CardTitle className="text-base">Missing Specialties</CardTitle>
+            <CardDescription>Property types and roles where you have no presence</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoadingDimensions ? (
