@@ -21,6 +21,7 @@ import {
   useDistinctMarkets,
   useDistinctPropertyTypes,
   useDistinctRoles,
+  useSubmarketsForBrokerage,
 } from "@/hooks/useDashboardData";
 import type { Filters } from "@/types/dashboard";
 
@@ -82,6 +83,10 @@ export default function Dashboard() {
   const { data: marketData = [], isLoading: loadingMarkets } = useMarketRankings(
     selectedBrokerage
   );
+  
+  const { data: submarkets = [], isLoading: loadingSubmarkets } = useSubmarketsForBrokerage(
+    selectedBrokerage
+  );
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -116,7 +121,12 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Section 2: Executive Overview - KPI Cards */}
         <section>
-          <KPICards summary={summary} isLoading={loadingSummary} />
+          <KPICards 
+            summary={summary} 
+            isLoading={loadingSummary} 
+            submarkets={submarkets}
+            submarketsLoading={loadingSubmarkets}
+          />
         </section>
 
         {/* Section 3: Market Visibility */}
