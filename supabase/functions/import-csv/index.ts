@@ -130,13 +130,14 @@ Deno.serve(async (req) => {
     const headers = rows[0];
     const dataRows = rows.slice(1);
     let inserted = 0;
+    let skippedMissingPrompt = 0;
     const errors: string[] = [];
     const batchSize = 500;
 
     console.log(`Processing ${dataRows.length} rows for table: ${table}`);
 
     for (let i = 0; i < dataRows.length; i += batchSize) {
-      const batch = dataRows.slice(i, i + batchSize).map((row) => {
+      const rawBatch = dataRows.slice(i, i + batchSize).map((row) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, idx) => {
           const val = row[idx] ?? "";
@@ -148,6 +149,44 @@ Deno.serve(async (req) => {
         });
         return obj;
       });
+
+      // For tables that reference lovable_prompts(prompt_hash), skip rows whose prompt_hash doesn't exist.
+      // This avoids entire-batch failure due to FK constraints.
+      let batch = rawBatch;
+      if (table === "lovable_entities" || table === "lovable_domains") {
+        const hashes = Array.from(
+          new Set(
+            rawBatch
+              .map((r) => (r["prompt_hash"] as string | null) ?? "")
+              .filter((h) => typeof h === "string" && h.length > 0)
+          )
+        );
+
+        if (hashes.length > 0) {
+          const { data: existing, error: existingErr } = await supabase
+            .from("lovable_prompts")
+            .select("prompt_hash")
+            .in("prompt_hash", hashes);
+
+          if (existingErr) {
+            console.error(`FK precheck error (batch ${i / batchSize + 1}):`, existingErr.message);
+            errors.push(`FK precheck batch ${i / batchSize + 1}: ${existingErr.message}`);
+            // Fall back to attempting the insert; it may still work.
+          } else {
+            const existingSet = new Set((existing ?? []).map((r) => r.prompt_hash));
+            const filtered = rawBatch.filter((r) => {
+              const h = (r["prompt_hash"] as string | null) ?? "";
+              return existingSet.has(h);
+            });
+            skippedMissingPrompt += rawBatch.length - filtered.length;
+            batch = filtered;
+          }
+        }
+
+        if (batch.length === 0) {
+          continue;
+        }
+      }
 
       let result;
       if (table === "lovable_prompts") {
@@ -180,6 +219,7 @@ Deno.serve(async (req) => {
         table,
         totalRows: dataRows.length,
         inserted,
+        skippedMissingPrompt: skippedMissingPrompt > 0 ? skippedMissingPrompt : undefined,
         errors: errors.length > 0 ? errors : undefined,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

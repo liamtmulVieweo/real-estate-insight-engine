@@ -87,9 +87,10 @@ const Import = () => {
       if (result.error) {
         setStatus(`Error: ${result.error.message}`);
       } else {
-        const data = result.data as { inserted: number; errors?: string[] };
+        const data = result.data as { inserted: number; skippedMissingPrompt?: number; errors?: string[] };
         setStatus(
           `Success! Inserted ${data.inserted} rows into ${table}` +
+          (data.skippedMissingPrompt ? ` (skipped ${data.skippedMissingPrompt} rows missing prompts)` : "") +
           (data.errors ? ` (${data.errors.length} batch errors)` : "")
         );
       }
