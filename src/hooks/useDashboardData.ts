@@ -172,21 +172,27 @@ export function useMarketRankings(targetBrokerage: string) {
   return useQuery({
     queryKey: ["market-rankings", targetBrokerage],
     queryFn: async (): Promise<MarketData[]> => {
-      const { data, error } = await supabase
-        .from("brokerage_market_rankings")
-        .select("*")
-        .eq("brokerage", targetBrokerage)
-        .order("mentions", { ascending: false });
+      const rows = await fetchAllRows<{
+        brokerage: string | null;
+        market: string | null;
+        mentions: number | null;
+        market_rank: number | null;
+        percentile: number | null;
+        market_share_pct: number | null;
+      }>("brokerage_market_rankings", "*");
 
-      if (error) throw error;
-      return (data || []).map((d, idx) => ({
-        market: d.market || "",
-        mentions: Number(d.mentions) || 0,
-        rank: Number(d.market_rank) || idx + 1,
-        totalBrokerages: 100, // Approximation
-        percentile: (d.percentile || 0) * 100,
-        marketSharePct: d.market_share_pct || 0,
-      }));
+      // Filter to target brokerage and sort by mentions
+      return rows
+        .filter((d) => d.brokerage === targetBrokerage)
+        .map((d, idx) => ({
+          market: d.market || "",
+          mentions: Number(d.mentions) || 0,
+          rank: Number(d.market_rank) || idx + 1,
+          totalBrokerages: 100,
+          percentile: (d.percentile || 0) * 100,
+          marketSharePct: d.market_share_pct || 0,
+        }))
+        .sort((a, b) => b.mentions - a.mentions);
     },
     enabled: !!targetBrokerage,
   });
