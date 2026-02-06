@@ -129,26 +129,42 @@ export function usePromptIntelligence(filters: {
   propertyType?: string;
   brokerRole?: string;
   model?: string;
-  limit?: number;
+  fetchAll?: boolean;
 }) {
   return useQuery({
     queryKey: ["prompt-intelligence", filters],
     queryFn: async (): Promise<PromptIntelligence[]> => {
-      const { data, error } = await supabase.rpc("get_prompt_intelligence", {
-        brokerage_filter: filters.brokerage || null,
-        market_filter: filters.market || null,
-        property_type_filter: filters.propertyType || null,
-        broker_role_filter: filters.brokerRole || null,
-        model_filter: filters.model || null,
-        page_limit: filters.limit || 20,
-        page_offset: 0,
-      });
+      const pageSize = 100; // Max allowed by RPC
+      const allResults: PromptIntelligence[] = [];
+      let offset = 0;
 
-      if (error) throw error;
-      return (data || []).map((d) => ({
-        ...d,
-        mentioned_entities: d.mentioned_entities as unknown as PromptIntelligence["mentioned_entities"],
-      }));
+      // Fetch all pages when fetchAll is true
+      while (true) {
+        const { data, error } = await supabase.rpc("get_prompt_intelligence", {
+          brokerage_filter: filters.brokerage || null,
+          market_filter: filters.market || null,
+          property_type_filter: filters.propertyType || null,
+          broker_role_filter: filters.brokerRole || null,
+          model_filter: filters.model || null,
+          page_limit: pageSize,
+          page_offset: offset,
+        });
+
+        if (error) throw error;
+
+        const batch = (data || []).map((d) => ({
+          ...d,
+          mentioned_entities: d.mentioned_entities as unknown as PromptIntelligence["mentioned_entities"],
+        }));
+
+        allResults.push(...batch);
+
+        // Stop if we got fewer results than page size (last page) or not fetching all
+        if (batch.length < pageSize || !filters.fetchAll) break;
+        offset += pageSize;
+      }
+
+      return allResults;
     },
   });
 }

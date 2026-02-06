@@ -74,7 +74,7 @@ export default function Dashboard() {
     market: marketFilter,
     propertyType: filters.propertyType !== "All" ? filters.propertyType : undefined,
     brokerRole: filters.role !== "All" ? filters.role : undefined,
-    limit: 10,
+    fetchAll: true,
   });
   
   const { data: sourceData = [], isLoading: loadingSource } = useSourceAttribution(
