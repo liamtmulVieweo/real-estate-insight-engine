@@ -140,10 +140,8 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MarketVisibility data={marketData} isLoading={loadingMarkets} />
           
-          {/* Placeholder for specialization breakdown - can be added later */}
-          <div className="space-y-4">
-            <PromptIntelligence prompts={prompts} isLoading={loadingPrompts} />
-          </div>
+          {/* Source Attribution */}
+          <SourceAttribution data={sourceData} isLoading={loadingSource} />
         </section>
 
         {/* Section 5: Competitive Rankings */}
@@ -161,9 +159,9 @@ export default function Dashboard() {
           />
         </section>
 
-        {/* Section 8 & 9: Source Attribution */}
+        {/* Section 8 & 9: Prompt Intelligence */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SourceAttribution data={sourceData} isLoading={loadingSource} />
+          <PromptIntelligence prompts={prompts} isLoading={loadingPrompts} />
           
           {/* Additional insights panel */}
           <div className="flex items-stretch">
