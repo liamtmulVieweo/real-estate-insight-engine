@@ -150,9 +150,22 @@ Deno.serve(async (req) => {
         return obj;
       });
 
+      // For lovable_prompts: dedupe by prompt_hash within the batch (keep last occurrence)
+      // This prevents "ON CONFLICT DO UPDATE command cannot affect row a second time" errors
+      let batch = rawBatch;
+      if (table === "lovable_prompts") {
+        const seen = new Map<string, Record<string, unknown>>();
+        for (const row of rawBatch) {
+          const h = (row["prompt_hash"] as string | null) ?? "";
+          if (h) {
+            seen.set(h, row);
+          }
+        }
+        batch = Array.from(seen.values());
+      }
+
       // For tables that reference lovable_prompts(prompt_hash), skip rows whose prompt_hash doesn't exist.
       // This avoids entire-batch failure due to FK constraints.
-      let batch = rawBatch;
       if (table === "lovable_entities" || table === "lovable_domains") {
         const hashes = Array.from(
           new Set(
