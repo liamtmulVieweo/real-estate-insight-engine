@@ -151,7 +151,8 @@ export type Database = {
       brokerage_mentions_total: {
         Row: {
           brokerage: string | null
-          markets_present: number | null
+          primary_markets_present: number | null
+          submarkets_present: number | null
           total_mentions: number | null
           unique_prompts: number | null
         }

@@ -19,7 +19,8 @@ export interface KPI {
 export interface DashboardSummary {
   total_mentions: number;
   unique_prompts: number;
-  markets_present: number;
+  primary_markets_present: number;
+  submarkets_present: number;
   market_rank: number | null;
   percentile: number | null;
   missed_markets_count: number;
