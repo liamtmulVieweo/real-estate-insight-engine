@@ -20,6 +20,8 @@ import type { DashboardSummary } from "@/types/dashboard";
 interface KPICardsProps {
   summary: DashboardSummary | undefined;
   isLoading: boolean;
+  primaryMarkets?: string[];
+  primaryMarketsLoading?: boolean;
   submarkets?: string[];
   submarketsLoading?: boolean;
 }
@@ -36,7 +38,14 @@ interface KPIData {
   hoverContent?: React.ReactNode;
 }
 
-export function KPICards({ summary, isLoading, submarkets = [], submarketsLoading }: KPICardsProps) {
+export function KPICards({ 
+  summary, 
+  isLoading, 
+  primaryMarkets = [], 
+  primaryMarketsLoading,
+  submarkets = [], 
+  submarketsLoading 
+}: KPICardsProps) {
   const kpis: KPIData[] = [
     {
       id: "prompts",
@@ -52,6 +61,24 @@ export function KPICards({ summary, isLoading, submarkets = [], submarketsLoadin
       value: summary?.primary_markets_present || 0,
       icon: Map,
       color: "text-blue-600 bg-blue-100",
+      hoverContent: primaryMarkets.length > 0 ? (
+        <div className="space-y-1">
+          <p className="font-medium text-sm mb-2">Markets ({primaryMarkets.length})</p>
+          <ScrollArea className="h-48">
+            <ul className="space-y-1 text-sm">
+              {primaryMarkets.map((market) => (
+                <li key={market} className="text-muted-foreground">
+                  {market}
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+        </div>
+      ) : primaryMarketsLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : (
+        <p className="text-sm text-muted-foreground">No markets found</p>
+      ),
     },
     {
       id: "submarkets",
