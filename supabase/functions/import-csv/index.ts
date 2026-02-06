@@ -131,6 +131,10 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ============= INPUT VALIDATION =============
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_ROWS = 100000;
+
     // Handle clear action
     if (action === "clear") {
       const validTables = ["lovable_prompts", "lovable_entities", "lovable_domains"];
@@ -176,6 +180,15 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate file size
+    if (csvData.length > MAX_FILE_SIZE) {
+      console.warn(`CSV data too large: ${csvData.length} bytes (max ${MAX_FILE_SIZE})`);
+      return new Response(
+        JSON.stringify({ error: `File too large. Maximum size is 50MB, received ${Math.round(csvData.length / 1024 / 1024)}MB` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const rows = parseCSV(csvData);
     if (rows.length < 2) {
       return new Response(
@@ -184,7 +197,38 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate row count
+    if (rows.length - 1 > MAX_ROWS) {
+      console.warn(`CSV has too many rows: ${rows.length - 1} (max ${MAX_ROWS})`);
+      return new Response(
+        JSON.stringify({ error: `Too many rows. Maximum is ${MAX_ROWS.toLocaleString()}, received ${(rows.length - 1).toLocaleString()}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const headers = rows[0];
+    
+    // Validate CSV headers match expected schema
+    const expectedHeaders: Record<string, string[]> = {
+      "lovable_prompts": ["prompt_hash", "prompt", "model", "market", "primary_market", "submarket", "property_type", "broker_role", "citation_count", "geo_level"],
+      "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market"],
+      "lovable_domains": ["prompt_hash", "domain"],
+    };
+    
+    const validTables = Object.keys(expectedHeaders);
+    if (!validTables.includes(table)) {
+      return new Response(
+        JSON.stringify({ error: `Unknown table: ${table}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const requiredHeaders = expectedHeaders[table];
+    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+    if (missingHeaders.length > 0) {
+      console.warn(`CSV missing required headers for ${table}: ${missingHeaders.join(", ")}`);
+      // Just log warning, don't fail - allow partial schemas
+    }
     const dataRows = rows.slice(1);
     let inserted = 0;
     let skippedMissingPrompt = 0;
