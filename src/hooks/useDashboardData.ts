@@ -189,7 +189,8 @@ export function useMarketRankings(targetBrokerage: string) {
           mentions: Number(d.mentions) || 0,
           rank: Number(d.market_rank) || idx + 1,
           totalBrokerages: 100,
-          percentile: (d.percentile || 0) * 100,
+          // Invert percentile: rank 1 (top) = 99th percentile (better than 99%)
+          percentile: (1 - (d.percentile || 0)) * 100,
           marketSharePct: d.market_share_pct || 0,
         }))
         .sort((a, b) => b.mentions - a.mentions);
