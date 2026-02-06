@@ -76,7 +76,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-2 font-medium text-muted-foreground">Market</th>
-                  <th className="text-right py-3 px-2 font-medium text-muted-foreground">Mentions</th>
+                  <th className="text-right py-3 px-2 font-medium text-muted-foreground">Share</th>
                   <th className="text-right py-3 px-2 font-medium text-muted-foreground">Rank</th>
                   <th className="text-right py-3 px-2 font-medium text-muted-foreground">Percentile</th>
                 </tr>
@@ -85,7 +85,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                 {topMarkets.map((item) => (
                   <tr key={item.market} className="border-b border-border/50 hover:bg-muted/30">
                     <td className="py-3 px-2 font-medium">{item.market}</td>
-                    <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
+                    <td className="py-3 px-2 text-right">{(item.marketSharePct * 100).toFixed(1)}%</td>
                     <td className="py-3 px-2 text-right">
                       <span className="font-semibold">#{item.rank}</span>
                       <span className="text-muted-foreground text-xs ml-1">
@@ -126,10 +126,10 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                 <XAxis type="number" />
                 <YAxis type="category" dataKey="market" width={75} tick={{ fontSize: 11 }} />
                 <Tooltip
-                  formatter={(value: number) => [value.toLocaleString(), "Mentions"]}
+                  formatter={(value: number) => [`${(value * 100).toFixed(1)}%`, "Market Share"]}
                   contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))" }}
                 />
-                <Bar dataKey="mentions" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="marketSharePct" radius={[0, 4, 4, 0]}>
                   {topMarkets.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
