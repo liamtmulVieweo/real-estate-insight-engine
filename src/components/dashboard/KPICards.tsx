@@ -7,7 +7,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   TrendingUp, 
-  MessageSquare, 
   MapPin, 
   Award,
   AlertCircle,
@@ -38,13 +37,6 @@ interface KPIData {
 
 export function KPICards({ summary, isLoading, submarkets = [], submarketsLoading }: KPICardsProps) {
   const kpis: KPIData[] = [
-    {
-      id: "mentions",
-      label: "Total Mentions",
-      value: summary?.total_mentions?.toLocaleString() || "0",
-      icon: MessageSquare,
-      color: "text-blue-600 bg-blue-100",
-    },
     {
       id: "prompts",
       label: "Unique Prompts",
