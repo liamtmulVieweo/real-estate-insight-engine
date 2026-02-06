@@ -74,26 +74,49 @@ const Import = () => {
     setStatus(`Reading ${file.name}...`);
 
     try {
-      const csvData = await file.text();
+      const csvText = await file.text();
+      const lines = csvText.split('\n');
+      const header = lines[0];
+      const dataLines = lines.slice(1).filter(l => l.trim().length > 0);
       
-      setProgress(30);
-      setStatus(`Uploading ${table} (${csvData.split('\n').length - 1} rows)...`);
+      const chunkSize = 500; // rows per request
+      const totalChunks = Math.ceil(dataLines.length / chunkSize);
+      let totalInserted = 0;
+      let totalSkipped = 0;
+      const allErrors: string[] = [];
 
-      const result = await supabase.functions.invoke("import-csv", {
-        body: { table, csvData },
-      });
+      setStatus(`Uploading ${table} (${dataLines.length} rows in ${totalChunks} chunks)...`);
+
+      for (let i = 0; i < totalChunks; i++) {
+        const chunkLines = dataLines.slice(i * chunkSize, (i + 1) * chunkSize);
+        const chunkCsv = [header, ...chunkLines].join('\n');
+
+        const result = await supabase.functions.invoke("import-csv", {
+          body: { table, csvData: chunkCsv },
+        });
+
+        if (result.error) {
+          allErrors.push(`Chunk ${i + 1}: ${result.error.message}`);
+        } else {
+          const data = result.data as { inserted: number; skippedMissingPrompt?: number; errors?: string[] };
+          totalInserted += data.inserted || 0;
+          totalSkipped += data.skippedMissingPrompt || 0;
+          if (data.errors) {
+            allErrors.push(...data.errors.map(e => `Chunk ${i + 1}: ${e}`));
+          }
+        }
+
+        const pct = Math.round(((i + 1) / totalChunks) * 90) + 10;
+        setProgress(pct);
+        setStatus(`Chunk ${i + 1}/${totalChunks} complete (${totalInserted} inserted so far)...`);
+      }
 
       setProgress(100);
-      if (result.error) {
-        setStatus(`Error: ${result.error.message}`);
-      } else {
-        const data = result.data as { inserted: number; skippedMissingPrompt?: number; errors?: string[] };
-        setStatus(
-          `Success! Inserted ${data.inserted} rows into ${table}` +
-          (data.skippedMissingPrompt ? ` (skipped ${data.skippedMissingPrompt} rows missing prompts)` : "") +
-          (data.errors ? ` (${data.errors.length} batch errors)` : "")
-        );
-      }
+      setStatus(
+        `Success! Inserted ${totalInserted} rows into ${table}` +
+        (totalSkipped > 0 ? ` (skipped ${totalSkipped} rows missing prompts)` : "") +
+        (allErrors.length > 0 ? ` (${allErrors.length} errors)` : "")
+      );
     } catch (err) {
       setStatus(`Error: ${(err as Error).message}`);
     } finally {
