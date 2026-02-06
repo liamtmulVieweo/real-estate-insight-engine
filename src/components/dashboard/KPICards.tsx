@@ -46,7 +46,7 @@ export function KPICards({ summary, isLoading }: KPICardsProps) {
     },
     {
       id: "markets",
-      label: "Markets Present",
+      label: "Submarkets Present",
       value: summary?.markets_present || 0,
       icon: MapPin,
       color: "text-purple-600 bg-purple-100",
