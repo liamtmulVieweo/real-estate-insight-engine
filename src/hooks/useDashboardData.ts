@@ -42,19 +42,21 @@ export function useBrokerageList() {
   return useQuery({
     queryKey: ["brokerages"],
     queryFn: async (): Promise<BrokerageMentionTotal[]> => {
-      const { data, error } = await supabase
-        .from("brokerage_mentions_total")
-        .select("*")
-        .order("total_mentions", { ascending: false })
-        .limit(100);
+      const rows = await fetchAllRows<{
+        brokerage: string | null;
+        total_mentions: number | null;
+        unique_prompts: number | null;
+        markets_present: number | null;
+      }>("brokerage_mentions_total", "*");
 
-      if (error) throw error;
-      return (data || []).map((d) => ({
-        brokerage: d.brokerage || "",
-        total_mentions: Number(d.total_mentions) || 0,
-        unique_prompts: Number(d.unique_prompts) || 0,
-        markets_present: Number(d.markets_present) || 0,
-      }));
+      return rows
+        .map((d) => ({
+          brokerage: d.brokerage || "",
+          total_mentions: Number(d.total_mentions) || 0,
+          unique_prompts: Number(d.unique_prompts) || 0,
+          markets_present: Number(d.markets_present) || 0,
+        }))
+        .sort((a, b) => b.total_mentions - a.total_mentions);
     },
   });
 }
