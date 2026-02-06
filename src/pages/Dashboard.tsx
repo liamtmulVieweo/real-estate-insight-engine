@@ -22,6 +22,7 @@ import {
   useDistinctPropertyTypes,
   useDistinctRoles,
   useSubmarketsForBrokerage,
+  usePrimaryMarketsForBrokerage,
 } from "@/hooks/useDashboardData";
 import type { Filters } from "@/types/dashboard";
 
@@ -87,6 +88,10 @@ export default function Dashboard() {
   const { data: submarkets = [], isLoading: loadingSubmarkets } = useSubmarketsForBrokerage(
     selectedBrokerage
   );
+  
+  const { data: primaryMarkets = [], isLoading: loadingPrimaryMarkets } = usePrimaryMarketsForBrokerage(
+    selectedBrokerage
+  );
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -124,6 +129,8 @@ export default function Dashboard() {
           <KPICards 
             summary={summary} 
             isLoading={loadingSummary} 
+            primaryMarkets={primaryMarkets}
+            primaryMarketsLoading={loadingPrimaryMarkets}
             submarkets={submarkets}
             submarketsLoading={loadingSubmarkets}
           />

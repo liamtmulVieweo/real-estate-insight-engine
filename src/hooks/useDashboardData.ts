@@ -284,3 +284,43 @@ export function useSubmarketsForBrokerage(targetBrokerage: string) {
   });
 }
 
+export function usePrimaryMarketsForBrokerage(targetBrokerage: string) {
+  return useQuery({
+    queryKey: ["primary-markets-for-brokerage", targetBrokerage],
+    queryFn: async (): Promise<string[]> => {
+      const rows = await fetchAllRows<{
+        brokerage: string | null;
+        name: string | null;
+        prompt_hash: string;
+      }>(
+        "lovable_entities",
+        "brokerage, name, prompt_hash"
+      );
+
+      // Get prompt hashes for this brokerage
+      const brokeragePromptHashes = new Set(
+        rows
+          .filter((r) => (r.brokerage || r.name) === targetBrokerage)
+          .map((r) => r.prompt_hash)
+      );
+
+      // Now fetch primary markets for those prompts
+      const promptRows = await fetchAllRows<{
+        prompt_hash: string;
+        primary_market: string | null;
+      }>("lovable_prompts", "prompt_hash, primary_market");
+
+      const primaryMarkets = [
+        ...new Set(
+          promptRows
+            .filter((p) => brokeragePromptHashes.has(p.prompt_hash) && p.primary_market)
+            .map((p) => p.primary_market)
+        ),
+      ];
+
+      return (primaryMarkets as string[]).sort();
+    },
+    enabled: !!targetBrokerage,
+  });
+}
+
