@@ -206,12 +206,12 @@ export type Database = {
       }
       visibility_records: {
         Row: {
-          broker_role: string
+          broker_role: string | null
           brokerage: string | null
           created_at: string
           entity_display: string | null
           entity_key: string
-          entity_type: string
+          entity_type: string | null
           evidence: string | null
           id: string
           market: string
@@ -219,15 +219,15 @@ export type Database = {
           market_role: string | null
           name: string
           prompt: string
-          property_type: string
+          property_type: string | null
         }
         Insert: {
-          broker_role: string
+          broker_role?: string | null
           brokerage?: string | null
           created_at?: string
           entity_display?: string | null
           entity_key: string
-          entity_type: string
+          entity_type?: string | null
           evidence?: string | null
           id?: string
           market: string
@@ -235,15 +235,15 @@ export type Database = {
           market_role?: string | null
           name: string
           prompt: string
-          property_type: string
+          property_type?: string | null
         }
         Update: {
-          broker_role?: string
+          broker_role?: string | null
           brokerage?: string | null
           created_at?: string
           entity_display?: string | null
           entity_key?: string
-          entity_type?: string
+          entity_type?: string | null
           evidence?: string | null
           id?: string
           market?: string
@@ -251,7 +251,7 @@ export type Database = {
           market_role?: string | null
           name?: string
           prompt?: string
-          property_type?: string
+          property_type?: string | null
         }
         Relationships: []
       }
