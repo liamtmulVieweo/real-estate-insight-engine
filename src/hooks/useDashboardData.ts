@@ -9,6 +9,7 @@ import type {
   SourceAttribution,
   BrokerageMentionTotal,
   MarketData,
+  PropertyTypeBreakdown,
 } from "@/types/dashboard";
 
 async function fetchAllRows<T>(
@@ -334,6 +335,25 @@ export function usePrimaryMarketsForBrokerage(targetBrokerage: string) {
 
       if (error) throw error;
       return (data || []).map((d: { primary_market: string }) => d.primary_market);
+    },
+    enabled: !!targetBrokerage,
+  });
+}
+
+export function usePropertyTypeBreakdown(targetBrokerage: string) {
+  return useQuery({
+    queryKey: ["property-type-breakdown", targetBrokerage],
+    queryFn: async (): Promise<PropertyTypeBreakdown[]> => {
+      const { data, error } = await supabase.rpc("get_property_type_breakdown", {
+        target_brokerage: targetBrokerage,
+      });
+
+      if (error) throw error;
+      return (data || []).map((d: { property_type: string; mentions: number; rank: number }) => ({
+        property_type: d.property_type,
+        mentions: Number(d.mentions),
+        rank: Number(d.rank),
+      }));
     },
     enabled: !!targetBrokerage,
   });

@@ -7,6 +7,7 @@ import {
   MissedOpportunities,
   PromptIntelligence,
   SourceAttribution,
+  PropertyTypeBreakdown,
   DashboardFooter,
 } from "@/components/dashboard";
 import {
@@ -24,6 +25,7 @@ import {
   useDistinctRoles,
   useSubmarketsForBrokerage,
   usePrimaryMarketsForBrokerage,
+  usePropertyTypeBreakdown,
 } from "@/hooks/useDashboardData";
 import type { Filters } from "@/types/dashboard";
 
@@ -94,6 +96,10 @@ export default function Dashboard() {
   const { data: primaryMarkets = [], isLoading: loadingPrimaryMarkets } = usePrimaryMarketsForBrokerage(
     selectedBrokerage
   );
+  
+  const { data: propertyTypeData = [], isLoading: loadingPropertyTypes } = usePropertyTypeBreakdown(
+    selectedBrokerage
+  );
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -143,11 +149,10 @@ export default function Dashboard() {
           />
         </section>
 
-        {/* Section 3: Market Visibility */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Section 3: Market Visibility & Property Types */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <MarketVisibility data={marketData} isLoading={loadingMarkets} />
-          
-          {/* Source Attribution */}
+          <PropertyTypeBreakdown data={propertyTypeData} isLoading={loadingPropertyTypes} />
           <SourceAttribution data={sourceData} isLoading={loadingSource} />
         </section>
 

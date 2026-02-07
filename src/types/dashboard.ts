@@ -99,6 +99,12 @@ export interface BrokerageMentionTotal {
   markets_present: number;
 }
 
+export interface PropertyTypeBreakdown {
+  property_type: string;
+  mentions: number;
+  rank: number;
+}
+
 export interface Filters {
   market: string;
   propertyType: string;
