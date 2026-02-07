@@ -33,6 +33,7 @@ import type { Filters } from "@/types/dashboard";
 
 export default function Dashboard() {
   const [selectedBrokerage, setSelectedBrokerage] = useState<string>("");
+  const [brokerTeamPropertyFilter, setBrokerTeamPropertyFilter] = useState<string>("All");
   const [filters, setFilters] = useState<Filters>({
     market: "All",
     propertyType: "All",
@@ -104,9 +105,12 @@ export default function Dashboard() {
     marketFilter
   );
 
+  const brokerTeamPropertyTypeFilter = brokerTeamPropertyFilter !== "All" ? brokerTeamPropertyFilter : undefined;
+  
   const { data: brokerTeamData = [], isLoading: loadingBrokerTeam } = useBrokerTeamBreakdown(
     selectedBrokerage,
-    marketFilter
+    marketFilter,
+    brokerTeamPropertyTypeFilter
   );
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
@@ -194,6 +198,9 @@ export default function Dashboard() {
             data={brokerTeamData}
             isLoading={loadingBrokerTeam}
             selectedMarket={marketFilter}
+            propertyTypes={propertyTypes}
+            selectedPropertyType={brokerTeamPropertyFilter}
+            onPropertyTypeChange={setBrokerTeamPropertyFilter}
           />
         </section>
       </main>

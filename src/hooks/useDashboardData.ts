@@ -369,13 +369,14 @@ export interface BrokerTeamData {
   total_brokers: number;
 }
 
-export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string) {
+export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string) {
   return useQuery({
-    queryKey: ["broker-team-breakdown", targetBrokerage, marketFilter],
+    queryKey: ["broker-team-breakdown", targetBrokerage, marketFilter, propertyTypeFilter],
     queryFn: async (): Promise<BrokerTeamData[]> => {
       const { data, error } = await supabase.rpc("get_broker_team_breakdown", {
         target_brokerage: targetBrokerage,
         market_filter: marketFilter || null,
+        property_type_filter: propertyTypeFilter || null,
       });
 
       if (error) throw error;
