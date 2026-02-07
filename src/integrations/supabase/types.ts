@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_requests: {
+        Row: {
+          asset_class: string | null
+          brokerage: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          interests: string[] | null
+          message: string | null
+          phone_number: string | null
+          primary_market: string | null
+          role: string | null
+        }
+        Insert: {
+          asset_class?: string | null
+          brokerage: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          interests?: string[] | null
+          message?: string | null
+          phone_number?: string | null
+          primary_market?: string | null
+          role?: string | null
+        }
+        Update: {
+          asset_class?: string | null
+          brokerage?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          interests?: string[] | null
+          message?: string | null
+          phone_number?: string | null
+          primary_market?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
+      email_signups: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       lovable_domains: {
         Row: {
           created_at: string | null
@@ -141,6 +201,57 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      visibility_records: {
+        Row: {
+          broker_role: string
+          brokerage: string | null
+          created_at: string
+          entity_display: string | null
+          entity_key: string
+          entity_type: string
+          evidence: string | null
+          id: string
+          market: string
+          market_asset: string | null
+          market_role: string | null
+          name: string
+          prompt: string
+          property_type: string
+        }
+        Insert: {
+          broker_role: string
+          brokerage?: string | null
+          created_at?: string
+          entity_display?: string | null
+          entity_key: string
+          entity_type: string
+          evidence?: string | null
+          id?: string
+          market: string
+          market_asset?: string | null
+          market_role?: string | null
+          name: string
+          prompt: string
+          property_type: string
+        }
+        Update: {
+          broker_role?: string
+          brokerage?: string | null
+          created_at?: string
+          entity_display?: string | null
+          entity_key?: string
+          entity_type?: string
+          evidence?: string | null
+          id?: string
+          market?: string
+          market_asset?: string | null
+          market_role?: string | null
+          name?: string
+          prompt?: string
+          property_type?: string
         }
         Relationships: []
       }

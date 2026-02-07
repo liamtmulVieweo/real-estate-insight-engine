@@ -1,0 +1,36 @@
+import { Hero, WhySection, MethodologySection, Features, EmailSignup } from '@/components/landing';
+import { VieweoLogo } from '@/components/VieweoLogo';
+import { Link } from 'react-router-dom';
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen">
+      <main>
+        <Hero />
+        <WhySection />
+        <MethodologySection />
+        <Features />
+        <EmailSignup />
+      </main>
+
+      <footer className="bg-foreground py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <VieweoLogo className="h-8 w-auto [&_text]:fill-white/90 [&_path]:fill-white/80 [&_rect]:fill-primary" />
+          </div>
+          <p className="text-white/60 text-sm text-center mb-4">
+            © {new Date().getFullYear()} Vieweo, Inc. All rights reserved.
+          </p>
+          <div className="flex items-center justify-center gap-6">
+            <Link to="/cre-dashboard" className="text-white/60 hover:text-white/80 text-sm transition-colors">
+              CRE Dashboard
+            </Link>
+            <Link to="/methodology" className="text-white/60 hover:text-white/80 text-sm transition-colors">
+              Methodology
+            </Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
