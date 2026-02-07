@@ -77,7 +77,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-2 font-medium text-muted-foreground">Market</th>
                   <th className="text-right py-3 px-2 font-medium text-muted-foreground">Mentions</th>
-                  <th className="text-right py-3 px-2 font-medium text-muted-foreground">Share</th>
+                  <th className="text-right py-3 px-2 font-medium text-muted-foreground">Share of Mentions</th>
                   <th className="text-right py-3 px-2 font-medium text-muted-foreground">Rank</th>
                   <th className="text-right py-3 px-2 font-medium text-muted-foreground">Percentile</th>
                 </tr>
