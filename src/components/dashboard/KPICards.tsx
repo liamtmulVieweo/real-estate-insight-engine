@@ -26,6 +26,7 @@ interface KPICardsProps {
   submarketsLoading?: boolean;
   totalTrackedMarkets?: number;
   totalTrackedSubmarkets?: number;
+  totalBrokerages?: number;
 }
 
 interface KPIData {
@@ -49,6 +50,7 @@ export function KPICards({
   submarketsLoading,
   totalTrackedMarkets = 0,
   totalTrackedSubmarkets = 0,
+  totalBrokerages = 0,
 }: KPICardsProps) {
   const kpis: KPIData[] = [
     {
@@ -115,6 +117,7 @@ export function KPICards({
       id: "rank",
       label: "Market Rank",
       value: summary?.market_rank ? `#${summary.market_rank}` : "N/A",
+      subValue: totalBrokerages > 0 ? `of ${totalBrokerages} brokerages` : undefined,
       icon: Award,
       color: "text-amber-600 bg-amber-100",
     },
