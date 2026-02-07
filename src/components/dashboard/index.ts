@@ -6,4 +6,5 @@ export { MissedOpportunities } from "./MissedOpportunities";
 export { PromptIntelligence } from "./PromptIntelligence";
 export { SourceAttribution } from "./SourceAttribution";
 export { PropertyTypeBreakdown } from "./PropertyTypeBreakdown";
+export { BrokerTeamBreakdown } from "./BrokerTeamBreakdown";
 export { DashboardFooter } from "./DashboardFooter";
