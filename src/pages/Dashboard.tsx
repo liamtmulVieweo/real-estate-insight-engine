@@ -133,6 +133,7 @@ export default function Dashboard() {
             primaryMarketsLoading={loadingPrimaryMarkets}
             submarkets={submarkets}
             submarketsLoading={loadingSubmarkets}
+            totalTrackedMarkets={markets.length}
           />
         </section>
 
