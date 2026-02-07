@@ -7,3 +7,4 @@ export { PromptExplorer } from './PromptExplorer';
 export { RawDataTable } from './RawDataTable';
 export { VieweoDashboardLoading } from './VieweoDashboardLoading';
 export { TrustDisclaimer } from './TrustDisclaimer';
+export { UpgradeBanner } from './UpgradeBanner';
