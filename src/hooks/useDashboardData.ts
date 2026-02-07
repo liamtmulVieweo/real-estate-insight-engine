@@ -297,10 +297,10 @@ export function useSubmarketsForBrokerage(targetBrokerage: string) {
         "brokerage, name, prompt_hash"
       );
 
-      // Get prompt hashes for this brokerage
+      // Get prompt hashes for this brokerage (match COALESCE logic from SQL)
       const brokeragePromptHashes = new Set(
         rows
-          .filter((r) => (r.brokerage || r.name) === targetBrokerage)
+          .filter((r) => (r.brokerage ?? r.name) === targetBrokerage)
           .map((r) => (r as any).prompt_hash)
       );
 
@@ -337,10 +337,10 @@ export function usePrimaryMarketsForBrokerage(targetBrokerage: string) {
         "brokerage, name, prompt_hash"
       );
 
-      // Get prompt hashes for this brokerage
+      // Get prompt hashes for this brokerage (match COALESCE logic from SQL)
       const brokeragePromptHashes = new Set(
         rows
-          .filter((r) => (r.brokerage || r.name) === targetBrokerage)
+          .filter((r) => (r.brokerage ?? r.name) === targetBrokerage)
           .map((r) => r.prompt_hash)
       );
 
