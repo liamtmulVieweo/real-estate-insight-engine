@@ -214,6 +214,12 @@ export type Database = {
           total_peer_mentions: number
         }[]
       }
+      get_primary_markets_for_brokerage: {
+        Args: { target_brokerage: string }
+        Returns: {
+          primary_market: string
+        }[]
+      }
       get_prompt_intelligence: {
         Args: {
           broker_name_filter?: string
