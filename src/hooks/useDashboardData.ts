@@ -350,10 +350,11 @@ export function usePropertyTypeBreakdown(targetBrokerage: string, marketFilter?:
       });
 
       if (error) throw error;
-      return (data || []).map((d: { property_type: string; mentions: number; rank: number }) => ({
+      return (data || []).map((d: { property_type: string; mentions: number; rank: number; total_brokerages: number }) => ({
         property_type: d.property_type,
         mentions: Number(d.mentions),
         rank: Number(d.rank),
+        total_brokerages: Number(d.total_brokerages),
       }));
     },
     enabled: !!targetBrokerage,

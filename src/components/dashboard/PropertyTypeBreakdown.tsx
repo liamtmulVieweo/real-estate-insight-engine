@@ -59,7 +59,12 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
                   <td className="py-3 px-2 text-right">
                     {totalMentions > 0 ? ((item.mentions / totalMentions) * 100).toFixed(1) : 0}%
                   </td>
-                  <td className="py-3 px-2 text-right font-semibold">#{item.rank}</td>
+                  <td className="py-3 px-2 text-right">
+                    <span className="font-semibold">#{item.rank}</span>
+                    <span className="text-muted-foreground text-xs ml-1">
+                      of {item.total_brokerages}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

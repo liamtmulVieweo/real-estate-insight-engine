@@ -258,6 +258,7 @@ export type Database = {
               mentions: number
               property_type: string
               rank: number
+              total_brokerages: number
             }[]
           }
       get_source_attribution_comparison: {

@@ -103,6 +103,7 @@ export interface PropertyTypeBreakdown {
   property_type: string;
   mentions: number;
   rank: number;
+  total_brokerages: number;
 }
 
 export interface Filters {
