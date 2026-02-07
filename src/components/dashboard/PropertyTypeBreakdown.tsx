@@ -47,7 +47,7 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-2 font-medium text-muted-foreground">Property Type</th>
                 <th className="text-right py-3 px-2 font-medium text-muted-foreground">Mentions</th>
-                <th className="text-right py-3 px-2 font-medium text-muted-foreground">Share</th>
+                <th className="text-right py-3 px-2 font-medium text-muted-foreground">Composition</th>
                 <th className="text-right py-3 px-2 font-medium text-muted-foreground">Rank</th>
               </tr>
             </thead>
