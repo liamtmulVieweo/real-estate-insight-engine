@@ -197,14 +197,22 @@ export function useMarketRankings(targetBrokerage: string) {
         market_share_pct: number | null;
       }>("brokerage_market_rankings", "*");
 
-      // Filter to target brokerage and sort by mentions
+      // Calculate total brokerages per market
+      const brokeragesPerMarket: Record<string, number> = {};
+      rows.forEach((row) => {
+        if (row.market) {
+          brokeragesPerMarket[row.market] = (brokeragesPerMarket[row.market] || 0) + 1;
+        }
+      });
+
+      // Filter to target brokerage and sort by market share
       return rows
         .filter((d) => d.brokerage === targetBrokerage)
-        .map((d, idx) => ({
+        .map((d) => ({
           market: d.market || "",
           mentions: Number(d.mentions) || 0,
-          rank: Number(d.market_rank) || idx + 1,
-          totalBrokerages: 100,
+          rank: Number(d.market_rank) || 1,
+          totalBrokerages: brokeragesPerMarket[d.market || ""] || 0,
           // Invert percentile: rank 1 (top) = 99th percentile (better than 99%)
           percentile: (1 - (d.percentile || 0)) * 100,
           marketSharePct: d.market_share_pct || 0,
