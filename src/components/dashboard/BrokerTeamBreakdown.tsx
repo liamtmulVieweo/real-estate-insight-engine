@@ -121,7 +121,7 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
                           {row.global_rank}
                         </span>
                         <span className="text-xs text-muted-foreground mt-0.5">
-                          of {row.total_brokers.toLocaleString()}
+                          of {(row.total_brokers || 0).toLocaleString()}
                         </span>
                       </div>
                     </td>
