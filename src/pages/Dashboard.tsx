@@ -19,6 +19,7 @@ import {
   useSourceAttribution,
   useMarketRankings,
   useDistinctMarkets,
+  useDistinctSubmarkets,
   useDistinctPropertyTypes,
   useDistinctRoles,
   useSubmarketsForBrokerage,
@@ -38,6 +39,7 @@ export default function Dashboard() {
   // Fetch filter options
   const { data: brokerages = [], isLoading: loadingBrokerages } = useBrokerageList();
   const { data: markets = [] } = useDistinctMarkets();
+  const { data: allSubmarkets = [] } = useDistinctSubmarkets();
   const { data: propertyTypes = [] } = useDistinctPropertyTypes();
   const { data: roles = [] } = useDistinctRoles();
 
@@ -134,6 +136,7 @@ export default function Dashboard() {
             submarkets={submarkets}
             submarketsLoading={loadingSubmarkets}
             totalTrackedMarkets={markets.length}
+            totalTrackedSubmarkets={allSubmarkets.length}
           />
         </section>
 

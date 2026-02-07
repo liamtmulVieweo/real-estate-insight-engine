@@ -25,6 +25,7 @@ interface KPICardsProps {
   submarkets?: string[];
   submarketsLoading?: boolean;
   totalTrackedMarkets?: number;
+  totalTrackedSubmarkets?: number;
 }
 
 interface KPIData {
@@ -47,6 +48,7 @@ export function KPICards({
   submarkets = [], 
   submarketsLoading,
   totalTrackedMarkets = 0,
+  totalTrackedSubmarkets = 0,
 }: KPICardsProps) {
   const kpis: KPIData[] = [
     {
@@ -87,6 +89,7 @@ export function KPICards({
       id: "submarkets",
       label: "Submarkets Present",
       value: summary?.submarkets_present || 0,
+      subValue: totalTrackedSubmarkets > 0 ? `of ${totalTrackedSubmarkets} tracked` : undefined,
       icon: MapPin,
       color: "text-purple-600 bg-purple-100",
       hoverContent: submarkets.length > 0 ? (

@@ -239,6 +239,21 @@ export function useDistinctMarkets() {
   });
 }
 
+export function useDistinctSubmarkets() {
+  return useQuery({
+    queryKey: ["distinct-submarkets"],
+    queryFn: async (): Promise<string[]> => {
+      const rows = await fetchAllRows<{ submarket: string | null }>(
+        "lovable_prompts",
+        "submarket"
+      );
+
+      const submarkets = [...new Set(rows.map((r) => r.submarket).filter(Boolean))];
+      return (submarkets as string[]).sort();
+    },
+  });
+}
+
 export function useDistinctPropertyTypes() {
   return useQuery({
     queryKey: ["distinct-property-types"],
