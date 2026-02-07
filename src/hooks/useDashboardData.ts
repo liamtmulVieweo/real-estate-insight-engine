@@ -340,12 +340,13 @@ export function usePrimaryMarketsForBrokerage(targetBrokerage: string) {
   });
 }
 
-export function usePropertyTypeBreakdown(targetBrokerage: string) {
+export function usePropertyTypeBreakdown(targetBrokerage: string, marketFilter?: string) {
   return useQuery({
-    queryKey: ["property-type-breakdown", targetBrokerage],
+    queryKey: ["property-type-breakdown", targetBrokerage, marketFilter],
     queryFn: async (): Promise<PropertyTypeBreakdown[]> => {
       const { data, error } = await supabase.rpc("get_property_type_breakdown", {
         target_brokerage: targetBrokerage,
+        market_filter: marketFilter || null,
       });
 
       if (error) throw error;

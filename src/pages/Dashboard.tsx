@@ -98,7 +98,8 @@ export default function Dashboard() {
   );
   
   const { data: propertyTypeData = [], isLoading: loadingPropertyTypes } = usePropertyTypeBreakdown(
-    selectedBrokerage
+    selectedBrokerage,
+    marketFilter
   );
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
