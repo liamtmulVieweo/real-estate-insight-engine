@@ -138,6 +138,8 @@ export default function Dashboard() {
             totalTrackedMarkets={markets.length}
             totalTrackedSubmarkets={allSubmarkets.length}
             totalBrokerages={brokerages.length}
+            missedMarkets={missedMarkets}
+            missedMarketsLoading={loadingMissedMarkets}
           />
         </section>
 

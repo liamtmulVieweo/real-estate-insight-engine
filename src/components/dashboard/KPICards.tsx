@@ -15,7 +15,7 @@ import {
   ArrowDownRight,
   Minus
 } from "lucide-react";
-import type { DashboardSummary } from "@/types/dashboard";
+import type { DashboardSummary, GapMarket } from "@/types/dashboard";
 
 interface KPICardsProps {
   summary: DashboardSummary | undefined;
@@ -27,6 +27,8 @@ interface KPICardsProps {
   totalTrackedMarkets?: number;
   totalTrackedSubmarkets?: number;
   totalBrokerages?: number;
+  missedMarkets?: GapMarket[];
+  missedMarketsLoading?: boolean;
 }
 
 interface KPIData {
@@ -51,6 +53,8 @@ export function KPICards({
   totalTrackedMarkets = 0,
   totalTrackedSubmarkets = 0,
   totalBrokerages = 0,
+  missedMarkets = [],
+  missedMarketsLoading,
 }: KPICardsProps) {
   const kpis: KPIData[] = [
     {
@@ -128,6 +132,27 @@ export function KPICards({
       subValue: "Opportunity gaps",
       icon: AlertCircle,
       color: "text-red-600 bg-red-100",
+      hoverContent: missedMarkets.length > 0 ? (
+        <div className="space-y-1">
+          <p className="font-medium text-sm mb-2">Top Missed Markets</p>
+          <ScrollArea className="h-48">
+            <ul className="space-y-2 text-sm">
+              {missedMarkets.slice(0, 5).map((market) => (
+                <li key={market.market} className="border-b border-border/50 pb-2 last:border-0">
+                  <p className="font-medium">{market.market}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {market.peer_count} competitors • {market.total_peer_mentions} mentions
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+        </div>
+      ) : missedMarketsLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : (
+        <p className="text-sm text-muted-foreground">No missed markets found</p>
+      ),
     },
   ];
 
