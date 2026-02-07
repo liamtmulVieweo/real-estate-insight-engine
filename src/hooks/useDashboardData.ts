@@ -209,7 +209,7 @@ export function useMarketRankings(targetBrokerage: string) {
           percentile: (1 - (d.percentile || 0)) * 100,
           marketSharePct: d.market_share_pct || 0,
         }))
-        .sort((a, b) => b.mentions - a.mentions);
+        .sort((a, b) => b.marketSharePct - a.marketSharePct);
     },
     enabled: !!targetBrokerage,
   });
