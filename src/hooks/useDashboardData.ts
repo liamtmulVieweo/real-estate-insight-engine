@@ -366,6 +366,7 @@ export interface BrokerTeamData {
   property_types: string[];
   mentions: number;
   global_rank: number;
+  total_brokers: number;
 }
 
 export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string) {
@@ -378,11 +379,12 @@ export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: s
       });
 
       if (error) throw error;
-      return (data || []).map((d: { broker_name: string; property_types: string[]; mentions: number; global_rank: number }) => ({
+      return (data || []).map((d: { broker_name: string; property_types: string[]; mentions: number; global_rank: number; total_brokers: number }) => ({
         broker_name: d.broker_name,
         property_types: d.property_types || [],
         mentions: Number(d.mentions),
         global_rank: Number(d.global_rank),
+        total_brokers: Number(d.total_brokers),
       }));
     },
     enabled: !!targetBrokerage,

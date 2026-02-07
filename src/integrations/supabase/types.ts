@@ -309,6 +309,7 @@ export type Database = {
           global_rank: number
           mentions: number
           property_types: string[]
+          total_brokers: number
         }[]
       }
       get_competitive_rankings: {
