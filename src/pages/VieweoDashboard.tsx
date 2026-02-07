@@ -12,6 +12,7 @@ import {
   RawDataTable,
   VieweoDashboardLoading,
   TrustDisclaimer,
+  UpgradeBanner,
 } from '@/components/vieweo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogOut, Database } from 'lucide-react';
@@ -85,6 +86,9 @@ export default function VieweoDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Upgrade Banner */}
+        <UpgradeBanner />
+
         {/* Description */}
         <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
           <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
