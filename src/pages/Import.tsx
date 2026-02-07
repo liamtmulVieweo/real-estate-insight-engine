@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Trash2 } from "lucide-react";
 
-type TableName = "lovable_prompts" | "lovable_entities" | "lovable_domains";
+type TableName = "lovable_prompts" | "lovable_entities" | "lovable_domains" | "visibility_records";
 
 const Import = () => {
   const [status, setStatus] = useState<string>("");
@@ -214,6 +214,35 @@ const Import = () => {
               onChange={handleFileUpload("lovable_domains")}
               disabled={isLoading}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Import visibility_records</CardTitle>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => clearTable("visibility_records")}
+              disabled={isLoading}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Clear All
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Expected columns: entity_key, entity_type, name, market, property_type, broker_role, prompt, brokerage, evidence, entity_display, market_role, market_asset
+            </p>
+            <div>
+              <label className="block text-sm font-medium mb-2">Upload CSV file:</label>
+              <input 
+                type="file" 
+                accept=".csv" 
+                onChange={handleFileUpload("visibility_records")}
+                disabled={isLoading}
+              />
+            </div>
           </CardContent>
         </Card>
 

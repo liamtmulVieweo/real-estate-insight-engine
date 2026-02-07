@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
 
     // Handle clear action
     if (action === "clear") {
-      const validTables = ["lovable_prompts", "lovable_entities", "lovable_domains"];
+      const validTables = ["lovable_prompts", "lovable_entities", "lovable_domains", "visibility_records"];
       if (!validTables.includes(table)) {
         return new Response(
           JSON.stringify({ error: `Unknown table: ${table}` }),
@@ -213,6 +213,7 @@ Deno.serve(async (req) => {
       "lovable_prompts": ["prompt_hash", "prompt", "model", "market", "primary_market", "submarket", "property_type", "broker_role", "citation_count", "geo_level"],
       "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market"],
       "lovable_domains": ["prompt_hash", "domain"],
+      "visibility_records": ["entity_key", "entity_type", "name", "market", "property_type", "broker_role", "prompt"],
     };
     
     const validTables = Object.keys(expectedHeaders);
@@ -318,6 +319,8 @@ Deno.serve(async (req) => {
         result = await supabase.from("lovable_entities").insert(batch);
       } else if (table === "lovable_domains") {
         result = await supabase.from("lovable_domains").insert(batch);
+      } else if (table === "visibility_records") {
+        result = await supabase.from("visibility_records").insert(batch);
       } else {
         return new Response(
           JSON.stringify({ error: `Unknown table: ${table}` }),
