@@ -308,7 +308,7 @@ export type Database = {
           broker_name: string
           global_rank: number
           mentions: number
-          property_type: string
+          property_types: string[]
         }[]
       }
       get_competitive_rankings: {

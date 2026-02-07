@@ -6,7 +6,7 @@ import { Search, Users } from "lucide-react";
 
 interface BrokerTeamData {
   broker_name: string;
-  property_type: string;
+  property_types: string[];
   mentions: number;
   global_rank: number;
 }
@@ -23,7 +23,7 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
   const filteredData = data.filter(
     (d) =>
       d.broker_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.property_type.toLowerCase().includes(searchTerm.toLowerCase())
+      d.property_types.some((pt) => pt.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) {
@@ -82,7 +82,7 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
               <thead className="sticky top-0 bg-card">
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-3 font-medium text-muted-foreground">Broker</th>
-                  <th className="text-left py-3 px-3 font-medium text-muted-foreground">Property Type</th>
+                  <th className="text-left py-3 px-3 font-medium text-muted-foreground">Property Types</th>
                   <th className="text-right py-3 px-3 font-medium text-muted-foreground">Mentions</th>
                   <th className="text-right py-3 px-3 font-medium text-muted-foreground">Global Rank</th>
                 </tr>
@@ -90,14 +90,18 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
               <tbody>
                 {filteredData.map((row, index) => (
                   <tr
-                    key={`${row.broker_name}-${row.property_type}-${index}`}
+                    key={`${row.broker_name}-${index}`}
                     className="border-b border-border/50 hover:bg-muted/30"
                   >
                     <td className="py-3 px-3 font-medium">{row.broker_name}</td>
                     <td className="py-3 px-3">
-                      <Badge variant="outline" className="font-normal">
-                        {row.property_type}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {row.property_types.map((pt) => (
+                          <Badge key={pt} variant="outline" className="font-normal text-xs">
+                            {pt}
+                          </Badge>
+                        ))}
+                      </div>
                     </td>
                     <td className="py-3 px-3 text-right font-medium">
                       {row.mentions.toLocaleString()}
@@ -123,7 +127,7 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
         )}
         {data.length > 0 && (
           <p className="text-xs text-muted-foreground mt-4 text-center">
-            Showing {filteredData.length} of {data.length} broker-property combinations
+            Showing {filteredData.length} of {data.length} brokers
           </p>
         )}
       </CardContent>
