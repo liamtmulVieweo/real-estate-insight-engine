@@ -243,6 +243,14 @@ export type Database = {
           source_domains: string[]
         }[]
       }
+      get_property_type_breakdown: {
+        Args: { target_brokerage: string }
+        Returns: {
+          mentions: number
+          property_type: string
+          rank: number
+        }[]
+      }
       get_source_attribution_comparison: {
         Args: { target_brokerage: string }
         Returns: {
