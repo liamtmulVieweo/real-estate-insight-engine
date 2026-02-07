@@ -150,10 +150,9 @@ export default function Dashboard() {
         </section>
 
         {/* Section 3: Market Visibility & Property Types */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MarketVisibility data={marketData} isLoading={loadingMarkets} />
           <PropertyTypeBreakdown data={propertyTypeData} isLoading={loadingPropertyTypes} />
-          <SourceAttribution data={sourceData} isLoading={loadingSource} />
         </section>
 
         {/* Section 5: Competitive Rankings */}
@@ -165,9 +164,9 @@ export default function Dashboard() {
         <section>
           <MissedOpportunities
             gapMarkets={missedMarkets}
-            gapDimensions={underIndexed}
+            sourceData={sourceData}
             isLoadingMarkets={loadingMissedMarkets}
-            isLoadingDimensions={loadingUnderIndexed}
+            isLoadingSource={loadingSource}
           />
         </section>
 

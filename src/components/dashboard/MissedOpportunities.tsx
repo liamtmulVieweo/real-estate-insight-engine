@@ -1,20 +1,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { GapMarket, GapDimension } from "@/types/dashboard";
+import type { GapMarket, SourceAttribution } from "@/types/dashboard";
 
 interface MissedOpportunitiesProps {
   gapMarkets: GapMarket[];
-  gapDimensions: GapDimension[];
+  sourceData: SourceAttribution[];
   isLoadingMarkets: boolean;
-  isLoadingDimensions: boolean;
+  isLoadingSource: boolean;
 }
 
 export function MissedOpportunities({
   gapMarkets,
-  gapDimensions,
+  sourceData,
   isLoadingMarkets,
-  isLoadingDimensions,
+  isLoadingSource,
 }: MissedOpportunitiesProps) {
   return (
     <div className="space-y-6">
@@ -72,50 +72,50 @@ export function MissedOpportunities({
           </CardContent>
         </Card>
 
-        {/* Missing Specialties */}
+        {/* Source Attribution */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Missing Specialties</CardTitle>
-            <CardDescription>Property types and roles where you have no presence</CardDescription>
+            <CardTitle className="text-base">Source Attribution</CardTitle>
+            <CardDescription>Domains driving your visibility vs. peers</CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoadingDimensions ? (
+            {isLoadingSource ? (
               <div className="h-48 bg-muted animate-pulse rounded" />
-            ) : gapDimensions.length === 0 ? (
+            ) : sourceData.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                No under-indexed specialties found
+                No source attribution data found
               </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left py-2 px-2 font-medium text-muted-foreground">Segment</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Your Share</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Avg Share</th>
-                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Gap</th>
+                      <th className="text-left py-2 px-2 font-medium text-muted-foreground">Domain</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Your %</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Peer Avg</th>
+                      <th className="text-right py-2 px-2 font-medium text-muted-foreground">Diff</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {gapDimensions.slice(0, 10).map((item, idx) => (
-                      <tr key={idx} className="border-b border-border/50 hover:bg-muted/30">
-                        <td className="py-2 px-2">
-                          <div>
-                            <span className="font-medium">{item.property_type}</span>
-                            <Badge variant="outline" className="text-xs ml-2">
-                              {item.broker_role}
-                            </Badge>
-                          </div>
+                    {sourceData.slice(0, 10).map((item) => (
+                      <tr key={item.domain} className="border-b border-border/50 hover:bg-muted/30">
+                        <td className="py-2 px-2 font-medium truncate max-w-[150px]" title={item.domain}>
+                          {item.domain}
                         </td>
+                        <td className="py-2 px-2 text-right">{item.target_pct?.toFixed(1)}%</td>
+                        <td className="py-2 px-2 text-right">{item.peer_avg_pct?.toFixed(1)}%</td>
                         <td className="py-2 px-2 text-right">
-                          {item.target_share_pct?.toFixed(1) || 0}%
-                        </td>
-                        <td className="py-2 px-2 text-right">
-                          {item.market_avg_share_pct?.toFixed(1) || 0}%
-                        </td>
-                        <td className="py-2 px-2 text-right">
-                          <span className="text-destructive font-medium">
-                            {item.gap_pct?.toFixed(1) || 0}%
+                          <span
+                            className={
+                              item.diff_pct > 0
+                                ? "text-green-600 font-medium"
+                                : item.diff_pct < 0
+                                ? "text-red-600 font-medium"
+                                : "text-muted-foreground"
+                            }
+                          >
+                            {item.diff_pct > 0 ? "+" : ""}
+                            {item.diff_pct?.toFixed(1)}%
                           </span>
                         </td>
                       </tr>
