@@ -1,12 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type { PropertyTypeBreakdown as PropertyTypeData } from "@/types/dashboard";
 
 interface PropertyTypeBreakdownProps {
   data: PropertyTypeData[];
   isLoading: boolean;
+  selectedMarket?: string;
 }
 
-export function PropertyTypeBreakdown({ data, isLoading }: PropertyTypeBreakdownProps) {
+export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: PropertyTypeBreakdownProps) {
   if (isLoading) {
     return (
       <Card className="h-full">
@@ -25,8 +27,18 @@ export function PropertyTypeBreakdown({ data, isLoading }: PropertyTypeBreakdown
   return (
     <Card className="h-full">
       <CardHeader className="pb-4">
-        <CardTitle>Property Types</CardTitle>
-        <CardDescription>Top property types by mention count</CardDescription>
+        <div className="flex items-center justify-between">
+          <CardTitle>Property Types</CardTitle>
+          {selectedMarket && (
+            <Badge variant="secondary" className="text-xs">
+              {selectedMarket}
+            </Badge>
+          )}
+        </div>
+        <CardDescription>
+          Top property types by mention count
+          {!selectedMarket && " (All Markets)"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
