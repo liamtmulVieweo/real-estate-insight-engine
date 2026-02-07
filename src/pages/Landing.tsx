@@ -22,9 +22,6 @@ export default function Landing() {
             © {new Date().getFullYear()} Vieweo, Inc. All rights reserved.
           </p>
           <div className="flex items-center justify-center gap-6">
-            <Link to="/cre-dashboard" className="text-white/60 hover:text-white/80 text-sm transition-colors">
-              CRE Dashboard
-            </Link>
             <Link to="/methodology" className="text-white/60 hover:text-white/80 text-sm transition-colors">
               Methodology
             </Link>
