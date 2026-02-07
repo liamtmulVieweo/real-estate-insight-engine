@@ -238,10 +238,24 @@ Deno.serve(async (req) => {
 
     console.log(`Processing ${dataRows.length} rows for table: ${table}`);
 
+    // Valid columns per table (to filter out unknown columns from CSV)
+    const validColumns: Record<string, string[]> = {
+      "lovable_prompts": ["prompt_hash", "prompt", "model", "market", "primary_market", "submarket", "property_type", "broker_role", "citation_count", "geo_level"],
+      "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market"],
+      "lovable_domains": ["prompt_hash", "domain"],
+      "visibility_records": ["entity_key", "entity_type", "name", "market", "property_type", "broker_role", "prompt", "brokerage", "evidence", "entity_display", "market_role", "market_asset"],
+    };
+
+    const tableColumns = validColumns[table] || [];
+
     for (let i = 0; i < dataRows.length; i += batchSize) {
       const rawBatch = dataRows.slice(i, i + batchSize).map((row, rowIndex) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, idx) => {
+          // Only include columns that exist in the table schema
+          if (!tableColumns.includes(h)) {
+            return; // Skip unknown columns
+          }
           const val = row[idx] ?? "";
           if (h === "citation_count") {
             obj[h] = parseInt(val, 10) || 0;
