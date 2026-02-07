@@ -24,6 +24,7 @@ interface KPICardsProps {
   primaryMarketsLoading?: boolean;
   submarkets?: string[];
   submarketsLoading?: boolean;
+  totalTrackedMarkets?: number;
 }
 
 interface KPIData {
@@ -44,7 +45,8 @@ export function KPICards({
   primaryMarkets = [], 
   primaryMarketsLoading,
   submarkets = [], 
-  submarketsLoading 
+  submarketsLoading,
+  totalTrackedMarkets = 0,
 }: KPICardsProps) {
   const kpis: KPIData[] = [
     {
@@ -59,6 +61,7 @@ export function KPICards({
       id: "primary-markets",
       label: "Markets Present",
       value: summary?.primary_markets_present || 0,
+      subValue: totalTrackedMarkets > 0 ? `of ${totalTrackedMarkets} tracked` : undefined,
       icon: Map,
       color: "text-blue-600 bg-blue-100",
       hoverContent: primaryMarkets.length > 0 ? (
