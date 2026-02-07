@@ -48,6 +48,7 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
                 <th className="text-left py-3 px-2 font-medium text-muted-foreground">Property Type</th>
                 <th className="text-right py-3 px-2 font-medium text-muted-foreground">Mentions</th>
                 <th className="text-right py-3 px-2 font-medium text-muted-foreground">Share</th>
+                <th className="text-right py-3 px-2 font-medium text-muted-foreground">Rank</th>
               </tr>
             </thead>
             <tbody>
@@ -58,6 +59,7 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
                   <td className="py-3 px-2 text-right">
                     {totalMentions > 0 ? ((item.mentions / totalMentions) * 100).toFixed(1) : 0}%
                   </td>
+                  <td className="py-3 px-2 text-right font-semibold">#{item.rank}</td>
                 </tr>
               ))}
             </tbody>
