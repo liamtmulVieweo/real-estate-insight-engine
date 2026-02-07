@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Users } from "lucide-react";
 
 interface BrokerTeamData {
@@ -16,9 +17,19 @@ interface BrokerTeamBreakdownProps {
   data: BrokerTeamData[];
   isLoading: boolean;
   selectedMarket?: string;
+  propertyTypes: string[];
+  selectedPropertyType?: string;
+  onPropertyTypeChange: (value: string) => void;
 }
 
-export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerTeamBreakdownProps) {
+export function BrokerTeamBreakdown({ 
+  data, 
+  isLoading, 
+  selectedMarket,
+  propertyTypes,
+  selectedPropertyType,
+  onPropertyTypeChange,
+}: BrokerTeamBreakdownProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredData = data.filter(
@@ -45,29 +56,49 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Brokerage Team Breakdown
           </CardTitle>
-          <CardDescription>
-            Individual broker visibility by property type
+          <CardDescription className="flex items-center gap-2 flex-wrap mt-1">
+            Individual broker visibility
             {selectedMarket && (
-              <Badge variant="secondary" className="ml-2 text-xs">
+              <Badge variant="secondary" className="text-xs">
                 {selectedMarket}
+              </Badge>
+            )}
+            {selectedPropertyType && selectedPropertyType !== "All" && (
+              <Badge variant="outline" className="text-xs">
+                {selectedPropertyType}
               </Badge>
             )}
           </CardDescription>
         </div>
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search brokers or types..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex items-center gap-3">
+          <Select value={selectedPropertyType || "All"} onValueChange={onPropertyTypeChange}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Property Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All Property Types</SelectItem>
+              {propertyTypes.map((pt) => (
+                <SelectItem key={pt} value={pt}>
+                  {pt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="relative w-48">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search brokers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
