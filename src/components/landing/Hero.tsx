@@ -22,20 +22,12 @@ export function Hero() {
           <div className="flex items-center gap-2">
             <VieweoLogo className="h-10 w-auto [&_text]:fill-white [&_path]:fill-white/90 [&_rect]:fill-primary" />
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/cre-dashboard"
-              className="text-sm font-medium text-white/70 hover:text-white transition-colors hidden sm:inline"
-            >
-              CRE Dashboard
-            </Link>
-            <button
-              onClick={scrollToSignup}
-              className="text-sm font-medium text-white/90 hover:text-white transition-colors px-4 py-2 rounded-full border border-white/20 hover:border-white/40"
-            >
-              Get Access
-            </button>
-          </div>
+          <button
+            onClick={scrollToSignup}
+            className="text-sm font-medium text-white/90 hover:text-white transition-colors px-4 py-2 rounded-full border border-white/20 hover:border-white/40"
+          >
+            Get Access
+          </button>
         </motion.nav>
 
         <div className="max-w-4xl mx-auto text-center">
