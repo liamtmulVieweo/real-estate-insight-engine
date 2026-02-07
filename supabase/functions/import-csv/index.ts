@@ -239,7 +239,7 @@ Deno.serve(async (req) => {
     console.log(`Processing ${dataRows.length} rows for table: ${table}`);
 
     for (let i = 0; i < dataRows.length; i += batchSize) {
-      const rawBatch = dataRows.slice(i, i + batchSize).map((row) => {
+      const rawBatch = dataRows.slice(i, i + batchSize).map((row, rowIndex) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, idx) => {
           const val = row[idx] ?? "";
@@ -249,6 +249,16 @@ Deno.serve(async (req) => {
             obj[h] = val || null;
           }
         });
+        
+        // Auto-generate entity_key for visibility_records if missing
+        if (table === "visibility_records" && !obj["entity_key"]) {
+          const name = (obj["name"] as string) || "";
+          const market = (obj["market"] as string) || "";
+          const entityType = (obj["entity_type"] as string) || "";
+          // Create a unique key from name + market + entity_type + row index
+          obj["entity_key"] = `${name.toLowerCase().replace(/\s+/g, "_")}_${market.toLowerCase().replace(/\s+/g, "_")}_${entityType}_${i + rowIndex}`;
+        }
+        
         return obj;
       });
 
