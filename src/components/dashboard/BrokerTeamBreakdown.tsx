@@ -23,7 +23,7 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
   const filteredData = data.filter(
     (d) =>
       d.broker_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.property_types.some((pt) => pt.toLowerCase().includes(searchTerm.toLowerCase()))
+      (d.property_types || []).some((pt) => pt.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) {
@@ -96,7 +96,7 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
                     <td className="py-3 px-3 font-medium">{row.broker_name}</td>
                     <td className="py-3 px-3">
                       <div className="flex flex-wrap gap-1">
-                        {row.property_types.map((pt) => (
+                        {(row.property_types || []).map((pt) => (
                           <Badge key={pt} variant="outline" className="font-normal text-xs">
                             {pt}
                           </Badge>
