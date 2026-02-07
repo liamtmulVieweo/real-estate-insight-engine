@@ -8,6 +8,7 @@ import {
   PromptIntelligence,
   SourceAttribution,
   PropertyTypeBreakdown,
+  BrokerTeamBreakdown,
   DashboardFooter,
 } from "@/components/dashboard";
 import {
@@ -26,6 +27,7 @@ import {
   useSubmarketsForBrokerage,
   usePrimaryMarketsForBrokerage,
   usePropertyTypeBreakdown,
+  useBrokerTeamBreakdown,
 } from "@/hooks/useDashboardData";
 import type { Filters } from "@/types/dashboard";
 
@@ -98,6 +100,11 @@ export default function Dashboard() {
   );
   
   const { data: propertyTypeData = [], isLoading: loadingPropertyTypes } = usePropertyTypeBreakdown(
+    selectedBrokerage,
+    marketFilter
+  );
+
+  const { data: brokerTeamData = [], isLoading: loadingBrokerTeam } = useBrokerTeamBreakdown(
     selectedBrokerage,
     marketFilter
   );
@@ -179,6 +186,15 @@ export default function Dashboard() {
           <div className="flex items-stretch">
             <DashboardFooter />
           </div>
+        </section>
+
+        {/* Section 10: Brokerage Team Breakdown */}
+        <section>
+          <BrokerTeamBreakdown
+            data={brokerTeamData}
+            isLoading={loadingBrokerTeam}
+            selectedMarket={marketFilter}
+          />
         </section>
       </main>
     </div>

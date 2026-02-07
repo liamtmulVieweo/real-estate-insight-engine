@@ -361,3 +361,31 @@ export function usePropertyTypeBreakdown(targetBrokerage: string, marketFilter?:
   });
 }
 
+export interface BrokerTeamData {
+  broker_name: string;
+  property_type: string;
+  mentions: number;
+  global_rank: number;
+}
+
+export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string) {
+  return useQuery({
+    queryKey: ["broker-team-breakdown", targetBrokerage, marketFilter],
+    queryFn: async (): Promise<BrokerTeamData[]> => {
+      const { data, error } = await supabase.rpc("get_broker_team_breakdown", {
+        target_brokerage: targetBrokerage,
+        market_filter: marketFilter || null,
+      });
+
+      if (error) throw error;
+      return (data || []).map((d: { broker_name: string; property_type: string; mentions: number; global_rank: number }) => ({
+        broker_name: d.broker_name,
+        property_type: d.property_type,
+        mentions: Number(d.mentions),
+        global_rank: Number(d.global_rank),
+      }));
+    },
+    enabled: !!targetBrokerage,
+  });
+}
+

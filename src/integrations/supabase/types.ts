@@ -302,6 +302,15 @@ export type Database = {
       }
     }
     Functions: {
+      get_broker_team_breakdown: {
+        Args: { market_filter?: string; target_brokerage: string }
+        Returns: {
+          broker_name: string
+          global_rank: number
+          mentions: number
+          property_type: string
+        }[]
+      }
       get_competitive_rankings: {
         Args: { market_filter?: string; target_brokerage: string }
         Returns: {
