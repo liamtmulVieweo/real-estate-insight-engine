@@ -9,6 +9,7 @@ interface BrokerTeamData {
   property_types: string[];
   mentions: number;
   global_rank: number;
+  total_brokers: number;
 }
 
 interface BrokerTeamBreakdownProps {
@@ -107,17 +108,22 @@ export function BrokerTeamBreakdown({ data, isLoading, selectedMarket }: BrokerT
                       {row.mentions.toLocaleString()}
                     </td>
                     <td className="py-3 px-3 text-right">
-                      <span
-                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                          row.global_rank <= 3
-                            ? "bg-amber-100 text-amber-700"
-                            : row.global_rank <= 10
-                            ? "bg-primary/10 text-primary"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {row.global_rank}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span
+                          className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                            row.global_rank <= 3
+                              ? "bg-amber-100 text-amber-700"
+                              : row.global_rank <= 10
+                              ? "bg-primary/10 text-primary"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {row.global_rank}
+                        </span>
+                        <span className="text-xs text-muted-foreground mt-0.5">
+                          of {row.total_brokers.toLocaleString()}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}
