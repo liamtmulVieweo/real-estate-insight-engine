@@ -153,7 +153,7 @@ export default function Dashboard() {
         {/* Section 3: Market Visibility & Property Types */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MarketVisibility data={marketData} isLoading={loadingMarkets} />
-          <PropertyTypeBreakdown data={propertyTypeData} isLoading={loadingPropertyTypes} />
+          <PropertyTypeBreakdown data={propertyTypeData} isLoading={loadingPropertyTypes} selectedMarket={marketFilter} />
         </section>
 
         {/* Section 5: Competitive Rankings */}
