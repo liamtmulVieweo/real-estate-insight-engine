@@ -86,15 +86,15 @@ export default function VieweoDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Upgrade Banner */}
-        <UpgradeBanner />
-
         {/* Description */}
         <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
           <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
             <span className="font-semibold text-foreground">Vieweo</span> measures how AI systems represent real estate professionals in discovery queries — revealing who AI trusts, who it omits, and where visibility gaps exist. This is not a ranking of performance or deals; it's an analysis of AI representation.
           </p>
         </div>
+
+        {/* Upgrade Banner */}
+        <UpgradeBanner />
 
         {/* Global Filters */}
         <GlobalFilters
