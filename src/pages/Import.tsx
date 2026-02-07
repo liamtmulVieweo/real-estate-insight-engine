@@ -79,36 +79,50 @@ const Import = () => {
       const header = lines[0];
       const dataLines = lines.slice(1).filter(l => l.trim().length > 0);
       
-      const chunkSize = 500; // rows per request
+      const chunkSize = 2000; // rows per request (increased from 500)
+      const concurrency = 5; // parallel uploads
       const totalChunks = Math.ceil(dataLines.length / chunkSize);
       let totalInserted = 0;
       let totalSkipped = 0;
+      let completedChunks = 0;
       const allErrors: string[] = [];
 
-      setStatus(`Uploading ${table} (${dataLines.length} rows in ${totalChunks} chunks)...`);
+      setStatus(`Uploading ${table} (${dataLines.length} rows in ${totalChunks} chunks, ${concurrency} parallel)...`);
 
-      for (let i = 0; i < totalChunks; i++) {
-        const chunkLines = dataLines.slice(i * chunkSize, (i + 1) * chunkSize);
-        const chunkCsv = [header, ...chunkLines].join('\n');
+      // Process chunks in parallel batches
+      for (let i = 0; i < totalChunks; i += concurrency) {
+        const chunkPromises = [];
+        
+        for (let j = i; j < Math.min(i + concurrency, totalChunks); j++) {
+          const chunkLines = dataLines.slice(j * chunkSize, (j + 1) * chunkSize);
+          const chunkCsv = [header, ...chunkLines].join('\n');
+          
+          chunkPromises.push(
+            supabase.functions.invoke("import-csv", {
+              body: { table, csvData: chunkCsv },
+            }).then(result => ({ result, chunkIndex: j }))
+          );
+        }
 
-        const result = await supabase.functions.invoke("import-csv", {
-          body: { table, csvData: chunkCsv },
-        });
-
-        if (result.error) {
-          allErrors.push(`Chunk ${i + 1}: ${result.error.message}`);
-        } else {
-          const data = result.data as { inserted: number; skippedMissingPrompt?: number; errors?: string[] };
-          totalInserted += data.inserted || 0;
-          totalSkipped += data.skippedMissingPrompt || 0;
-          if (data.errors) {
-            allErrors.push(...data.errors.map(e => `Chunk ${i + 1}: ${e}`));
+        const results = await Promise.all(chunkPromises);
+        
+        for (const { result, chunkIndex } of results) {
+          completedChunks++;
+          if (result.error) {
+            allErrors.push(`Chunk ${chunkIndex + 1}: ${result.error.message}`);
+          } else {
+            const data = result.data as { inserted: number; skippedMissingPrompt?: number; errors?: string[] };
+            totalInserted += data.inserted || 0;
+            totalSkipped += data.skippedMissingPrompt || 0;
+            if (data.errors) {
+              allErrors.push(...data.errors.map(e => `Chunk ${chunkIndex + 1}: ${e}`));
+            }
           }
         }
 
-        const pct = Math.round(((i + 1) / totalChunks) * 90) + 10;
+        const pct = Math.round((completedChunks / totalChunks) * 90) + 10;
         setProgress(pct);
-        setStatus(`Chunk ${i + 1}/${totalChunks} complete (${totalInserted} inserted so far)...`);
+        setStatus(`${completedChunks}/${totalChunks} chunks complete (${totalInserted} inserted)...`);
       }
 
       setProgress(100);

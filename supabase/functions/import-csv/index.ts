@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
     let inserted = 0;
     let skippedMissingPrompt = 0;
     const errors: string[] = [];
-    const batchSize = 500;
+    const batchSize = 1000; // increased from 500
 
     console.log(`Processing ${dataRows.length} rows for table: ${table}`);
 
