@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useVieweoAuth } from '@/contexts/VieweoAuthContext';
@@ -112,6 +112,12 @@ export function EmailSignup() {
                 <Lock className="w-4 h-4" />
                 We respect your privacy. No spam, ever.
               </p>
+              <Link
+                to="/cre-dashboard"
+                className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm mt-4 transition-colors"
+              >
+                Or explore the CRE Dashboard →
+              </Link>
             </motion.form>
           )}
         </motion.div>
