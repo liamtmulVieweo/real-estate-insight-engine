@@ -8,6 +8,7 @@ import { VieweoProtectedRoute } from "@/components/VieweoProtectedRoute";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import VieweoDashboard from "./pages/VieweoDashboard";
+import SubscriptionPage from "./pages/SubscriptionPage";
 import Methodology from "./pages/Methodology";
 import Import from "./pages/Import";
 import Auth from "./pages/Auth";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/cre-dashboard" element={<Dashboard />} />
             <Route path="/vieweo" element={<VieweoDashboard />} />
+            <Route path="/subscribe" element={<SubscriptionPage />} />
             <Route path="/methodology" element={<Methodology />} />
             <Route path="/auth" element={<Auth />} />
             <Route
