@@ -15,7 +15,11 @@ import {
   Table2,
 } from 'lucide-react'
 
-export function UpgradeBanner() {
+interface UpgradeBannerProps {
+  onOpenSubscription: () => void;
+}
+
+export function UpgradeBanner({ onOpenSubscription }: UpgradeBannerProps) {
   const features = [
     {
       icon: MapPin,
@@ -99,19 +103,19 @@ export function UpgradeBanner() {
           </ul>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center pt-1">
-            <a
-              href="/subscribe"
+            <button
+              onClick={onOpenSubscription}
               className="inline-flex items-center justify-center rounded-lg bg-teal-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 transition-colors group"
             >
               Unlock Brokerage Dashboard
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </a>
-            <a
-              href="/subscribe#pricing"
+            </button>
+            <button
+              onClick={onOpenSubscription}
               className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
             >
               Learn more
-            </a>
+            </button>
           </div>
         </div>
 
