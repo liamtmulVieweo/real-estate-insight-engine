@@ -15,7 +15,7 @@ import {
   UpgradeBanner,
 } from '@/components/vieweo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogOut, Database } from 'lucide-react';
+import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogIn, Database } from 'lucide-react';
 
 export default function VieweoDashboard() {
   const { signOut } = useVieweoAuth();
@@ -67,8 +67,8 @@ export default function VieweoDashboard() {
                 onClick={signOut}
                 className="gap-2"
               >
-                <LogOut className="h-4 w-4" />
-                Sign Out
+                <LogIn className="h-4 w-4" />
+                Sign In
               </Button>
             </div>
             {/* Mobile CTA */}
@@ -78,7 +78,7 @@ export default function VieweoDashboard() {
                 size="icon"
                 onClick={signOut}
               >
-                <LogOut className="h-4 w-4" />
+                <LogIn className="h-4 w-4" />
               </Button>
             </div>
           </div>
