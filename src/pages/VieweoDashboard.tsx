@@ -59,7 +59,7 @@ export default function VieweoDashboard() {
                 </span>
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/cre-dashboard" className="gap-2">
+                <Link to="/subscribe" className="gap-2">
                   CRE Dashboard
                 </Link>
               </Button>
@@ -188,7 +188,7 @@ export default function VieweoDashboard() {
               View Methodology
             </Link>
             <Link
-              to="/cre-dashboard"
+              to="/subscribe"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               CRE Dashboard →
