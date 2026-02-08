@@ -2,14 +2,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Database } from 'lucide-react';
 import { VieweoLogo } from '@/components/VieweoLogo';
 import { Link } from 'react-router-dom';
+import { LeaderboardPreview } from './LeaderboardPreview';
 
 export function Hero() {
-  const scrollToSignup = () => {
-    document.getElementById('signup')?.scrollIntoView({
-      behavior: 'smooth',
-    });
-  };
-
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-primary via-primary to-secondary overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -35,7 +30,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm"
           >
             <Database className="w-4 h-4" />
             63,974 records analyzed
@@ -45,7 +40,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 mt-8"
           >
             Measure Your AI Visibility in{' '}
             <span className="text-accent">Commercial Real Estate</span>
@@ -82,6 +77,9 @@ export function Hero() {
             </Link>
           </motion.div>
         </div>
+
+        {/* Leaderboard Preview */}
+        <LeaderboardPreview />
       </div>
 
       {/* Background decoration */}
