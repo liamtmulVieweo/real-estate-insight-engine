@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { VieweoLogo } from '@/components/VieweoLogo';
 import { Button } from '@/components/ui/button';
-import { useVieweoAuth } from '@/contexts/VieweoAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useVieweoData } from '@/hooks/useVieweoData';
 import {
   GlobalFilters,
@@ -19,7 +19,7 @@ import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogIn, LogOut, Datab
 import { useNavigate } from 'react-router-dom';
 
 export default function VieweoDashboard() {
-  const { isAuthenticated, signOut } = useVieweoAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const {
     filters,
@@ -63,7 +63,7 @@ export default function VieweoDashboard() {
                   CRE Dashboard
                 </Link>
               </Button>
-              {isAuthenticated ? (
+              {user ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -77,7 +77,7 @@ export default function VieweoDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/auth?redirect=/vieweo')}
                   className="gap-2"
                 >
                   <LogIn className="h-4 w-4" />
@@ -90,9 +90,9 @@ export default function VieweoDashboard() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={isAuthenticated ? signOut : () => navigate('/auth')}
+                onClick={user ? signOut : () => navigate('/auth?redirect=/vieweo')}
               >
-                {isAuthenticated ? <LogOut className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+                {user ? <LogOut className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
               </Button>
             </div>
           </div>
