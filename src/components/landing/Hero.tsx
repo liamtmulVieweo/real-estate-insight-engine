@@ -22,12 +22,12 @@ export function Hero() {
           <div className="flex items-center gap-2">
             <VieweoLogo className="h-10 w-auto [&_text]:fill-white [&_path]:fill-white/90 [&_rect]:fill-primary" />
           </div>
-          <button
-            onClick={scrollToSignup}
+          <Link
+            to="/vieweo"
             className="text-sm font-medium text-white/90 hover:text-white transition-colors px-4 py-2 rounded-full border border-white/20 hover:border-white/40"
           >
-            Get Access
-          </button>
+            View Leaderboard
+          </Link>
         </motion.nav>
 
         <div className="max-w-4xl mx-auto text-center">
@@ -67,13 +67,13 @@ export function Hero() {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <button
-              onClick={scrollToSignup}
+            <Link
+              to="/vieweo"
               className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-full hover:bg-white/90 transition-all shadow-lg hover:shadow-xl"
             >
-              Get Full Access
+              View Market Leaderboard
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
             <Link
               to="/methodology"
               className="px-8 py-4 text-white font-medium hover:text-white/80 transition-colors"
