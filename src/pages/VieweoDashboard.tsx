@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { VieweoLogo } from '@/components/VieweoLogo';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,13 +15,14 @@ import {
   TrustDisclaimer,
   UpgradeBanner,
 } from '@/components/vieweo';
+import { SubscriptionModal } from '@/components/subscription';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogIn, LogOut, Database } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { BarChart3, Users, FileSearch, TableIcon, LogIn, LogOut, Database } from 'lucide-react';
 
 export default function VieweoDashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const {
     filters,
     setFilters,
@@ -58,10 +60,8 @@ export default function VieweoDashboard() {
                   {stats.totalRecords.toLocaleString()} records
                 </span>
               </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/subscribe" className="gap-2">
-                  CRE Dashboard
-                </Link>
+              <Button variant="outline" size="sm" onClick={() => setIsSubscriptionModalOpen(true)}>
+                CRE Dashboard
               </Button>
               {user ? (
                 <Button
@@ -108,7 +108,7 @@ export default function VieweoDashboard() {
         </div>
 
         {/* Upgrade Banner */}
-        <UpgradeBanner />
+        <UpgradeBanner onOpenSubscription={() => setIsSubscriptionModalOpen(true)} />
 
         {/* Global Filters */}
         <GlobalFilters
@@ -187,15 +187,21 @@ export default function VieweoDashboard() {
               <FileSearch className="h-4 w-4" />
               View Methodology
             </Link>
-            <Link
-              to="/subscribe"
+            <button
+              onClick={() => setIsSubscriptionModalOpen(true)}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               CRE Dashboard →
-            </Link>
+            </button>
           </div>
         </div>
       </footer>
+
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+      />
     </div>
   );
 }
