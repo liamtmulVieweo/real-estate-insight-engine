@@ -1,4 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { VieweoFilters } from '@/hooks/useVieweoData';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Select,
   SelectContent,
@@ -25,7 +27,14 @@ export function GlobalFilters({
   brokerRoles,
   entityTypes,
 }: GlobalFiltersProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const updateFilter = (key: keyof VieweoFilters, value: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
     setFilters({ ...filters, [key]: value });
   };
 
@@ -39,6 +48,9 @@ export function GlobalFilters({
       <div className="flex items-center gap-2 mb-4">
         <Filter className="h-4 w-4 text-primary" />
         <span className="text-sm font-medium text-foreground">Filters</span>
+        {!user && (
+          <span className="text-xs text-muted-foreground ml-auto">Sign in to filter</span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
