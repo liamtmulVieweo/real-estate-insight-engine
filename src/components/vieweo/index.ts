@@ -1,4 +1,5 @@
 export { GlobalFilters } from './GlobalFilters';
+export { AuthPromptDialog } from './AuthPromptDialog';
 export { StatCard } from './StatCard';
 export { MarketSummary } from './MarketSummary';
 export { TopBrokerages } from './TopBrokerages';
