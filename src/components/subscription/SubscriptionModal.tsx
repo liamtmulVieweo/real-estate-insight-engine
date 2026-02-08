@@ -50,10 +50,7 @@ export function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [isAnnual, setIsAnnual] = useState(false);
 
   const monthlyPrices = { individual: 50, brokerage: 399 };
-  const annualPrices = {
-    individual: Math.round(monthlyPrices.individual * 0.85),
-    brokerage: Math.round(monthlyPrices.brokerage * 0.85),
-  };
+  const annualPrices = { individual: 42, brokerage: 339 };
 
   const currentPrices = isAnnual ? annualPrices : monthlyPrices;
 
