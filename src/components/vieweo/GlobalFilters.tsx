@@ -34,7 +34,7 @@ export function GlobalFilters({
     if (!user) {
       e.preventDefault();
       e.stopPropagation();
-      navigate('/auth');
+      navigate('/auth?redirect=/vieweo');
     }
   };
 
