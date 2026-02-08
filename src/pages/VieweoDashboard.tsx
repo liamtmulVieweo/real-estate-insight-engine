@@ -15,10 +15,12 @@ import {
   UpgradeBanner,
 } from '@/components/vieweo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogIn, Database } from 'lucide-react';
+import { BarChart3, Users, FileSearch, TableIcon, Sparkles, LogIn, LogOut, Database } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function VieweoDashboard() {
-  const { signOut } = useVieweoAuth();
+  const { isAuthenticated, signOut } = useVieweoAuth();
+  const navigate = useNavigate();
   const {
     filters,
     setFilters,
@@ -61,24 +63,36 @@ export default function VieweoDashboard() {
                   CRE Dashboard
                 </Link>
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={signOut}
-                className="gap-2"
-              >
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={signOut}
+                  className="gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="gap-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              )}
             </div>
             {/* Mobile CTA */}
             <div className="md:hidden flex items-center gap-2">
               <Button
                 variant="outline"
                 size="icon"
-                onClick={signOut}
+                onClick={isAuthenticated ? signOut : () => navigate('/auth')}
               >
-                <LogIn className="h-4 w-4" />
+                {isAuthenticated ? <LogOut className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
               </Button>
             </div>
           </div>
