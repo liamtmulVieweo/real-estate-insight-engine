@@ -118,19 +118,6 @@ export function WhySection() {
             </motion.div>
           </div>
 
-          {/* CTA */}
-          <motion.div variants={itemVariants} className="text-center">
-            <button
-              onClick={scrollToSignup}
-              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-primary-foreground transition-all duration-200 bg-primary rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
-              Get early access
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </button>
-            <p className="mt-4 text-sm text-muted-foreground">
-              See how visible you really are.
-            </p>
-          </motion.div>
         </motion.div>
       </div>
     </section>
