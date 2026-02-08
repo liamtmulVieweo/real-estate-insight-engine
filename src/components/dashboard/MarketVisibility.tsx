@@ -82,43 +82,47 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                   <th className="text-right py-3 px-2 font-medium text-muted-foreground">Percentile</th>
                 </tr>
               </thead>
-              <tbody>
-                {topMarkets.map((item) => (
-                  <tr key={item.market} className="border-b border-border/50 hover:bg-muted/30">
-                    <td className="py-3 px-2 font-medium">{item.market}</td>
-                    <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
-                    <td className="py-3 px-2 text-right">{item.marketSharePct.toFixed(1)}%</td>
-                    <td className="py-3 px-2 text-right">
-                      <span className="font-semibold">#{item.rank}</span>
-                      <span className="text-muted-foreground text-xs ml-1">
-                        of {item.totalBrokerages}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              item.percentile > 90
-                                ? "bg-green-500"
-                                : item.percentile > 70
-                                ? "bg-blue-500"
-                                : item.percentile > 50
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
-                            }`}
-                            style={{ width: `${item.percentile}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium w-12 text-right">
-                          {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
             </table>
+            <div className="max-h-[220px] overflow-y-auto">
+              <table className="w-full text-sm">
+                <tbody>
+                  {topMarkets.map((item) => (
+                    <tr key={item.market} className="border-b border-border/50 hover:bg-muted/30">
+                      <td className="py-3 px-2 font-medium">{item.market}</td>
+                      <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
+                      <td className="py-3 px-2 text-right">{item.marketSharePct.toFixed(1)}%</td>
+                      <td className="py-3 px-2 text-right">
+                        <span className="font-semibold">#{item.rank}</span>
+                        <span className="text-muted-foreground text-xs ml-1">
+                          of {item.totalBrokerages}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${
+                                item.percentile > 90
+                                  ? "bg-green-500"
+                                  : item.percentile > 70
+                                  ? "bg-blue-500"
+                                  : item.percentile > 50
+                                  ? "bg-yellow-500"
+                                  : "bg-red-500"
+                              }`}
+                              style={{ width: `${item.percentile}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium w-12 text-right">
+                            {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="h-64">
