@@ -26,14 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/cre-dashboard" element={<Dashboard />} />
-            <Route
-              path="/vieweo"
-              element={
-                <VieweoProtectedRoute>
-                  <VieweoDashboard />
-                </VieweoProtectedRoute>
-              }
-            />
+            <Route path="/vieweo" element={<VieweoDashboard />} />
             <Route path="/methodology" element={<Methodology />} />
             <Route path="/auth" element={<Auth />} />
             <Route
