@@ -30,11 +30,15 @@ export function GlobalFilters({
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const updateFilter = (key: keyof VieweoFilters, value: string) => {
+  const handleFilterClick = (e: React.MouseEvent) => {
     if (!user) {
+      e.preventDefault();
+      e.stopPropagation();
       navigate('/auth');
-      return;
     }
+  };
+
+  const updateFilter = (key: keyof VieweoFilters, value: string) => {
     setFilters({ ...filters, [key]: value });
   };
 
@@ -56,8 +60,8 @@ export function GlobalFilters({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">Market</label>
-          <Select value={filters.market} onValueChange={(v) => updateFilter('market', v)}>
-            <SelectTrigger className="h-9 bg-background">
+          <Select value={filters.market} onValueChange={(v) => updateFilter('market', v)} disabled={!user}>
+            <SelectTrigger className="h-9 bg-background" onPointerDown={handleFilterClick}>
               <SelectValue placeholder="All Markets" />
             </SelectTrigger>
             <SelectContent>
@@ -71,8 +75,8 @@ export function GlobalFilters({
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">Property Type</label>
-          <Select value={filters.propertyType} onValueChange={(v) => updateFilter('propertyType', v)}>
-            <SelectTrigger className="h-9 bg-background">
+          <Select value={filters.propertyType} onValueChange={(v) => updateFilter('propertyType', v)} disabled={!user}>
+            <SelectTrigger className="h-9 bg-background" onPointerDown={handleFilterClick}>
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -86,8 +90,8 @@ export function GlobalFilters({
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">Broker Role</label>
-          <Select value={filters.brokerRole} onValueChange={(v) => updateFilter('brokerRole', v)}>
-            <SelectTrigger className="h-9 bg-background">
+          <Select value={filters.brokerRole} onValueChange={(v) => updateFilter('brokerRole', v)} disabled={!user}>
+            <SelectTrigger className="h-9 bg-background" onPointerDown={handleFilterClick}>
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>
             <SelectContent>
@@ -101,8 +105,8 @@ export function GlobalFilters({
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">Entity Type</label>
-          <Select value={filters.entityType} onValueChange={(v) => updateFilter('entityType', v)}>
-            <SelectTrigger className="h-9 bg-background">
+          <Select value={filters.entityType} onValueChange={(v) => updateFilter('entityType', v)} disabled={!user}>
+            <SelectTrigger className="h-9 bg-background" onPointerDown={handleFilterClick}>
               <SelectValue placeholder="All Entities" />
             </SelectTrigger>
             <SelectContent>
