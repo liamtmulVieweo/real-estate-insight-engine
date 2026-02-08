@@ -22,17 +22,17 @@ export function LeaderboardPreview() {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.6 }}
-      className="mt-16 mb-8"
+      className="flex flex-col h-full"
     >
-      <div className="text-center mb-6">
+      <div className="text-center mb-4">
         <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white/90 text-sm font-medium">
           <BarChart3 className="w-4 h-4" />
           Market Leaderboard Preview
         </span>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-white/20">
+      <div className="flex-1 flex flex-col">
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-white/20 flex-1 flex flex-col">
           {/* Filters Header */}
           <div className="bg-slate-50 border-b border-slate-200 p-4">
             <div className="flex items-center gap-2 text-slate-600 text-sm mb-3">

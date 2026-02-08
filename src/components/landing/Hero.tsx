@@ -3,6 +3,7 @@ import { ArrowRight, Database } from 'lucide-react';
 import { VieweoLogo } from '@/components/VieweoLogo';
 import { Link } from 'react-router-dom';
 import { LeaderboardPreview } from './LeaderboardPreview';
+import { BrokerageDashboardPreview } from './BrokerageDashboardPreview';
 
 export function Hero() {
   return (
@@ -78,8 +79,11 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Leaderboard Preview */}
-        <LeaderboardPreview />
+        {/* Dashboard Previews - Side by Side */}
+        <div className="mt-16 mb-8 grid lg:grid-cols-2 gap-6 items-start">
+          <LeaderboardPreview />
+          <BrokerageDashboardPreview />
+        </div>
       </div>
 
       {/* Background decoration */}
