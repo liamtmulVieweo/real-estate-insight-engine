@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Building2, Filter, Check, ChevronsUpDown, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -182,16 +183,12 @@ export function DashboardHeader({
               </SelectContent>
             </Select>
 
-            <a
-              href="https://github.com/AbhijnanPrakash/ai-visibility-navigator"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link to="/ai-visibility">
               <Button variant="outline" size="sm" className="gap-2 h-9">
                 <Eye className="h-4 w-4" />
                 AI Visibility
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
