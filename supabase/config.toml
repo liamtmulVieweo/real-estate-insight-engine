@@ -1,1 +1,7 @@
 project_id = "cmmoavuurfkhhxmulxhk"
+
+[functions.gemini-lookup]
+verify_jwt = false
+
+[functions.analyze-ledger]
+verify_jwt = false
