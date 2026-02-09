@@ -12,6 +12,7 @@ import SubscriptionPage from "./pages/SubscriptionPage";
 import Methodology from "./pages/Methodology";
 import Import from "./pages/Import";
 import Auth from "./pages/Auth";
+import AIVisibility from "./pages/AIVisibility";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/subscribe" element={<SubscriptionPage />} />
             <Route path="/methodology" element={<Methodology />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/ai-visibility" element={<AIVisibility />} />
             <Route
               path="/import"
               element={
