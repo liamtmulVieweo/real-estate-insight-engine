@@ -60,7 +60,7 @@ export default function VieweoDashboard() {
                   {stats.totalRecords.toLocaleString()} records
                 </span>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setIsSubscriptionModalOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => navigate('/cre-dashboard')}>
                 CRE Dashboard
               </Button>
               {user ? (
