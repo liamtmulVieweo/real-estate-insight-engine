@@ -13,7 +13,7 @@ function statusBadge(status: string) {
   switch (status) {
     case "Eligible":
       return (
-        <Badge variant="outline" className="gap-1 text-green-600 border-green-300">
+        <Badge variant="outline" className="gap-1 text-status-success border-status-success/30">
           <CheckCircle2 className="h-3 w-3" />
           Eligible
         </Badge>
@@ -21,7 +21,7 @@ function statusBadge(status: string) {
     case "Needs Work":
     case "Partially Blocked":
       return (
-        <Badge variant="outline" className="gap-1 text-yellow-600 border-yellow-300">
+        <Badge variant="outline" className="gap-1 text-status-warning border-status-warning/30">
           <AlertTriangle className="h-3 w-3" />
           Needs Work
         </Badge>

@@ -28,7 +28,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-status-danger" />
                     <span className="font-medium text-sm">Key Issues</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Unlock className="h-4 w-4 text-green-500" />
+                    <Unlock className="h-4 w-4 text-status-success" />
                     <span className="font-medium text-sm">Key Wins</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
                 <div className="space-y-2">
                   {(summary.key_unlocks || []).map((unlock, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
-                      <span className="text-green-500">✓</span>
+                      <span className="text-status-success">✓</span>
                       <span>{unlock}</span>
                     </div>
                   ))}

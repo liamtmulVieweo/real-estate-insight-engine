@@ -9,15 +9,15 @@ interface OverallScoreProps {
 }
 
 function scoreColor(score: number) {
-  if (score >= 70) return "text-green-600 dark:text-green-400";
-  if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
-  return "text-red-600 dark:text-red-400";
+  if (score >= 70) return "text-status-success";
+  if (score >= 50) return "text-status-warning";
+  return "text-status-danger";
 }
 
 function scoreBorderColor(score: number) {
-  if (score >= 70) return "border-l-green-500";
-  if (score >= 50) return "border-l-yellow-500";
-  return "border-l-red-500";
+  if (score >= 70) return "border-l-status-success";
+  if (score >= 50) return "border-l-status-warning";
+  return "border-l-status-danger";
 }
 
 function pillarIcon(pillar: string) {

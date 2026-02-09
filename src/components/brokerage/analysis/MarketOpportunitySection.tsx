@@ -46,7 +46,7 @@ export function MarketOpportunitySection({ opportunity }: MarketOpportunitySecti
               <div className="space-y-1">
                 {(opportunity.required_content || []).map((item, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-green-500">✓</span>
+                    <span className="text-status-success">✓</span>
                     <span>{item}</span>
                   </div>
                 ))}
@@ -58,7 +58,7 @@ export function MarketOpportunitySection({ opportunity }: MarketOpportunitySecti
               <div className="space-y-1">
                 {(opportunity.avoid || []).map((item, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-red-500">✕</span>
+                    <span className="text-status-danger">✕</span>
                     <span>{item}</span>
                   </div>
                 ))}

@@ -38,6 +38,10 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    --status-success: 160 45% 40%;
+    --status-warning: 35 80% 50%;
+    --status-danger: 0 70% 55%;
+
     --sidebar-background: 201 65% 34%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
@@ -76,6 +80,11 @@ All colors MUST be HSL.
     --border: 201 50% 20%;
     --input: 201 50% 20%;
     --ring: 175 50% 45%;
+
+    --status-success: 160 50% 50%;
+    --status-warning: 35 85% 55%;
+    --status-danger: 0 65% 55%;
+
     --sidebar-background: 201 65% 12%;
     --sidebar-foreground: 200 30% 96%;
     --sidebar-primary: 175 50% 45%;
