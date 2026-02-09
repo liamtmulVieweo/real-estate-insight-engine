@@ -59,7 +59,7 @@ export function LedgerEditor({ scanResult, onSave, isAnalyzing }: LedgerEditorPr
           <div
             key={item.key}
             className={`flex items-center gap-3 p-3 rounded-md border ${
-              isEmpty(item.answer) ? "border-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20" : "border-border"
+              isEmpty(item.answer) ? "border-status-warning bg-status-warning/5" : "border-border"
             }`}
           >
             <span className="text-sm font-medium min-w-[140px] shrink-0">{item.label}</span>
@@ -84,7 +84,7 @@ export function LedgerEditor({ scanResult, onSave, isAnalyzing }: LedgerEditorPr
               </div>
             ) : (
               <div className="flex items-center gap-2 flex-1">
-                <span className={`text-sm flex-1 ${isEmpty(item.answer) ? "text-yellow-600 dark:text-yellow-400 italic" : "text-muted-foreground"}`}>
+                <span className={`text-sm flex-1 ${isEmpty(item.answer) ? "text-status-warning italic" : "text-muted-foreground"}`}>
                   {isEmpty(item.answer) ? "Not found" : item.answer}
                 </span>
                 <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => startEdit(item)}>

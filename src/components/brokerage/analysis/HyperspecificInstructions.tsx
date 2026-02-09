@@ -118,7 +118,7 @@ export function HyperspecificInstructions({ instructions }: HyperspecificInstruc
                     <div className="space-y-1">
                       {(inst.avoid || []).map((a, i) => (
                         <div key={i} className="flex items-start gap-2 text-sm">
-                          <span className="text-red-500">✕</span>
+                          <span className="text-status-danger">✕</span>
                           <span>{a}</span>
                         </div>
                       ))}

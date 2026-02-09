@@ -126,7 +126,7 @@ export function RecommendedActions({ actions }: RecommendedActionsProps) {
                     <div className="space-y-1">
                       {(a.how_to_know_done || []).map((item, i) => (
                         <div key={i} className="flex items-start gap-2 text-sm">
-                          <span className="text-green-500">✓</span>
+                          <span className="text-status-success">✓</span>
                           <span>{item}</span>
                         </div>
                       ))}
