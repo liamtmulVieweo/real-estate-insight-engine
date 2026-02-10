@@ -28,6 +28,7 @@ import {
   usePrimaryMarketsForBrokerage,
   usePropertyTypeBreakdown,
   useBrokerTeamBreakdown,
+  useOriginalBrokerageNames,
 } from "@/hooks/useDashboardData";
 import type { Filters } from "@/types/dashboard";
 
@@ -108,10 +109,10 @@ export default function Dashboard() {
   const brokerTeamPropertyTypeFilter = brokerTeamPropertyFilter !== "All" ? brokerTeamPropertyFilter : undefined;
   
   const { data: brokerTeamData = [], isLoading: loadingBrokerTeam } = useBrokerTeamBreakdown(
-    selectedBrokerage,
-    marketFilter,
-    brokerTeamPropertyTypeFilter
+    selectedBrokerage, marketFilter, brokerTeamPropertyTypeFilter
   );
+
+  const { data: originalNames = [] } = useOriginalBrokerageNames(selectedBrokerage);
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -140,6 +141,7 @@ export default function Dashboard() {
         filters={filters}
         onBrokerageChange={setSelectedBrokerage}
         onFilterChange={handleFilterChange}
+        originalNames={originalNames}
       />
 
       {/* Main content */}

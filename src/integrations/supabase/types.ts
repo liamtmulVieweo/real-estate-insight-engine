@@ -111,6 +111,7 @@ export type Database = {
           id: string
           market: string | null
           name: string
+          normalized_brokerage: string | null
           prompt_hash: string
         }
         Insert: {
@@ -120,6 +121,7 @@ export type Database = {
           id?: string
           market?: string | null
           name: string
+          normalized_brokerage?: string | null
           prompt_hash: string
         }
         Update: {
@@ -129,6 +131,7 @@ export type Database = {
           id?: string
           market?: string | null
           name?: string
+          normalized_brokerage?: string | null
           prompt_hash?: string
         }
         Relationships: [

@@ -36,6 +36,7 @@ interface DashboardHeaderProps {
   filters: Filters;
   onBrokerageChange: (brokerage: string) => void;
   onFilterChange: (key: keyof Filters, value: string) => void;
+  originalNames?: string[];
 }
 
 export function DashboardHeader({
@@ -47,6 +48,7 @@ export function DashboardHeader({
   filters,
   onBrokerageChange,
   onFilterChange,
+  originalNames = [],
 }: DashboardHeaderProps) {
   const [brokerageOpen, setBrokerageOpen] = useState(false);
 
@@ -116,10 +118,15 @@ export function DashboardHeader({
                 </PopoverContent>
               </Popover>
               {selectedBrokerageData && (
-                <div className="flex gap-2 mt-1">
+                <div className="flex gap-2 mt-1 flex-wrap">
                   <Badge variant="secondary" className="text-xs">
                     {selectedBrokerageData.total_mentions.toLocaleString()} total mentions
                   </Badge>
+                  {originalNames.length > 0 && (
+                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                      a.k.a. {originalNames.join(", ")}
+                    </Badge>
+                  )}
                 </div>
               )}
             </div>

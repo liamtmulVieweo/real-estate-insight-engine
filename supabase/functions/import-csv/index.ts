@@ -211,7 +211,7 @@ Deno.serve(async (req) => {
     // Validate CSV headers match expected schema
     const expectedHeaders: Record<string, string[]> = {
       "lovable_prompts": ["prompt_hash", "prompt", "model", "market", "primary_market", "submarket", "property_type", "broker_role", "citation_count", "geo_level"],
-      "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market"],
+      "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market", "normalized_brokerage"],
       "lovable_domains": ["prompt_hash", "domain"],
       "visibility_records": ["entity_key", "entity_type", "name", "market", "property_type", "broker_role", "prompt"],
     };
@@ -241,7 +241,7 @@ Deno.serve(async (req) => {
     // Valid columns per table (to filter out unknown columns from CSV)
     const validColumns: Record<string, string[]> = {
       "lovable_prompts": ["prompt_hash", "prompt", "model", "market", "primary_market", "submarket", "property_type", "broker_role", "citation_count", "geo_level"],
-      "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market"],
+      "lovable_entities": ["prompt_hash", "name", "entity_type", "brokerage", "market", "normalized_brokerage"],
       "lovable_domains": ["prompt_hash", "domain"],
       "visibility_records": ["entity_key", "entity_type", "name", "market", "property_type", "broker_role", "prompt", "brokerage", "evidence", "entity_display", "market_role", "market_asset"],
     };
