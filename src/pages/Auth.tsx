@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ const authSchema = z.object({
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isResetMode, setIsResetMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -50,11 +52,30 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (isResetMode) {
+      if (!z.string().email().safeParse(email).success) {
+        setErrors({ email: "Invalid email address" });
+        return;
+      }
+      setErrors({});
+    } else if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
+      if (isResetMode) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth?mode=update-password`,
+        });
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success("Password reset email sent! Check your inbox.");
+        setIsResetMode(false);
+        return;
+      }
+
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
@@ -89,9 +110,11 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>{isLogin ? "Sign In" : "Create Account"}</CardTitle>
+          <CardTitle>{isResetMode ? "Reset Password" : isLogin ? "Sign In" : "Create Account"}</CardTitle>
           <CardDescription>
-            {isLogin
+            {isResetMode
+              ? "Enter your email to receive a password reset link"
+              : isLogin
               ? "Enter your credentials to access your account"
               : "Create a new account to get started"}
           </CardDescription>
@@ -113,32 +136,45 @@ const Auth = () => {
                 <p className="text-sm text-destructive">{errors.email}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className={errors.password ? "border-destructive" : ""}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
-            </div>
+            {!isResetMode && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className={errors.password ? "border-destructive" : ""}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
+              {isLoading ? "Loading..." : isResetMode ? "Send Reset Link" : isLogin ? "Sign In" : "Sign Up"}
             </Button>
           </form>
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center space-y-2">
+            {isLogin && !isResetMode && (
+              <button
+                type="button"
+                onClick={() => setIsResetMode(true)}
+                className="text-sm text-muted-foreground hover:text-primary underline block w-full"
+              >
+                Forgot password?
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsResetMode(false); setIsLogin(!isLogin); }}
               className="text-sm text-muted-foreground hover:text-primary underline"
             >
-              {isLogin
+              {isResetMode
+                ? "Back to sign in"
+                : isLogin
                 ? "Don't have an account? Sign up"
                 : "Already have an account? Sign in"}
             </button>
