@@ -392,3 +392,30 @@ export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: s
   });
 }
 
+export function useOriginalBrokerageNames(normalizedBrokerage: string) {
+  return useQuery({
+    queryKey: ["original-brokerage-names", normalizedBrokerage],
+    queryFn: async (): Promise<string[]> => {
+      // Fetch entities where normalized_brokerage matches, and collect distinct original brokerage/name values
+      const rows = await fetchAllRows<{
+        brokerage: string | null;
+        name: string | null;
+        normalized_brokerage: string | null;
+      }>("lovable_entities", "brokerage, name, normalized_brokerage");
+
+      const originals = new Set<string>();
+      rows.forEach((r) => {
+        const resolved = r.brokerage ?? r.name ?? "";
+        const normalized = r.normalized_brokerage;
+        // If this entity has a normalized name matching our target, and the original differs
+        if (normalized === normalizedBrokerage && resolved && resolved !== normalizedBrokerage) {
+          originals.add(resolved);
+        }
+      });
+
+      return [...originals].sort();
+    },
+    enabled: !!normalizedBrokerage,
+  });
+}
+
