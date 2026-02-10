@@ -122,11 +122,6 @@ export function DashboardHeader({
                   <Badge variant="secondary" className="text-xs">
                     {selectedBrokerageData.total_mentions.toLocaleString()} total mentions
                   </Badge>
-                  {originalNames.length > 0 && (
-                    <Badge variant="outline" className="text-xs text-muted-foreground">
-                      a.k.a. {originalNames.join(", ")}
-                    </Badge>
-                  )}
                 </div>
               )}
             </div>
