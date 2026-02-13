@@ -17,7 +17,7 @@ const features = [
   {
     title: 'Role-Based Metrics',
     description:
-      'See exactly how AI categorizes your professional focus—whether tenant rep, agency, or capital markets.',
+      'See exactly how AI categorizes your professional focus, whether tenant rep, agency, or capital markets.',
     icon: Users,
   },
   {
@@ -30,7 +30,7 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-24 bg-background">
+    <section className="py-12 md:py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

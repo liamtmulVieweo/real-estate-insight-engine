@@ -45,7 +45,7 @@ export function WhySection() {
             <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
               <p>
                 Buyers are already asking AI tools who to trust, who to contact, and who to work with.
-                If you're not visible — or inaccurately represented — you're invisible at the moment intent is highest.
+                If you're not visible, or inaccurately represented, you're invisible at the moment intent is highest.
               </p>
               <p className="font-medium text-foreground">
                 AI visibility isn't branding. It's distribution. And distribution is what turns awareness
@@ -67,7 +67,7 @@ export function WhySection() {
               variants={itemVariants}
               className="text-2xl md:text-3xl font-semibold text-foreground"
             >
-              We help you turn AI visibility into measurable business impact — step by step.
+              We help you turn AI visibility into measurable business impact, step by step.
             </motion.h3>
           </div>
 
@@ -98,7 +98,7 @@ export function WhySection() {
               <h4 className="text-lg font-bold text-foreground mb-1">Diagnose what's going wrong</h4>
               <p className="text-primary font-medium mb-3 text-xs uppercase tracking-wide">Identify the gaps</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                We analyze accuracy, positioning, and consistency to understand why AI systems may overlook you — and where others are winning.
+                We analyze accuracy, positioning, and consistency to understand why AI systems may overlook you, and where others are winning.
               </p>
             </motion.div>
 
