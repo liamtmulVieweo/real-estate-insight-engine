@@ -25,6 +25,12 @@ export default function Landing() {
             <Link to="/methodology" className="text-white/60 hover:text-white/80 text-sm transition-colors">
               Methodology
             </Link>
+            <Link to="/privacy" className="text-white/60 hover:text-white/80 text-sm transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-white/60 hover:text-white/80 text-sm transition-colors">
+              Terms of Use
+            </Link>
           </div>
         </div>
       </footer>
