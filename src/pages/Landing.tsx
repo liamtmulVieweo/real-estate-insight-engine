@@ -1,5 +1,5 @@
 import { Hero, WhySection, MethodologySection, Features, EmailSignup } from '@/components/landing';
-import { VieweoLogo } from '@/components/VieweoLogo';
+import vieweoLogoWhite from '@/assets/vieweo-logo-white.png';
 import { Link } from 'react-router-dom';
 
 export default function Landing() {
@@ -16,7 +16,7 @@ export default function Landing() {
       <footer className="bg-foreground py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <VieweoLogo className="h-8 w-auto [&_text]:fill-white/90 [&_path]:fill-white/80 [&_rect]:fill-primary" />
+            <img src={vieweoLogoWhite} alt="Vieweo" className="h-8 w-auto" />
           </div>
           <p className="text-white/60 text-sm text-center mb-4">
             © {new Date().getFullYear()} Vieweo, Inc. All rights reserved.

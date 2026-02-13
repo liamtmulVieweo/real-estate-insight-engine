@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Database } from 'lucide-react';
-import { VieweoLogo } from '@/components/VieweoLogo';
+import vieweoLogoWhite from '@/assets/vieweo-logo-white.png';
 import { Link } from 'react-router-dom';
 import { LeaderboardPreview } from './LeaderboardPreview';
 import { BrokerageDashboardPreview } from './BrokerageDashboardPreview';
@@ -16,7 +16,7 @@ export function Hero() {
           className="flex items-center justify-between mb-12 md:mb-16"
         >
           <div className="flex items-center gap-2">
-            <VieweoLogo className="h-10 w-auto [&_text]:fill-white [&_path]:fill-white/90 [&_rect]:fill-primary" />
+            <img src={vieweoLogoWhite} alt="Vieweo" className="h-10 w-auto" />
           </div>
           <Link
             to="/vieweo"
