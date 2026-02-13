@@ -53,7 +53,7 @@ export function Hero() {
             transition={{ delay: 0.4 }}
             className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto"
           >
-            Measure how AI platforms represent you as a broker and your brokerage across thousands of commercial real estate prompts. Surface visibility gaps, clarify positioning, and turn overlooked exposure into strategic advantage.
+            Measure how AI platforms represent you as a broker and your brokerage across thousands of CRE specific prompts. Identify gaps. Seize opportunities.
           </motion.p>
 
           <motion.div
