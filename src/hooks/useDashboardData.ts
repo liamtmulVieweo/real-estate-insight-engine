@@ -12,6 +12,8 @@ import type {
   PropertyTypeBreakdown,
 } from "@/types/dashboard";
 
+const LONG_STALE = 30 * 60 * 1000; // 30 minutes for stable/filter data
+
 async function fetchAllRows<T>(
   table: string,
   select: string,
@@ -42,6 +44,7 @@ async function fetchAllRows<T>(
 export function useBrokerageList() {
   return useQuery({
     queryKey: ["brokerages"],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<BrokerageMentionTotal[]> => {
       const rows = await fetchAllRows<{
         brokerage: string | null;
@@ -188,6 +191,7 @@ export function useSourceAttribution(targetBrokerage: string) {
 export function useMarketRankings(targetBrokerage: string) {
   return useQuery({
     queryKey: ["market-rankings", targetBrokerage],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<MarketData[]> => {
       const rows = await fetchAllRows<{
         brokerage: string | null;
@@ -228,6 +232,7 @@ export function useDistinctMarkets() {
   return useQuery({
     // paginated fetch avoids the 1000-row default cap
     queryKey: ["distinct-primary-markets"],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<string[]> => {
       const rows = await fetchAllRows<{ primary_market: string | null }>(
         "lovable_prompts",
@@ -243,6 +248,7 @@ export function useDistinctMarkets() {
 export function useDistinctSubmarkets() {
   return useQuery({
     queryKey: ["distinct-submarkets"],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<string[]> => {
       const rows = await fetchAllRows<{ submarket: string | null }>(
         "lovable_prompts",
@@ -258,6 +264,7 @@ export function useDistinctSubmarkets() {
 export function useDistinctPropertyTypes() {
   return useQuery({
     queryKey: ["distinct-property-types"],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<string[]> => {
       const rows = await fetchAllRows<{ property_type: string | null }>(
         "lovable_prompts",
@@ -273,6 +280,7 @@ export function useDistinctPropertyTypes() {
 export function useDistinctRoles() {
   return useQuery({
     queryKey: ["distinct-roles"],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<string[]> => {
       const rows = await fetchAllRows<{ broker_role: string | null }>(
         "lovable_prompts",
@@ -395,6 +403,7 @@ export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: s
 export function useOriginalBrokerageNames(normalizedBrokerage: string) {
   return useQuery({
     queryKey: ["original-brokerage-names", normalizedBrokerage],
+    staleTime: LONG_STALE,
     queryFn: async (): Promise<string[]> => {
       // Fetch entities where normalized_brokerage matches, and collect distinct original brokerage/name values
       const rows = await fetchAllRows<{
