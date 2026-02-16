@@ -11,10 +11,10 @@ import {
   TopBrokers,
   PromptExplorer,
   RawDataTable,
-  VieweoDashboardLoading,
   TrustDisclaimer,
   UpgradeBanner,
 } from '@/components/vieweo';
+import { DashboardLoadingScreen } from '@/components/ui/DashboardLoadingScreen';
 import { SubscriptionModal } from '@/components/subscription';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, Users, FileSearch, TableIcon, LogIn, LogOut, Database, ArrowLeft } from 'lucide-react';
@@ -47,7 +47,19 @@ export default function VieweoDashboard() {
   } = useVieweoData(activeTab);
 
   if (isLoading) {
-    return <VieweoDashboardLoading />;
+    return (
+      <DashboardLoadingScreen
+        title="Vieweo Dashboard"
+        steps={[
+          "Connecting to database...",
+          "Loading AI visibility data...",
+          "Aggregating brokerage mentions...",
+          "Analyzing broker rankings...",
+          "Crunching 64,000+ records...",
+          "Preparing visualizations...",
+        ]}
+      />
+    );
   }
 
   return (

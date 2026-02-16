@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useDashboardData";
 import { useCREBootstrap } from "@/hooks/useCREBootstrap";
 import type { Filters } from "@/types/dashboard";
+import { DashboardLoadingScreen } from "@/components/ui/DashboardLoadingScreen";
 
 export default function Dashboard() {
   const [selectedBrokerage, setSelectedBrokerage] = useState<string>("");
@@ -116,12 +117,16 @@ export default function Dashboard() {
 
   if (loadingBrokerages) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
+      <DashboardLoadingScreen
+        title="CRE Dashboard"
+        steps={[
+          "Connecting to database...",
+          "Loading brokerage list...",
+          "Fetching market data...",
+          "Aggregating brokerage rankings...",
+          "Preparing market visualizations...",
+        ]}
+      />
     );
   }
 
