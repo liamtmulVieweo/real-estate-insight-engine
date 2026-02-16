@@ -18,15 +18,17 @@ import {
 import { SubscriptionModal } from '@/components/subscription';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, Users, FileSearch, TableIcon, LogIn, LogOut, Database } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function VieweoDashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('brokerages');
+
   const {
     filters,
     setFilters,
-    filteredData,
     markets,
     propertyTypes,
     brokerRoles,
@@ -36,9 +38,13 @@ export default function VieweoDashboard() {
     topBrokerages,
     allBrokers,
     topBrokers,
+    brokersLoading,
     promptData,
+    promptsLoading,
+    rawData,
+    rawDataLoading,
     isLoading,
-  } = useVieweoData();
+  } = useVieweoData(activeTab);
 
   if (isLoading) {
     return <VieweoDashboardLoading />;
@@ -124,7 +130,7 @@ export default function VieweoDashboard() {
         <MarketSummary stats={stats} />
 
         {/* Tabbed Content */}
-        <Tabs defaultValue="brokerages" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="bg-muted/50 p-1">
             <TabsTrigger value="brokerages" className="gap-2 data-[state=active]:bg-card">
               <BarChart3 className="h-4 w-4" />
@@ -149,23 +155,41 @@ export default function VieweoDashboard() {
           </TabsContent>
 
           <TabsContent value="brokers" className="mt-4">
-            <TopBrokers data={topBrokers} allData={allBrokers} />
+            {brokersLoading ? (
+              <div className="bg-card rounded-lg border border-border p-5 shadow-sm space-y-4">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-[420px] w-full" />
+              </div>
+            ) : (
+              <TopBrokers data={topBrokers} allData={allBrokers} />
+            )}
           </TabsContent>
 
           <TabsContent value="prompts" className="mt-4">
-            <PromptExplorer data={promptData} />
+            {promptsLoading ? (
+              <div className="bg-card rounded-lg border border-border p-5 shadow-sm space-y-4">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-64" />
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full" />
+                ))}
+              </div>
+            ) : (
+              <PromptExplorer data={promptData} />
+            )}
           </TabsContent>
 
           <TabsContent value="raw" className="mt-4">
-            <RawDataTable data={filteredData.map(d => ({
-              name: d.name,
-              brokerage: d.brokerage,
-              entity_type: d.entity_type,
-              market: d.market,
-              property_type: d.property_type,
-              broker_role: d.broker_role,
-              prompt: d.prompt,
-            }))} />
+            {rawDataLoading ? (
+              <div className="bg-card rounded-lg border border-border p-5 shadow-sm space-y-4">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-[400px] w-full" />
+              </div>
+            ) : (
+              <RawDataTable data={rawData} />
+            )}
           </TabsContent>
         </Tabs>
       </main>

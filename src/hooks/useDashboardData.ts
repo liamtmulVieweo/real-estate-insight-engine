@@ -81,7 +81,7 @@ export function useDashboardSummary(targetBrokerage: string, targetMarket?: stri
   });
 }
 
-export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: string) {
+export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: string, enabled = true) {
   return useQuery({
     queryKey: ["competitive-rankings", targetBrokerage, marketFilter],
     queryFn: async (): Promise<Competitor[]> => {
@@ -93,11 +93,11 @@ export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: s
       if (error) throw error;
       return data || [];
     },
-    enabled: !!targetBrokerage,
+    enabled: !!targetBrokerage && enabled,
   });
 }
 
-export function useMissedMarketOpportunities(targetBrokerage: string) {
+export function useMissedMarketOpportunities(targetBrokerage: string, enabled = true) {
   return useQuery({
     queryKey: ["missed-opportunities", targetBrokerage],
     queryFn: async (): Promise<GapMarket[]> => {
@@ -108,11 +108,11 @@ export function useMissedMarketOpportunities(targetBrokerage: string) {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!targetBrokerage,
+    enabled: !!targetBrokerage && enabled,
   });
 }
 
-export function useUnderIndexSegments(targetBrokerage: string) {
+export function useUnderIndexSegments(targetBrokerage: string, enabled = true) {
   return useQuery({
     queryKey: ["underindex-segments", targetBrokerage],
     queryFn: async (): Promise<GapDimension[]> => {
@@ -123,7 +123,7 @@ export function useUnderIndexSegments(targetBrokerage: string) {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!targetBrokerage,
+    enabled: !!targetBrokerage && enabled,
   });
 }
 
@@ -134,6 +134,7 @@ export function usePromptIntelligence(filters: {
   brokerRole?: string;
   model?: string;
   fetchAll?: boolean;
+  enabled?: boolean;
 }) {
   return useQuery({
     queryKey: ["prompt-intelligence", filters],
@@ -170,10 +171,11 @@ export function usePromptIntelligence(filters: {
 
       return allResults;
     },
+    enabled: filters.enabled !== false,
   });
 }
 
-export function useSourceAttribution(targetBrokerage: string) {
+export function useSourceAttribution(targetBrokerage: string, enabled = true) {
   return useQuery({
     queryKey: ["source-attribution", targetBrokerage],
     queryFn: async (): Promise<SourceAttribution[]> => {
@@ -184,7 +186,7 @@ export function useSourceAttribution(targetBrokerage: string) {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!targetBrokerage,
+    enabled: !!targetBrokerage && enabled,
   });
 }
 
@@ -293,7 +295,7 @@ export function useDistinctRoles() {
   });
 }
 
-export function useSubmarketsForBrokerage(targetBrokerage: string) {
+export function useSubmarketsForBrokerage(targetBrokerage: string, enabled = true) {
   return useQuery({
     queryKey: ["submarkets-for-brokerage", targetBrokerage],
     queryFn: async (): Promise<string[]> => {
@@ -329,7 +331,7 @@ export function useSubmarketsForBrokerage(targetBrokerage: string) {
 
       return (submarkets as string[]).sort();
     },
-    enabled: !!targetBrokerage,
+    enabled: !!targetBrokerage && enabled,
   });
 }
 
@@ -377,7 +379,7 @@ export interface BrokerTeamData {
   total_brokers: number;
 }
 
-export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string) {
+export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string, enabled = true) {
   return useQuery({
     queryKey: ["broker-team-breakdown", targetBrokerage, marketFilter, propertyTypeFilter],
     queryFn: async (): Promise<BrokerTeamData[]> => {
@@ -396,11 +398,11 @@ export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: s
         total_brokers: Number(d.total_brokers),
       }));
     },
-    enabled: !!targetBrokerage,
+    enabled: !!targetBrokerage && enabled,
   });
 }
 
-export function useOriginalBrokerageNames(normalizedBrokerage: string) {
+export function useOriginalBrokerageNames(normalizedBrokerage: string, enabled = true) {
   return useQuery({
     queryKey: ["original-brokerage-names", normalizedBrokerage],
     staleTime: LONG_STALE,
@@ -424,7 +426,7 @@ export function useOriginalBrokerageNames(normalizedBrokerage: string) {
 
       return [...originals].sort();
     },
-    enabled: !!normalizedBrokerage,
+    enabled: !!normalizedBrokerage && enabled,
   });
 }
 
