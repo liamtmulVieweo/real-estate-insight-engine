@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Filter, Check, ChevronsUpDown, Eye } from "lucide-react";
+import { Building2, Filter, Check, ChevronsUpDown, Eye, ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -184,6 +184,13 @@ export function DashboardHeader({
                 ))}
               </SelectContent>
             </Select>
+
+            <Link to="/">
+              <Button variant="outline" size="sm" className="gap-2 h-9">
+                <ArrowLeft className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
 
             <Link to="/ai-visibility">
               <Button variant="outline" size="sm" className="gap-2 h-9">
