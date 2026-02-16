@@ -329,6 +329,10 @@ export type Database = {
           vs_target_diff: number
         }[]
       }
+      get_cre_dashboard_bootstrap: {
+        Args: { market_filter?: string; target_brokerage?: string }
+        Returns: Json
+      }
       get_dashboard_summary: {
         Args: { target_brokerage: string; target_market?: string }
         Returns: Json
