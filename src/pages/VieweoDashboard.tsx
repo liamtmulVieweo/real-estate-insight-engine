@@ -17,7 +17,7 @@ import {
 } from '@/components/vieweo';
 import { SubscriptionModal } from '@/components/subscription';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Users, FileSearch, TableIcon, LogIn, LogOut, Database } from 'lucide-react';
+import { BarChart3, Users, FileSearch, TableIcon, LogIn, LogOut, Database, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function VieweoDashboard() {
@@ -66,6 +66,10 @@ export default function VieweoDashboard() {
                   {stats.totalRecords.toLocaleString()} records
                 </span>
               </div>
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/')}>
+                <ArrowLeft className="h-4 w-4" />
+                Home
+              </Button>
               <Button variant="outline" size="sm" onClick={() => navigate('/cre-dashboard')}>
                 CRE Dashboard
               </Button>
