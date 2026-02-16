@@ -1,4 +1,5 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface VieweoRecord {
@@ -23,13 +24,48 @@ export interface VieweoFilters {
   entityType: string;
 }
 
-export function useVieweoData() {
-  const [rawData, setRawData] = useState<VieweoRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [dataLoaded, setDataLoaded] = useState(false);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
+async function fetchAllVisibilityRecords(): Promise<VieweoRecord[]> {
+  const allRecords: VieweoRecord[] = [];
+  let offset = 0;
+  const batchSize = 1000;
+  let hasMore = true;
 
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('visibility_records')
+      .select('*')
+      .range(offset, offset + batchSize - 1);
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      const mappedRecords = data.map(record => ({
+        entity_key: record.entity_key,
+        entity_type: (record.entity_type || 'NONE') as 'broker' | 'brokerage' | 'NONE',
+        name: record.name,
+        brokerage: record.brokerage || '',
+        entity_display: record.entity_display || '',
+        market: record.market,
+        property_type: record.property_type || '',
+        broker_role: record.broker_role || '',
+        market_asset: record.market_asset || '',
+        market_role: record.market_role || '',
+        prompt: record.prompt,
+        evidence: record.evidence || '',
+      }));
+      allRecords.push(...mappedRecords);
+      offset += batchSize;
+      hasMore = data.length === batchSize;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  console.log('Loaded records from database:', allRecords.length);
+  return allRecords;
+}
+
+export function useVieweoData() {
   const [filters, setFilters] = useState<VieweoFilters>({
     market: 'all',
     propertyType: 'all',
@@ -37,69 +73,14 @@ export function useVieweoData() {
     entityType: 'all',
   });
 
-  const refetch = useCallback(() => {
-    setRefetchTrigger(prev => prev + 1);
-  }, []);
+  const { data: rawData = [], isLoading, error: queryError, refetch } = useQuery({
+    queryKey: ['vieweo-visibility-records'],
+    queryFn: fetchAllVisibilityRecords,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
 
-  // Load from Supabase on mount or when refetch is triggered
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Fetch all records in batches to avoid the 1000 row limit
-        let allRecords: VieweoRecord[] = [];
-        let offset = 0;
-        const batchSize = 1000;
-        let hasMore = true;
-
-        while (hasMore) {
-          const { data, error: fetchError } = await supabase
-            .from('visibility_records')
-            .select('*')
-            .range(offset, offset + batchSize - 1);
-
-          if (fetchError) {
-            throw fetchError;
-          }
-
-          if (data && data.length > 0) {
-            const mappedRecords = data.map(record => ({
-              entity_key: record.entity_key,
-              entity_type: (record.entity_type || 'NONE') as 'broker' | 'brokerage' | 'NONE',
-              name: record.name,
-              brokerage: record.brokerage || '',
-              entity_display: record.entity_display || '',
-              market: record.market,
-              property_type: record.property_type,
-              broker_role: record.broker_role,
-              market_asset: record.market_asset || '',
-              market_role: record.market_role || '',
-              prompt: record.prompt,
-              evidence: record.evidence || '',
-            }));
-            allRecords = [...allRecords, ...mappedRecords];
-            offset += batchSize;
-            hasMore = data.length === batchSize;
-          } else {
-            hasMore = false;
-          }
-        }
-
-        console.log('Loaded records from database:', allRecords.length);
-        setRawData(allRecords);
-        setDataLoaded(true);
-      } catch (err) {
-        console.error('Failed to load data from database:', err);
-        setError(`Failed to load data: ${err}`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [refetchTrigger]);
+  const error = queryError ? String(queryError) : null;
+  const dataLoaded = rawData.length > 0;
 
   const filteredData = useMemo(() => {
     return rawData.filter(record => {
