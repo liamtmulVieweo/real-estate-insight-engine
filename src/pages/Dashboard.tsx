@@ -59,45 +59,13 @@ export default function Dashboard() {
   // Fetch dashboard data for selected brokerage
   const marketFilter = filters.market !== "All" ? filters.market : undefined;
   
+  // Tier 1: Critical above-the-fold data
   const { data: summary, isLoading: loadingSummary } = useDashboardSummary(
     selectedBrokerage,
     marketFilter
   );
   
-  const { data: competitors = [], isLoading: loadingCompetitors } = useCompetitiveRankings(
-    selectedBrokerage,
-    marketFilter
-  );
-  
-  const { data: missedMarkets = [], isLoading: loadingMissedMarkets } = useMissedMarketOpportunities(
-    selectedBrokerage
-  );
-  
-  const { data: underIndexed = [], isLoading: loadingUnderIndexed } = useUnderIndexSegments(
-    selectedBrokerage
-  );
-  
-  const { data: prompts = [], isLoading: loadingPrompts } = usePromptIntelligence({
-    brokerage: selectedBrokerage || undefined,
-    market: marketFilter,
-    propertyType: filters.propertyType !== "All" ? filters.propertyType : undefined,
-    brokerRole: filters.role !== "All" ? filters.role : undefined,
-    fetchAll: true,
-  });
-  
-  const { data: sourceData = [], isLoading: loadingSource } = useSourceAttribution(
-    selectedBrokerage
-  );
-  
   const { data: marketData = [], isLoading: loadingMarkets } = useMarketRankings(
-    selectedBrokerage
-  );
-  
-  const { data: submarkets = [], isLoading: loadingSubmarkets } = useSubmarketsForBrokerage(
-    selectedBrokerage
-  );
-  
-  const { data: primaryMarkets = [], isLoading: loadingPrimaryMarkets } = usePrimaryMarketsForBrokerage(
     selectedBrokerage
   );
   
@@ -106,13 +74,56 @@ export default function Dashboard() {
     marketFilter
   );
 
+  const { data: primaryMarkets = [], isLoading: loadingPrimaryMarkets } = usePrimaryMarketsForBrokerage(
+    selectedBrokerage
+  );
+
+  // Tier 1 ready flag - enables Tier 2 loading
+  const tier1Ready = !loadingBrokerages && !loadingSummary;
+
+  // Tier 2: Below-the-fold data (loads after first paint)
+  const { data: competitors = [], isLoading: loadingCompetitors } = useCompetitiveRankings(
+    selectedBrokerage,
+    marketFilter,
+    tier1Ready
+  );
+  
+  const { data: missedMarkets = [], isLoading: loadingMissedMarkets } = useMissedMarketOpportunities(
+    selectedBrokerage,
+    tier1Ready
+  );
+  
+  const { data: underIndexed = [], isLoading: loadingUnderIndexed } = useUnderIndexSegments(
+    selectedBrokerage,
+    tier1Ready
+  );
+  
+  const { data: prompts = [], isLoading: loadingPrompts } = usePromptIntelligence({
+    brokerage: selectedBrokerage || undefined,
+    market: marketFilter,
+    propertyType: filters.propertyType !== "All" ? filters.propertyType : undefined,
+    brokerRole: filters.role !== "All" ? filters.role : undefined,
+    fetchAll: true,
+    enabled: tier1Ready,
+  });
+  
+  const { data: sourceData = [], isLoading: loadingSource } = useSourceAttribution(
+    selectedBrokerage,
+    tier1Ready
+  );
+  
+  const { data: submarkets = [], isLoading: loadingSubmarkets } = useSubmarketsForBrokerage(
+    selectedBrokerage,
+    tier1Ready
+  );
+
   const brokerTeamPropertyTypeFilter = brokerTeamPropertyFilter !== "All" ? brokerTeamPropertyFilter : undefined;
   
   const { data: brokerTeamData = [], isLoading: loadingBrokerTeam } = useBrokerTeamBreakdown(
-    selectedBrokerage, marketFilter, brokerTeamPropertyTypeFilter
+    selectedBrokerage, marketFilter, brokerTeamPropertyTypeFilter, tier1Ready
   );
 
-  const { data: originalNames = [] } = useOriginalBrokerageNames(selectedBrokerage);
+  const { data: originalNames = [] } = useOriginalBrokerageNames(selectedBrokerage, tier1Ready);
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));

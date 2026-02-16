@@ -411,6 +411,54 @@ export type Database = {
           target_share_pct: number
         }[]
       }
+      get_vieweo_all_brokerages: {
+        Args: {
+          broker_role_filter?: string
+          market_filter?: string
+          property_type_filter?: string
+        }
+        Returns: Json
+      }
+      get_vieweo_bootstrap: {
+        Args: {
+          broker_role_filter?: string
+          entity_type_filter?: string
+          market_filter?: string
+          property_type_filter?: string
+        }
+        Returns: Json
+      }
+      get_vieweo_prompts: {
+        Args: {
+          broker_role_filter?: string
+          entity_type_filter?: string
+          market_filter?: string
+          property_type_filter?: string
+        }
+        Returns: Json
+      }
+      get_vieweo_raw_data: {
+        Args: {
+          broker_role_filter?: string
+          entity_type_filter?: string
+          market_filter?: string
+          page_limit?: number
+          page_offset?: number
+          property_type_filter?: string
+          search_query?: string
+        }
+        Returns: Json
+      }
+      get_vieweo_top_brokers: {
+        Args: {
+          broker_role_filter?: string
+          entity_type_filter?: string
+          market_filter?: string
+          property_type_filter?: string
+          result_limit?: number
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
