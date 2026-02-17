@@ -465,3 +465,18 @@ export function useOriginalBrokerageNames(normalizedBrokerage: string, enabled =
   });
 }
 
+export function useCoMentionedBrokerages(targetBrokerage: string, enabled = true) {
+  return useQuery({
+    queryKey: ["co-mentioned-brokerages", targetBrokerage],
+    staleTime: LONG_STALE,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_co_mentioned_brokerages", {
+        target_brokerage: targetBrokerage,
+      });
+      if (error) throw error;
+      return (data || []) as Array<{ brokerage: string; co_mentions: number }>;
+    },
+    enabled: !!targetBrokerage && enabled,
+  });
+}
+

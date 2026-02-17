@@ -11,8 +11,7 @@ import { useMemo, useState } from "react";
 const BROKERAGE_CATEGORIES = ["Residential Brokerage", "CRE Brokerage"];
 
 const CATEGORY_ORDER = [
-  "CRE Brokerage",
-  "Residential Brokerage",
+  "Brokerage Website",
   "Listing Platform/Marketplace",
   "Media/News",
   "Tourism/Attractions",
@@ -166,7 +165,9 @@ export function MissedOpportunities({
 
     const groups: Record<string, SourceAttribution[]> = {};
     for (const item of normalized) {
-      const cat = item.category || "Other";
+      let cat = item.category || "Other";
+      // Rename CRE Brokerage to Brokerage Website for display
+      if (cat === "CRE Brokerage") cat = "Brokerage Website";
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
     }
