@@ -108,7 +108,7 @@ export function MissedOpportunities({
   
   const showCompetitor = !!competitorBrokerage;
 
-  // Group source data by category, including all categories
+  // Group source data by category, filtering and renormalizing to 100%
   const { ownDomain, groupedCategories } = useMemo(() => {
     let ownDomain: SourceAttribution | null = null;
 
@@ -121,8 +121,34 @@ export function MissedOpportunities({
       }
     }
 
+    // Filter: remove Residential Brokerage entirely, keep only own domain in CRE Brokerage
+    const filtered = sourceData.filter((item) => {
+      const cat = item.category || "Other";
+      if (cat === "Residential Brokerage") return false;
+      if (cat === "CRE Brokerage") {
+        return brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase();
+      }
+      return true;
+    });
+
+    // Renormalize percentages so they sum to 100%
+    const targetTotal = filtered.reduce((s, i) => s + (i.target_pct ?? 0), 0);
+    const competitorTotal = filtered.reduce((s, i) => s + (i.competitor_pct ?? 0), 0);
+
+    const normalized: SourceAttribution[] = filtered.map((item) => ({
+      ...item,
+      target_pct: targetTotal > 0 ? ((item.target_pct ?? 0) / targetTotal) * 100 : 0,
+      competitor_pct: competitorTotal > 0 ? ((item.competitor_pct ?? 0) / competitorTotal) * 100 : 0,
+    }));
+
+    // Also update ownDomain with normalized values
+    if (ownDomain) {
+      const match = normalized.find(i => i.domain.toLowerCase() === ownDomain!.domain.toLowerCase());
+      if (match) ownDomain = match;
+    }
+
     const groups: Record<string, SourceAttribution[]> = {};
-    for (const item of sourceData) {
+    for (const item of normalized) {
       const cat = item.category || "Other";
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
@@ -130,7 +156,6 @@ export function MissedOpportunities({
 
     const sortedCategories = Object.entries(groups)
       .filter(([, items]) => {
-        // Keep category if any item has target_pct > 0 or (comparing) competitor_pct > 0
         return items.some(i => (i.target_pct ?? 0) > 0 || (showCompetitor && (i.competitor_pct ?? 0) > 0));
       })
       .sort(([a], [b]) => {
