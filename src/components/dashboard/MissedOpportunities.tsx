@@ -108,40 +108,39 @@ export function MissedOpportunities({
   
   const showCompetitor = !!competitorBrokerage;
 
-  // Group source data by category, filtering brokerage categories
+  // Group source data by category, including all categories
   const { ownDomain, groupedCategories } = useMemo(() => {
     let ownDomain: SourceAttribution | null = null;
-    const filtered: SourceAttribution[] = [];
 
+    // Find own domain from brokerage categories
     for (const item of sourceData) {
       const cat = item.category || "Other";
-      const isBrokerageCat = BROKERAGE_CATEGORIES.includes(cat);
-
-      if (isBrokerageCat) {
-        if (brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase()) {
-          ownDomain = item;
-        }
-        continue;
+      if (BROKERAGE_CATEGORIES.includes(cat) && brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase()) {
+        ownDomain = item;
+        break;
       }
-
-      filtered.push(item);
     }
 
     const groups: Record<string, SourceAttribution[]> = {};
-    for (const item of filtered) {
+    for (const item of sourceData) {
       const cat = item.category || "Other";
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
     }
 
-    const sortedCategories = Object.entries(groups).sort(([a], [b]) => {
-      const ai = CATEGORY_ORDER.indexOf(a);
-      const bi = CATEGORY_ORDER.indexOf(b);
-      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-    });
+    const sortedCategories = Object.entries(groups)
+      .filter(([, items]) => {
+        // Keep category if any item has target_pct > 0 or (comparing) competitor_pct > 0
+        return items.some(i => (i.target_pct ?? 0) > 0 || (showCompetitor && (i.competitor_pct ?? 0) > 0));
+      })
+      .sort(([a], [b]) => {
+        const ai = CATEGORY_ORDER.indexOf(a);
+        const bi = CATEGORY_ORDER.indexOf(b);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
 
     return { ownDomain, groupedCategories: sortedCategories };
-  }, [sourceData, brokerageMatchedDomain]);
+  }, [sourceData, brokerageMatchedDomain, showCompetitor]);
 
 
   return (
