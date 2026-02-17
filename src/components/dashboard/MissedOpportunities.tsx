@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import type { GapMarket, SourceAttribution, BrokerageMentionTotal } from "@/types/dashboard";
 import { useMemo, useState } from "react";
 
@@ -105,7 +105,7 @@ export function MissedOpportunities({
   onCompetitorChange,
 }: MissedOpportunitiesProps) {
   const [competitorOpen, setCompetitorOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  
   const showCompetitor = !!competitorBrokerage;
 
   // Group source data by category, filtering brokerage categories
@@ -143,14 +143,6 @@ export function MissedOpportunities({
     return { ownDomain, groupedCategories: sortedCategories };
   }, [sourceData, brokerageMatchedDomain]);
 
-  // Items to display based on selected category
-  const displayItems = useMemo(() => {
-    if (selectedCategory === "all") {
-      return groupedCategories.flatMap(([, items]) => items);
-    }
-    const found = groupedCategories.find(([cat]) => cat === selectedCategory);
-    return found ? found[1] : [];
-  }, [selectedCategory, groupedCategories]);
 
   return (
     <div className="space-y-6">
@@ -303,24 +295,19 @@ export function MissedOpportunities({
                   </div>
                 )}
 
-                {/* Category dropdown */}
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-full text-xs h-9">
-                    <SelectValue placeholder="Filter by category" />
-                  </SelectTrigger>
-                  <SelectContent className="z-50 bg-popover border border-border shadow-md">
-                    <SelectItem value="all">All Categories ({groupedCategories.reduce((sum, [, items]) => sum + items.length, 0)})</SelectItem>
-                    {groupedCategories.map(([cat, items]) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat} ({items.length})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Table */}
-                <div className="max-h-[220px] overflow-y-auto">
-                  <SourceTable items={displayItems} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
+                {/* Collapsible category sections */}
+                <div className="max-h-[220px] overflow-y-auto space-y-1">
+                  {groupedCategories.map(([cat, items]) => (
+                    <Collapsible key={cat}>
+                      <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
+                        <span>{cat} ({items.length})</span>
+                        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SourceTable items={items} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
                 </div>
               </div>
             )}
