@@ -1,10 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Search, X } from "lucide-react";
+import { AlertCircle, ChevronDown, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GapMarket, SourceAttribution, BrokerageMentionTotal } from "@/types/dashboard";
 import { useMemo, useState } from "react";
 
@@ -33,7 +33,7 @@ interface MissedOpportunitiesProps {
   onCompetitorChange: (value: string) => void;
 }
 
-function SourceTable({ items, showCompetitor }: { items: SourceAttribution[]; showCompetitor: boolean }) {
+function SourceTable({ items, showCompetitor, competitorName }: { items: SourceAttribution[]; showCompetitor: boolean; competitorName?: string }) {
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground text-center py-4 text-sm">
@@ -50,22 +50,43 @@ function SourceTable({ items, showCompetitor }: { items: SourceAttribution[]; sh
             <th className="text-left py-2 px-2 font-medium text-muted-foreground">Domain</th>
             <th className="text-right py-2 px-2 font-medium text-muted-foreground">You %</th>
             {showCompetitor && (
-              <th className="text-right py-2 px-2 font-medium text-muted-foreground">Competitor %</th>
+              <>
+                <th className="text-right py-2 px-2 font-medium text-muted-foreground">{competitorName || "Competitor"} %</th>
+                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Diff</th>
+              </>
             )}
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
-            <tr key={item.domain} className="border-b border-border/50 hover:bg-muted/30">
-              <td className="py-2 px-2 font-medium truncate max-w-[150px]" title={item.domain}>
-                {item.domain}
-              </td>
-              <td className="py-2 px-2 text-right">{item.target_pct?.toFixed(1)}%</td>
-              {showCompetitor && (
-                <td className="py-2 px-2 text-right">{(item.competitor_pct ?? 0).toFixed(1)}%</td>
-              )}
-            </tr>
-          ))}
+          {items.map((item) => {
+            const diff = showCompetitor ? (item.target_pct ?? 0) - (item.competitor_pct ?? 0) : 0;
+            return (
+              <tr key={item.domain} className="border-b border-border/50 hover:bg-muted/30">
+                <td className="py-2 px-2 font-medium truncate max-w-[150px]" title={item.domain}>
+                  {item.domain}
+                </td>
+                <td className="py-2 px-2 text-right">{item.target_pct?.toFixed(1)}%</td>
+                {showCompetitor && (
+                  <>
+                    <td className="py-2 px-2 text-right">{(item.competitor_pct ?? 0).toFixed(1)}%</td>
+                    <td className="py-2 px-2 text-right">
+                      <span
+                        className={
+                          diff > 0
+                            ? "text-green-600 font-medium"
+                            : diff < 0
+                            ? "text-red-600 font-medium"
+                            : "text-muted-foreground"
+                        }
+                      >
+                        {diff > 0 ? "+" : ""}{diff.toFixed(1)}%
+                      </span>
+                    </td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -84,6 +105,7 @@ export function MissedOpportunities({
   onCompetitorChange,
 }: MissedOpportunitiesProps) {
   const [competitorOpen, setCompetitorOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const showCompetitor = !!competitorBrokerage;
 
   // Group source data by category, filtering brokerage categories
@@ -121,7 +143,14 @@ export function MissedOpportunities({
     return { ownDomain, groupedCategories: sortedCategories };
   }, [sourceData, brokerageMatchedDomain]);
 
-  const defaultTab = groupedCategories.length > 0 ? groupedCategories[0][0] : "Other";
+  // Items to display based on selected category
+  const displayItems = useMemo(() => {
+    if (selectedCategory === "all") {
+      return groupedCategories.flatMap(([, items]) => items);
+    }
+    const found = groupedCategories.find(([cat]) => cat === selectedCategory);
+    return found ? found[1] : [];
+  }, [selectedCategory, groupedCategories]);
 
   return (
     <div className="space-y-6">
@@ -185,7 +214,9 @@ export function MissedOpportunities({
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <CardTitle className="text-base">Source Attribution</CardTitle>
-                <CardDescription>Domains driving your visibility{showCompetitor ? " vs. competitor" : ""}</CardDescription>
+                <CardDescription>
+                  Domains driving your visibility{showCompetitor ? ` vs. ${competitorBrokerage}` : ""}
+                </CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 <Popover open={competitorOpen} onOpenChange={setCompetitorOpen}>
@@ -195,7 +226,7 @@ export function MissedOpportunities({
                       {competitorBrokerage || "Compare with..."}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[250px] p-0" align="end">
+                  <PopoverContent className="w-[250px] p-0 z-50 bg-popover border border-border shadow-md" align="end">
                     <Command>
                       <CommandInput placeholder="Search competitor..." />
                       <CommandList>
@@ -245,7 +276,7 @@ export function MissedOpportunities({
                 {/* Own domain pinned at top */}
                 {ownDomain ? (
                   <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-sm flex-wrap gap-2">
                       <div>
                         <span className="font-semibold">{ownDomain.domain}</span>
                         <Badge variant="outline" className="ml-2 text-xs">{ownDomain.category}</Badge>
@@ -253,7 +284,13 @@ export function MissedOpportunities({
                       <div className="flex gap-4 text-xs">
                         <span>You: <strong>{ownDomain.target_pct?.toFixed(1)}%</strong></span>
                         {showCompetitor && (
-                          <span>Competitor: {(ownDomain.competitor_pct ?? 0).toFixed(1)}%</span>
+                          <>
+                            <span>{competitorBrokerage}: {(ownDomain.competitor_pct ?? 0).toFixed(1)}%</span>
+                            <span className={((ownDomain.target_pct ?? 0) - (ownDomain.competitor_pct ?? 0)) >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                              {((ownDomain.target_pct ?? 0) - (ownDomain.competitor_pct ?? 0)) > 0 ? "+" : ""}
+                              {((ownDomain.target_pct ?? 0) - (ownDomain.competitor_pct ?? 0)).toFixed(1)}%
+                            </span>
+                          </>
                         )}
                       </div>
                     </div>
@@ -266,23 +303,25 @@ export function MissedOpportunities({
                   </div>
                 )}
 
-                {/* Category tabs */}
-                <Tabs defaultValue={defaultTab}>
-                  <TabsList className="w-full flex-wrap h-auto gap-1">
+                {/* Category dropdown */}
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full text-xs h-9">
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover border border-border shadow-md">
+                    <SelectItem value="all">All Categories ({groupedCategories.reduce((sum, [, items]) => sum + items.length, 0)})</SelectItem>
                     {groupedCategories.map(([cat, items]) => (
-                      <TabsTrigger key={cat} value={cat} className="text-xs">
+                      <SelectItem key={cat} value={cat}>
                         {cat} ({items.length})
-                      </TabsTrigger>
+                      </SelectItem>
                     ))}
-                  </TabsList>
-                  {groupedCategories.map(([cat, items]) => (
-                    <TabsContent key={cat} value={cat}>
-                      <div className="max-h-[220px] overflow-y-auto">
-                        <SourceTable items={items} showCompetitor={showCompetitor} />
-                      </div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
+                  </SelectContent>
+                </Select>
+
+                {/* Table */}
+                <div className="max-h-[220px] overflow-y-auto">
+                  <SourceTable items={displayItems} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
+                </div>
               </div>
             )}
           </CardContent>
