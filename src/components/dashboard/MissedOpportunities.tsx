@@ -296,20 +296,39 @@ export function MissedOpportunities({
                 )}
 
                 {/* Accordion category sections */}
-                <div className="max-h-[280px] overflow-y-auto">
-                  <Accordion type="single" collapsible className="space-y-1">
-                    {groupedCategories.map(([cat, items]) => (
+                <Accordion type="single" collapsible className="space-y-1">
+                  {groupedCategories.map(([cat, items]) => {
+                    const targetSum = items.reduce((s, i) => s + (i.target_pct ?? 0), 0);
+                    const competitorSum = items.reduce((s, i) => s + (i.competitor_pct ?? 0), 0);
+                    const diff = targetSum - competitorSum;
+                    return (
                       <AccordionItem key={cat} value={cat} className="border-none">
                         <AccordionTrigger className="rounded-md px-3 py-2.5 text-base font-bold hover:bg-muted/50 hover:no-underline transition-colors">
-                          {cat} ({items.length})
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span>{cat} ({items.length})</span>
+                            <span className="text-xs font-normal text-muted-foreground">
+                              You: {targetSum.toFixed(1)}%
+                              {showCompetitor && (
+                                <>
+                                  {" | "}{competitorBrokerage}: {competitorSum.toFixed(1)}%
+                                  {" | "}
+                                  <span className={diff >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                    {diff > 0 ? "+" : ""}{diff.toFixed(1)}%
+                                  </span>
+                                </>
+                              )}
+                            </span>
+                          </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <SourceTable items={items} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
+                          <div className="max-h-[200px] overflow-y-auto">
+                            <SourceTable items={items} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
+                          </div>
                         </AccordionContent>
                       </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
+                    );
+                  })}
+                </Accordion>
               </div>
             )}
           </CardContent>
