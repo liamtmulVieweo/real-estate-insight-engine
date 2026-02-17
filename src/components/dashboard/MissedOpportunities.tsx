@@ -304,20 +304,36 @@ export function MissedOpportunities({
                     return (
                       <AccordionItem key={cat} value={cat} className="border-none">
                         <AccordionTrigger className="rounded-md px-3 py-2.5 text-base font-bold hover:bg-muted/50 hover:no-underline transition-colors">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span>{cat} ({items.length})</span>
-                            <span className="text-xs font-normal text-muted-foreground">
-                              You: {targetSum.toFixed(1)}%
+                          <div className="flex flex-col gap-1.5 w-full mr-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span>{cat} ({items.length})</span>
+                              <span className="text-xs font-normal text-muted-foreground">
+                                You: {targetSum.toFixed(1)}%
+                                {showCompetitor && (
+                                  <>
+                                    {" | "}{competitorBrokerage}: {competitorSum.toFixed(1)}%
+                                    {" | "}
+                                    <span className={diff >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                      {diff > 0 ? "+" : ""}{diff.toFixed(1)}%
+                                    </span>
+                                  </>
+                                )}
+                              </span>
+                            </div>
+                            <div className="relative h-2 w-full rounded-full bg-muted/50 overflow-hidden">
+                              <div
+                                className="absolute top-0 left-0 h-full rounded-full bg-primary/70 transition-all duration-300"
+                                style={{ width: `${Math.min(targetSum, 100)}%` }}
+                                title={`You: ${targetSum.toFixed(1)}%`}
+                              />
                               {showCompetitor && (
-                                <>
-                                  {" | "}{competitorBrokerage}: {competitorSum.toFixed(1)}%
-                                  {" | "}
-                                  <span className={diff >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                                    {diff > 0 ? "+" : ""}{diff.toFixed(1)}%
-                                  </span>
-                                </>
+                                <div
+                                  className="absolute top-0 left-0 h-full rounded-full bg-destructive/40 border border-destructive/60 transition-all duration-300"
+                                  style={{ width: `${Math.min(competitorSum, 100)}%` }}
+                                  title={`${competitorBrokerage}: ${competitorSum.toFixed(1)}%`}
+                                />
                               )}
-                            </span>
+                            </div>
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
