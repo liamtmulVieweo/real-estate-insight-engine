@@ -402,6 +402,7 @@ export type Database = {
       get_source_attribution_comparison: {
         Args: { target_brokerage: string }
         Returns: {
+          category: string
           diff_pct: number
           domain: string
           peer_avg_pct: number

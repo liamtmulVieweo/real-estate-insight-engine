@@ -182,6 +182,7 @@ export default function Dashboard() {
             sourceData={sourceData}
             isLoadingMarkets={loadingMissedMarkets}
             isLoadingSource={loadingSource}
+            selectedBrokerage={selectedBrokerage}
           />
         </section>
 

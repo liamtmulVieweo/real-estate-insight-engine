@@ -90,6 +90,7 @@ export interface SourceAttribution {
   diff_pct: number;
   target_rank: number;
   peer_avg_rank: number;
+  category: string | null;
 }
 
 export interface BrokerageMentionTotal {
