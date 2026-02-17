@@ -165,6 +165,8 @@ export function MissedOpportunities({
 
     const groups: Record<string, SourceAttribution[]> = {};
     for (const item of normalized) {
+      // Skip domains where both sides are 0%
+      if ((item.target_pct ?? 0) === 0 && (!showCompetitor || (item.competitor_pct ?? 0) === 0)) continue;
       let cat = item.category || "Other";
       // Rename CRE Brokerage to Brokerage Website for display
       if (cat === "CRE Brokerage") cat = "Brokerage Website";
