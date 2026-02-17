@@ -1,9 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { GapMarket, SourceAttribution } from "@/types/dashboard";
-import { useMemo } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import type { GapMarket, SourceAttribution, BrokerageMentionTotal } from "@/types/dashboard";
+import { useMemo, useState } from "react";
 
 const BROKERAGE_CATEGORIES = ["Residential Brokerage", "CRE Brokerage"];
 
@@ -25,9 +28,12 @@ interface MissedOpportunitiesProps {
   isLoadingSource: boolean;
   selectedBrokerage?: string;
   brokerageMatchedDomain?: string;
+  brokerages?: BrokerageMentionTotal[];
+  competitorBrokerage: string;
+  onCompetitorChange: (value: string) => void;
 }
 
-function SourceTable({ items }: { items: SourceAttribution[] }) {
+function SourceTable({ items, showCompetitor }: { items: SourceAttribution[]; showCompetitor: boolean }) {
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground text-center py-4 text-sm">
@@ -42,9 +48,10 @@ function SourceTable({ items }: { items: SourceAttribution[] }) {
         <thead>
           <tr className="border-b border-border">
             <th className="text-left py-2 px-2 font-medium text-muted-foreground">Domain</th>
-            <th className="text-right py-2 px-2 font-medium text-muted-foreground">Your %</th>
-            <th className="text-right py-2 px-2 font-medium text-muted-foreground">Peer Avg</th>
-            <th className="text-right py-2 px-2 font-medium text-muted-foreground">Diff</th>
+            <th className="text-right py-2 px-2 font-medium text-muted-foreground">You %</th>
+            {showCompetitor && (
+              <th className="text-right py-2 px-2 font-medium text-muted-foreground">Competitor %</th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -54,21 +61,9 @@ function SourceTable({ items }: { items: SourceAttribution[] }) {
                 {item.domain}
               </td>
               <td className="py-2 px-2 text-right">{item.target_pct?.toFixed(1)}%</td>
-              <td className="py-2 px-2 text-right">{item.peer_avg_pct?.toFixed(1)}%</td>
-              <td className="py-2 px-2 text-right">
-                <span
-                  className={
-                    item.diff_pct > 0
-                      ? "text-green-600 font-medium"
-                      : item.diff_pct < 0
-                      ? "text-red-600 font-medium"
-                      : "text-muted-foreground"
-                  }
-                >
-                  {item.diff_pct > 0 ? "+" : ""}
-                  {item.diff_pct?.toFixed(1)}%
-                </span>
-              </td>
+              {showCompetitor && (
+                <td className="py-2 px-2 text-right">{(item.competitor_pct ?? 0).toFixed(1)}%</td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -84,10 +79,15 @@ export function MissedOpportunities({
   isLoadingSource,
   selectedBrokerage,
   brokerageMatchedDomain,
+  brokerages = [],
+  competitorBrokerage,
+  onCompetitorChange,
 }: MissedOpportunitiesProps) {
+  const [competitorOpen, setCompetitorOpen] = useState(false);
+  const showCompetitor = !!competitorBrokerage;
+
   // Group source data by category, filtering brokerage categories
   const { ownDomain, groupedCategories } = useMemo(() => {
-    // Use matched_domain from DB instead of fuzzy matching
     let ownDomain: SourceAttribution | null = null;
     const filtered: SourceAttribution[] = [];
 
@@ -96,18 +96,15 @@ export function MissedOpportunities({
       const isBrokerageCat = BROKERAGE_CATEGORIES.includes(cat);
 
       if (isBrokerageCat) {
-        // Only match if we have an exact matched_domain from the DB
         if (brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase()) {
           ownDomain = item;
         }
-        // Skip all brokerage category domains from regular display
         continue;
       }
 
       filtered.push(item);
     }
 
-    // Group by category
     const groups: Record<string, SourceAttribution[]> = {};
     for (const item of filtered) {
       const cat = item.category || "Other";
@@ -115,7 +112,6 @@ export function MissedOpportunities({
       groups[cat].push(item);
     }
 
-    // Sort categories by defined order
     const sortedCategories = Object.entries(groups).sort(([a], [b]) => {
       const ai = CATEGORY_ORDER.indexOf(a);
       const bi = CATEGORY_ORDER.indexOf(b);
@@ -125,7 +121,6 @@ export function MissedOpportunities({
     return { ownDomain, groupedCategories: sortedCategories };
   }, [sourceData, brokerageMatchedDomain]);
 
-  // Default to first available category
   const defaultTab = groupedCategories.length > 0 ? groupedCategories[0][0] : "Other";
 
   return (
@@ -184,11 +179,59 @@ export function MissedOpportunities({
           </CardContent>
         </Card>
 
-        {/* Source Attribution - grouped by category */}
+        {/* Source Attribution */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Source Attribution</CardTitle>
-            <CardDescription>Domains driving your visibility vs. peers, by category</CardDescription>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div>
+                <CardTitle className="text-base">Source Attribution</CardTitle>
+                <CardDescription>Domains driving your visibility{showCompetitor ? " vs. competitor" : ""}</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Popover open={competitorOpen} onOpenChange={setCompetitorOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs gap-1.5">
+                      <Search className="h-3.5 w-3.5" />
+                      {competitorBrokerage || "Compare with..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[250px] p-0" align="end">
+                    <Command>
+                      <CommandInput placeholder="Search competitor..." />
+                      <CommandList>
+                        <CommandEmpty>No brokerage found.</CommandEmpty>
+                        <CommandGroup>
+                          {brokerages
+                            .filter((b) => b.brokerage !== selectedBrokerage)
+                            .map((b) => (
+                              <CommandItem
+                                key={b.brokerage}
+                                value={b.brokerage}
+                                onSelect={(val) => {
+                                  onCompetitorChange(val);
+                                  setCompetitorOpen(false);
+                                }}
+                              >
+                                {b.brokerage}
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                {showCompetitor && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    onClick={() => onCompetitorChange("")}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoadingSource ? (
@@ -209,10 +252,9 @@ export function MissedOpportunities({
                       </div>
                       <div className="flex gap-4 text-xs">
                         <span>You: <strong>{ownDomain.target_pct?.toFixed(1)}%</strong></span>
-                        <span>Peers: {ownDomain.peer_avg_pct?.toFixed(1)}%</span>
-                        <span className={ownDomain.diff_pct >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                          {ownDomain.diff_pct > 0 ? "+" : ""}{ownDomain.diff_pct?.toFixed(1)}%
-                        </span>
+                        {showCompetitor && (
+                          <span>Competitor: {(ownDomain.competitor_pct ?? 0).toFixed(1)}%</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -236,7 +278,7 @@ export function MissedOpportunities({
                   {groupedCategories.map(([cat, items]) => (
                     <TabsContent key={cat} value={cat}>
                       <div className="max-h-[220px] overflow-y-auto">
-                        <SourceTable items={items} />
+                        <SourceTable items={items} showCompetitor={showCompetitor} />
                       </div>
                     </TabsContent>
                   ))}

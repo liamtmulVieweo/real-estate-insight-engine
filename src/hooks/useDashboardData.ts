@@ -190,6 +190,22 @@ export function useSourceAttribution(targetBrokerage: string, enabled = true) {
   });
 }
 
+export function useSourceAttributionVsCompetitor(targetBrokerage: string, competitorBrokerage: string, enabled = true) {
+  return useQuery({
+    queryKey: ["source-attribution-vs-competitor", targetBrokerage, competitorBrokerage],
+    queryFn: async (): Promise<SourceAttribution[]> => {
+      const { data, error } = await supabase.rpc("get_source_attribution_vs_competitor" as any, {
+        target_brokerage: targetBrokerage,
+        competitor_brokerage: competitorBrokerage,
+      });
+
+      if (error) throw error;
+      return (data || []) as SourceAttribution[];
+    },
+    enabled: !!targetBrokerage && !!competitorBrokerage && enabled,
+  });
+}
+
 export function useBrokerageMatchedDomain(targetBrokerage: string, enabled = true) {
   return useQuery({
     queryKey: ["brokerage-matched-domain", targetBrokerage],

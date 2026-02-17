@@ -34,7 +34,7 @@ export function SourceAttribution({ data, isLoading }: SourceAttributionProps) {
     name: item.domain.length > 20 ? item.domain.slice(0, 20) + "..." : item.domain,
     fullName: item.domain,
     you: item.target_pct || 0,
-    peers: item.peer_avg_pct || 0,
+    peers: item.competitor_pct || 0,
   }));
 
   return (

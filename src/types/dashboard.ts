@@ -86,10 +86,8 @@ export interface PromptIntelligence {
 export interface SourceAttribution {
   domain: string;
   target_pct: number;
-  peer_avg_pct: number;
-  diff_pct: number;
-  target_rank: number;
-  peer_avg_rank: number;
+  competitor_pct?: number;
+  target_rank?: number;
   category: string | null;
 }
 
