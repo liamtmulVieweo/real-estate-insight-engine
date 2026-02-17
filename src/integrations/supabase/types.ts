@@ -325,6 +325,13 @@ export type Database = {
           total_brokers: number
         }[]
       }
+      get_co_mentioned_brokerages: {
+        Args: { target_brokerage: string }
+        Returns: {
+          brokerage: string
+          co_mentions: number
+        }[]
+      }
       get_competitive_rankings: {
         Args: { market_filter?: string; target_brokerage: string }
         Returns: {

@@ -8,3 +8,5 @@ export { SourceAttribution } from "./SourceAttribution";
 export { PropertyTypeBreakdown } from "./PropertyTypeBreakdown";
 export { BrokerTeamBreakdown } from "./BrokerTeamBreakdown";
 export { DashboardFooter } from "./DashboardFooter";
+export { CompetitorsList } from "./CompetitorsList";
+export { ExpertCTA } from "./ExpertCTA";

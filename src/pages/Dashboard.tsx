@@ -10,6 +10,8 @@ import {
   PropertyTypeBreakdown,
   BrokerTeamBreakdown,
   DashboardFooter,
+  CompetitorsList,
+  ExpertCTA,
 } from "@/components/dashboard";
 import {
   useBrokerageList,
@@ -23,6 +25,7 @@ import {
   useSubmarketsForBrokerage,
   useBrokerTeamBreakdown,
   useOriginalBrokerageNames,
+  useCoMentionedBrokerages,
 } from "@/hooks/useDashboardData";
 import { useCREBootstrap } from "@/hooks/useCREBootstrap";
 import type { Filters } from "@/types/dashboard";
@@ -123,7 +126,7 @@ export default function Dashboard() {
 
   const { data: originalNames = [] } = useOriginalBrokerageNames(selectedBrokerage, tier1Ready);
   const { data: matchedDomain } = useBrokerageMatchedDomain(selectedBrokerage, tier1Ready);
-
+  const { data: coMentioned = [], isLoading: loadingCoMentioned } = useCoMentionedBrokerages(selectedBrokerage, tier1Ready);
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
@@ -200,6 +203,20 @@ export default function Dashboard() {
             brokerages={brokerages}
             competitorBrokerage={competitorBrokerage}
             onCompetitorChange={setCompetitorBrokerage}
+          />
+        </section>
+
+        {/* Expert CTA */}
+        <section>
+          <ExpertCTA />
+        </section>
+
+        {/* Competitors */}
+        <section>
+          <CompetitorsList
+            data={coMentioned}
+            isLoading={loadingCoMentioned}
+            selectedBrokerage={selectedBrokerage}
           />
         </section>
 
