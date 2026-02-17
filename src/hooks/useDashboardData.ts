@@ -190,6 +190,25 @@ export function useSourceAttribution(targetBrokerage: string, enabled = true) {
   });
 }
 
+export function useBrokerageMatchedDomain(targetBrokerage: string, enabled = true) {
+  return useQuery({
+    queryKey: ["brokerage-matched-domain", targetBrokerage],
+    staleTime: LONG_STALE,
+    queryFn: async (): Promise<string | null> => {
+      const { data, error } = await supabase
+        .from("lovable_entities")
+        .select("matched_domain")
+        .or(`normalized_brokerage.eq.${targetBrokerage},brokerage.eq.${targetBrokerage}`)
+        .not("matched_domain", "is", null)
+        .limit(1);
+
+      if (error) throw error;
+      return data?.[0]?.matched_domain || null;
+    },
+    enabled: !!targetBrokerage && enabled,
+  });
+}
+
 export function useMarketRankings(targetBrokerage: string) {
   return useQuery({
     queryKey: ["market-rankings", targetBrokerage],
