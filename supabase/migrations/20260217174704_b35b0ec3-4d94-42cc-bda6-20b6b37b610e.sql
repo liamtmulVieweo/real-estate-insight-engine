@@ -1,0 +1,1 @@
+ALTER TABLE public.lovable_entities ADD COLUMN matched_domain text;

@@ -110,6 +110,7 @@ export type Database = {
           entity_type: string | null
           id: string
           market: string | null
+          matched_domain: string | null
           name: string
           normalized_brokerage: string | null
           prompt_hash: string
@@ -120,6 +121,7 @@ export type Database = {
           entity_type?: string | null
           id?: string
           market?: string | null
+          matched_domain?: string | null
           name: string
           normalized_brokerage?: string | null
           prompt_hash: string
@@ -130,6 +132,7 @@ export type Database = {
           entity_type?: string | null
           id?: string
           market?: string | null
+          matched_domain?: string | null
           name?: string
           normalized_brokerage?: string | null
           prompt_hash?: string
