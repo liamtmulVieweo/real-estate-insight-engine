@@ -1,51 +1,32 @@
 
 
-## Source Attribution: Replace Peer Avg with Competitor Comparison
+## Replace Category Dropdown with Collapsible Sections
 
 ### What Changes
 
-The Source Attribution section currently compares your brokerage against the average of *all* other brokerages. This plan replaces that with a 1:1 competitor comparison where you pick a specific competitor from a searchable dropdown.
+The category dropdown filter in the Source Attribution card will be replaced with collapsible (accordion-style) sections. Each category becomes its own expandable section header showing the category name and domain count. Clicking a section expands it to reveal the domain table for that category.
 
-### UI Changes
+### UI Behavior
 
-- Remove the "Peer Avg" and "Diff" columns from the source table
-- Add a searchable competitor selector (combobox) at the top of the Source Attribution card
-- When no competitor is selected, show only the "You %" column
-- When a competitor is selected, add a second column showing the competitor's % for each domain
-- Combine both domain lists: if one side doesn't appear in a domain, show 0%
-- The own-domain pinned card at the top will also show the competitor's % if selected
-
-### Database Changes
-
-**New RPC: `get_source_attribution_vs_competitor`**
-
-Accepts `target_brokerage` and `competitor_brokerage` parameters. Returns a FULL OUTER JOIN of both brokerages' domain data from `domain_attribution_by_brokerage`, joined with `lovable_domains` for category. Missing entries default to 0%.
+- Remove the `Select` dropdown currently used for category filtering
+- Remove the `selectedCategory` state and `displayItems` memo (no longer needed)
+- Each category from `groupedCategories` renders as a `Collapsible` section
+- The trigger shows: category name + domain count (e.g., "Media/News (10)")
+- Expanding a section reveals the `SourceTable` for that category's domains
+- All sections start collapsed by default
+- Multiple sections can be open simultaneously
+- The own-domain pinned card and competitor selector remain unchanged
+- The outer scrollable container (`max-h-[220px]`) moves to wrap all collapsible sections instead
 
 ### Technical Details
 
-1. **New migration** -- create `get_source_attribution_vs_competitor` RPC:
-   - Query `domain_attribution_by_brokerage` for target rows and competitor rows
-   - FULL OUTER JOIN on domain
-   - LEFT JOIN `lovable_domains` for category
-   - Return: `domain`, `target_pct`, `competitor_pct`, `category`
+**File: `src/components/dashboard/MissedOpportunities.tsx`**
 
-2. **New hook** in `useDashboardData.ts` -- `useSourceAttributionVsCompetitor(targetBrokerage, competitorBrokerage)`:
-   - Calls the new RPC
-   - Only enabled when both brokerages are set
-
-3. **Update `SourceAttribution` type** in `types/dashboard.ts`:
-   - Add `competitor_pct` field (optional, for when competitor is selected)
-   - Remove `peer_avg_pct`, `diff_pct`, `peer_avg_rank` (no longer needed)
-
-4. **Update `MissedOpportunities.tsx`** (Source Attribution card):
-   - Add competitor state and searchable combobox using existing brokerage list
-   - Remove "Peer Avg" and "Diff" table columns
-   - Add "Competitor %" column when a competitor is selected
-   - Update the `SourceTable` component accordingly
-   - Update own-domain pinned card to show competitor % instead of peer avg
-   - Switch data source: use original `useSourceAttribution` when no competitor, use new hook when competitor selected
-
-5. **Update `Dashboard.tsx`**:
-   - Pass `brokerages` list to `MissedOpportunities` so the competitor selector can search it
-   - Wire up the new competitor-specific source attribution hook
+1. Replace `Select` import with `Collapsible, CollapsibleTrigger, CollapsibleContent` from `@/components/ui/collapsible`
+2. Remove `selectedCategory` state and `displayItems` memo
+3. Replace the category dropdown + single table with a scrollable list of collapsible sections:
+   - Each `groupedCategories` entry maps to a `Collapsible` component
+   - `CollapsibleTrigger` displays category name, count, and a chevron icon
+   - `CollapsibleContent` contains the `SourceTable` for that category's items
+4. Keep the `max-h-[220px] overflow-y-auto` wrapper around the collapsible list so the card doesn't grow unbounded
 
