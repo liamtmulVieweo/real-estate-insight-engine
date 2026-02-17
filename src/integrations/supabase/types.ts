@@ -411,6 +411,15 @@ export type Database = {
           target_rank: number
         }[]
       }
+      get_source_attribution_vs_competitor: {
+        Args: { competitor_brokerage: string; target_brokerage: string }
+        Returns: {
+          category: string
+          competitor_pct: number
+          domain: string
+          target_pct: number
+        }[]
+      }
       get_underindex_segments: {
         Args: { target_brokerage: string }
         Returns: {

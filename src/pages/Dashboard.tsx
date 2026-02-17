@@ -18,6 +18,7 @@ import {
   useUnderIndexSegments,
   usePromptIntelligence,
   useSourceAttribution,
+  useSourceAttributionVsCompetitor,
   useBrokerageMatchedDomain,
   useSubmarketsForBrokerage,
   useBrokerTeamBreakdown,
@@ -29,6 +30,7 @@ import { DashboardLoadingScreen } from "@/components/ui/DashboardLoadingScreen";
 
 export default function Dashboard() {
   const [selectedBrokerage, setSelectedBrokerage] = useState<string>("");
+  const [competitorBrokerage, setCompetitorBrokerage] = useState<string>("");
   const [brokerTeamPropertyFilter, setBrokerTeamPropertyFilter] = useState<string>("All");
   const [filters, setFilters] = useState<Filters>({
     market: "All",
@@ -94,10 +96,19 @@ export default function Dashboard() {
     enabled: tier1Ready,
   });
 
-  const { data: sourceData = [], isLoading: loadingSource } = useSourceAttribution(
+  const { data: sourceDataBase = [], isLoading: loadingSourceBase } = useSourceAttribution(
     selectedBrokerage,
-    tier1Ready
+    tier1Ready && !competitorBrokerage
   );
+
+  const { data: sourceDataVs = [], isLoading: loadingSourceVs } = useSourceAttributionVsCompetitor(
+    selectedBrokerage,
+    competitorBrokerage,
+    tier1Ready && !!competitorBrokerage
+  );
+
+  const sourceData = competitorBrokerage ? sourceDataVs : sourceDataBase;
+  const loadingSource = competitorBrokerage ? loadingSourceVs : loadingSourceBase;
 
   const { data: submarkets = [], isLoading: loadingSubmarkets } = useSubmarketsForBrokerage(
     selectedBrokerage,
@@ -186,6 +197,9 @@ export default function Dashboard() {
             isLoadingSource={loadingSource}
             selectedBrokerage={selectedBrokerage}
             brokerageMatchedDomain={matchedDomain ?? undefined}
+            brokerages={brokerages}
+            competitorBrokerage={competitorBrokerage}
+            onCompetitorChange={setCompetitorBrokerage}
           />
         </section>
 
