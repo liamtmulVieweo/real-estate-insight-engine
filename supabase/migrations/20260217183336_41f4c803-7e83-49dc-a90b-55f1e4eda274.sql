@@ -1,0 +1,1 @@
+ALTER TABLE public.lovable_domains ADD COLUMN category text;
