@@ -84,26 +84,10 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                         of {item.totalBrokerages}
                       </span>
                     </td>
-                    <td className="py-3 px-2">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              item.percentile > 90
-                                ? "bg-green-500"
-                                : item.percentile > 70
-                                ? "bg-blue-500"
-                                : item.percentile > 50
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
-                            }`}
-                            style={{ width: `${item.percentile}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium w-12 text-right">
-                          {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
-                        </span>
-                      </div>
+                    <td className="py-3 px-2 text-right">
+                      <span className="text-xs font-medium">
+                        {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
+                      </span>
                     </td>
                   </tr>
                 ))}
