@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const headers = rows[0];
+    const headers = rows[0].map(h => h.trim().toLowerCase());
     
     // Validate CSV headers match expected schema
     const expectedHeaders: Record<string, string[]> = {
