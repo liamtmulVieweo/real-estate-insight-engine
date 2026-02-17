@@ -112,10 +112,27 @@ export function MissedOpportunities({
   const { ownDomain, groupedCategories } = useMemo(() => {
     let ownDomain: SourceAttribution | null = null;
 
-    // Find own domain from brokerage categories
+    // Derive a slug from the brokerage name for fuzzy domain matching
+    // e.g. "Avison Young" -> "avisonyoung"
+    const brokerageSlug = selectedBrokerage
+      ? selectedBrokerage.toLowerCase().replace(/[^a-z0-9]/g, "")
+      : "";
+
+    // Helper: check if a domain belongs to this brokerage
+    const isOwnDomain = (domain: string) => {
+      const d = domain.toLowerCase();
+      if (brokerageMatchedDomain && d === brokerageMatchedDomain.toLowerCase()) return true;
+      if (brokerageSlug && brokerageSlug.length >= 4) {
+        const domainBase = d.replace(/\.(com|net|org|co|io|us|ca|uk)$/i, "").replace(/[^a-z0-9]/g, "");
+        if (domainBase.includes(brokerageSlug) || brokerageSlug.includes(domainBase)) return true;
+      }
+      return false;
+    };
+
+    // Find own domain from CRE Brokerage category
     for (const item of sourceData) {
       const cat = item.category || "Other";
-      if (BROKERAGE_CATEGORIES.includes(cat) && brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase()) {
+      if (cat === "CRE Brokerage" && isOwnDomain(item.domain)) {
         ownDomain = item;
         break;
       }
@@ -126,7 +143,7 @@ export function MissedOpportunities({
       const cat = item.category || "Other";
       if (cat === "Residential Brokerage") return false;
       if (cat === "CRE Brokerage") {
-        return brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase();
+        return isOwnDomain(item.domain);
       }
       return true;
     });
@@ -165,7 +182,7 @@ export function MissedOpportunities({
       });
 
     return { ownDomain, groupedCategories: sortedCategories };
-  }, [sourceData, brokerageMatchedDomain, showCompetitor]);
+  }, [sourceData, brokerageMatchedDomain, showCompetitor, selectedBrokerage]);
 
 
   return (
