@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useCoMentionDetails } from "@/hooks/useDashboardData";
 
 export interface CoMentionedBrokerage {
@@ -29,42 +28,41 @@ function PeerRow({ item, idx, selectedBrokerage }: { item: CoMentionedBrokerage;
     : [];
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <tr className="border-b border-border/50 hover:bg-muted/30 cursor-pointer">
-          <td className="py-2 px-2 text-muted-foreground">{idx + 1}</td>
-          <td className="py-2 px-2 font-medium">{item.brokerage}</td>
-          <td className="py-2 px-2 text-right">
-            <div className="flex items-center justify-end gap-1">
-              <Badge variant="secondary" className="text-xs">
-                {item.co_mentions.toLocaleString()}
-              </Badge>
-              {isOpen ? (
-                <ChevronUp className="h-3 w-3 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
-              )}
-            </div>
-          </td>
-        </tr>
-      </CollapsibleTrigger>
-      <CollapsibleContent asChild>
+    <>
+      <tr
+        className="border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <td className="py-2.5 px-3 text-muted-foreground text-xs">{idx + 1}</td>
+        <td className="py-2.5 px-3 font-medium text-sm">{item.brokerage}</td>
+        <td className="py-2.5 px-3 text-right">
+          <div className="flex items-center justify-end gap-2">
+            <span className="text-sm text-muted-foreground">{item.co_mentions.toLocaleString()}</span>
+            {isOpen ? (
+              <ChevronUp className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            )}
+          </div>
+        </td>
+      </tr>
+      {isOpen && (
         <tr>
           <td colSpan={3} className="p-0">
-            <div className="px-4 py-3 bg-muted/20 border-b border-border/50">
+            <div className="px-4 py-3 bg-muted/10 border-b border-border/50">
               {isLoading ? (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
+                <div className="flex items-center gap-2 text-muted-foreground text-xs py-2">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Loading details...
                 </div>
               ) : (
-                <>
+                <div className="space-y-3">
                   {markets.length > 0 && (
-                    <div className="mb-2">
-                      <span className="text-xs text-muted-foreground font-medium">Markets</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
+                    <div>
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Markets</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
                         {markets.map((m) => (
-                          <Badge key={m} variant="outline" className="text-xs">
+                          <Badge key={m} variant="outline" className="text-xs font-normal">
                             {m}
                           </Badge>
                         ))}
@@ -73,12 +71,21 @@ function PeerRow({ item, idx, selectedBrokerage }: { item: CoMentionedBrokerage;
                   )}
                   {details && details.length > 0 && (
                     <div>
-                      <span className="text-xs text-muted-foreground font-medium">Shared Prompts</span>
-                      <div className="mt-1 space-y-1 max-h-[150px] overflow-y-auto">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Shared Prompts ({details.length})
+                      </span>
+                      <div className="mt-1.5 space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
                         {details.map((d) => (
-                          <p key={d.prompt_hash} className="text-xs text-foreground/80 line-clamp-1">
-                            "{d.prompt}"
-                          </p>
+                          <div key={d.prompt_hash} className="text-xs text-foreground/80 bg-background/50 rounded px-2.5 py-1.5 border border-border/30">
+                            <p className="line-clamp-2">"{d.prompt}"</p>
+                            {(d.property_type || d.broker_role) && (
+                              <div className="flex gap-2 mt-1 text-muted-foreground">
+                                {d.property_type && <span>{d.property_type}</span>}
+                                {d.property_type && d.broker_role && <span>·</span>}
+                                {d.broker_role && <span>{d.broker_role}</span>}
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -86,13 +93,13 @@ function PeerRow({ item, idx, selectedBrokerage }: { item: CoMentionedBrokerage;
                   {(!details || details.length === 0) && (
                     <p className="text-xs text-muted-foreground">No shared prompt details found</p>
                   )}
-                </>
+                </div>
               )}
             </div>
           </td>
         </tr>
-      </CollapsibleContent>
-    </Collapsible>
+      )}
+    </>
   );
 }
 
@@ -118,13 +125,13 @@ export function CompetitorsList({ data, isLoading, selectedBrokerage }: Competit
             No co-mentioned brokerages found
           </p>
         ) : (
-          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+          <div className="overflow-x-auto max-h-[450px] overflow-y-auto">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-card">
+              <thead className="sticky top-0 bg-card z-10">
                 <tr className="border-b border-border">
-                  <th className="text-left py-2 px-2 font-medium text-muted-foreground w-10">#</th>
-                  <th className="text-left py-2 px-2 font-medium text-muted-foreground">Brokerage</th>
-                  <th className="text-right py-2 px-2 font-medium text-muted-foreground">Shared Prompts</th>
+                  <th className="text-left py-2 px-3 font-medium text-muted-foreground w-10">#</th>
+                  <th className="text-left py-2 px-3 font-medium text-muted-foreground">Brokerage</th>
+                  <th className="text-right py-2 px-3 font-medium text-muted-foreground">Shared Prompts</th>
                 </tr>
               </thead>
               <tbody>
