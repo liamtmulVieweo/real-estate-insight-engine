@@ -480,3 +480,27 @@ export function useCoMentionedBrokerages(targetBrokerage: string, enabled = true
   });
 }
 
+export interface CoMentionDetail {
+  prompt_hash: string;
+  prompt: string;
+  market: string;
+  property_type: string;
+  broker_role: string;
+}
+
+export function useCoMentionDetails(targetBrokerage: string, peerBrokerage: string, enabled = true) {
+  return useQuery({
+    queryKey: ["co-mention-details", targetBrokerage, peerBrokerage],
+    staleTime: LONG_STALE,
+    queryFn: async (): Promise<CoMentionDetail[]> => {
+      const { data, error } = await supabase.rpc("get_co_mention_details" as any, {
+        target_brokerage: targetBrokerage,
+        peer_brokerage: peerBrokerage,
+      });
+      if (error) throw error;
+      return (data || []) as CoMentionDetail[];
+    },
+    enabled: !!targetBrokerage && !!peerBrokerage && enabled,
+  });
+}
+

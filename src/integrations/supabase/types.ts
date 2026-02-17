@@ -325,6 +325,16 @@ export type Database = {
           total_brokers: number
         }[]
       }
+      get_co_mention_details: {
+        Args: { peer_brokerage: string; target_brokerage: string }
+        Returns: {
+          broker_role: string
+          market: string
+          prompt: string
+          prompt_hash: string
+          property_type: string
+        }[]
+      }
       get_co_mentioned_brokerages: {
         Args: { target_brokerage: string }
         Returns: {
