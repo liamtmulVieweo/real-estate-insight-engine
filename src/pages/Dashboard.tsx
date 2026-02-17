@@ -18,6 +18,7 @@ import {
   useUnderIndexSegments,
   usePromptIntelligence,
   useSourceAttribution,
+  useBrokerageMatchedDomain,
   useSubmarketsForBrokerage,
   useBrokerTeamBreakdown,
   useOriginalBrokerageNames,
@@ -110,6 +111,7 @@ export default function Dashboard() {
   );
 
   const { data: originalNames = [] } = useOriginalBrokerageNames(selectedBrokerage, tier1Ready);
+  const { data: matchedDomain } = useBrokerageMatchedDomain(selectedBrokerage, tier1Ready);
 
   const handleFilterChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -183,6 +185,7 @@ export default function Dashboard() {
             isLoadingMarkets={loadingMissedMarkets}
             isLoadingSource={loadingSource}
             selectedBrokerage={selectedBrokerage}
+            brokerageMatchedDomain={matchedDomain ?? undefined}
           />
         </section>
 

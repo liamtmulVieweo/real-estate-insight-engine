@@ -24,6 +24,7 @@ interface MissedOpportunitiesProps {
   isLoadingMarkets: boolean;
   isLoadingSource: boolean;
   selectedBrokerage?: string;
+  brokerageMatchedDomain?: string;
 }
 
 function SourceTable({ items }: { items: SourceAttribution[] }) {
@@ -82,12 +83,11 @@ export function MissedOpportunities({
   isLoadingMarkets,
   isLoadingSource,
   selectedBrokerage,
+  brokerageMatchedDomain,
 }: MissedOpportunitiesProps) {
   // Group source data by category, filtering brokerage categories
   const { ownDomain, groupedCategories } = useMemo(() => {
-    const brokerageLower = (selectedBrokerage || "").toLowerCase();
-
-    // Find own domain: brokerage category domains where domain matches brokerage name
+    // Use matched_domain from DB instead of fuzzy matching
     let ownDomain: SourceAttribution | null = null;
     const filtered: SourceAttribution[] = [];
 
@@ -96,13 +96,8 @@ export function MissedOpportunities({
       const isBrokerageCat = BROKERAGE_CATEGORIES.includes(cat);
 
       if (isBrokerageCat) {
-        // Check if this is the target brokerage's own domain
-        const domainLower = item.domain.toLowerCase();
-        const brokerageWords = brokerageLower.split(/[\s&,]+/).filter(w => w.length > 2);
-        const isOwnDomain = brokerageWords.some(w => domainLower.includes(w)) ||
-          domainLower.includes(brokerageLower.replace(/[^a-z0-9]/g, ""));
-
-        if (isOwnDomain) {
+        // Only match if we have an exact matched_domain from the DB
+        if (brokerageMatchedDomain && item.domain.toLowerCase() === brokerageMatchedDomain.toLowerCase()) {
           ownDomain = item;
         }
         // Skip all brokerage category domains from regular display
@@ -128,7 +123,7 @@ export function MissedOpportunities({
     });
 
     return { ownDomain, groupedCategories: sortedCategories };
-  }, [sourceData, selectedBrokerage]);
+  }, [sourceData, brokerageMatchedDomain]);
 
   // Default to first available category
   const defaultTab = groupedCategories.length > 0 ? groupedCategories[0][0] : "Other";
@@ -205,7 +200,7 @@ export function MissedOpportunities({
             ) : (
               <div className="space-y-3">
                 {/* Own domain pinned at top */}
-                {ownDomain && (
+                {ownDomain ? (
                   <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
                     <div className="flex items-center justify-between text-sm">
                       <div>
@@ -220,6 +215,12 @@ export function MissedOpportunities({
                         </span>
                       </div>
                     </div>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-muted bg-muted/30 p-3">
+                    <p className="text-sm text-muted-foreground">
+                      No brokerage website found in the sources
+                    </p>
                   </div>
                 )}
 
