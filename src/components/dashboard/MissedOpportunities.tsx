@@ -377,20 +377,6 @@ export function MissedOpportunities({
                                 )}
                               </span>
                             </div>
-                            <div className="relative h-2 w-full rounded-full bg-muted/50 overflow-hidden">
-                              <div
-                                className="absolute top-0 left-0 h-full rounded-full bg-primary/70 transition-all duration-300"
-                                style={{ width: `${Math.min(targetSum, 100)}%` }}
-                                title={`You: ${targetSum.toFixed(1)}%`}
-                              />
-                              {showCompetitor && (
-                                <div
-                                  className="absolute top-0 left-0 h-full rounded-full bg-destructive/40 border border-destructive/60 transition-all duration-300"
-                                  style={{ width: `${Math.min(competitorSum, 100)}%` }}
-                                  title={`${competitorBrokerage}: ${competitorSum.toFixed(1)}%`}
-                                />
-                              )}
-                            </div>
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
