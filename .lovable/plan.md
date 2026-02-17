@@ -1,47 +1,51 @@
 
-# Animated Loading Screen with Live Progress Steps
 
-Replace the basic spinner loading screens on both dashboards with a polished, Claude-inspired loading experience that shows a simulated progress bar and a live feed of what's happening behind the scenes.
+## Source Attribution: Replace Peer Avg with Competitor Comparison
 
-## What the User Will See
+### What Changes
 
-A centered loading card with:
-- An animated progress bar that fills from 0% to ~95% over a few seconds
-- A percentage counter (e.g., "42%") that ticks up smoothly
-- A scrolling list of status messages that appear one by one, like:
-  - "Connecting to database..."
-  - "Fetching market data..."
-  - "Aggregating brokerage rankings..."
-  - "Crunching 64,000+ records..."
-  - "Preparing visualizations..."
-- Each step gets a checkmark icon as the next one starts, with subtle fade-in animations
-- The Vieweo or CRE logo at the top for branding
+The Source Attribution section currently compares your brokerage against the average of *all* other brokerages. This plan replaces that with a 1:1 competitor comparison where you pick a specific competitor from a searchable dropdown.
 
-This creates the feel of watching a system work in real-time, similar to Claude's "thinking" indicator.
+### UI Changes
 
-## Files Changed
+- Remove the "Peer Avg" and "Diff" columns from the source table
+- Add a searchable competitor selector (combobox) at the top of the Source Attribution card
+- When no competitor is selected, show only the "You %" column
+- When a competitor is selected, add a second column showing the competitor's % for each domain
+- Combine both domain lists: if one side doesn't appear in a domain, show 0%
+- The own-domain pinned card at the top will also show the competitor's % if selected
 
-### New: `src/components/ui/DashboardLoadingScreen.tsx`
-A shared loading component used by both dashboards. Accepts:
-- `title` -- e.g., "Vieweo Dashboard" or "CRE Dashboard"
-- `steps` -- an array of status messages specific to each dashboard
+### Database Changes
 
-Internally:
-- Uses `useState` + `useEffect` with `setInterval` to advance through steps every ~800ms
-- Progress bar value is derived from the current step index (step 1 of 5 = 20%, etc.)
-- Uses `framer-motion` (already installed) for smooth fade-in of each step and the progress bar fill
-- Each completed step shows a green checkmark; the active step shows a pulsing dot
-- The percentage number animates smoothly using a counter effect
+**New RPC: `get_source_attribution_vs_competitor`**
 
-### Modified: `src/pages/VieweoDashboard.tsx`
-- Replace the `<VieweoDashboardLoading />` usage with the new `<DashboardLoadingScreen>` component, passing Vieweo-specific steps like "Loading AI visibility data...", "Aggregating brokerage mentions...", etc.
+Accepts `target_brokerage` and `competitor_brokerage` parameters. Returns a FULL OUTER JOIN of both brokerages' domain data from `domain_attribution_by_brokerage`, joined with `lovable_domains` for category. Missing entries default to 0%.
 
-### Modified: `src/pages/Dashboard.tsx`
-- Replace the inline spinner loading block (lines 117-125) with the new `<DashboardLoadingScreen>` component, passing CRE-specific steps like "Loading brokerage list...", "Preparing market rankings...", etc.
+### Technical Details
 
-## Technical Details
+1. **New migration** -- create `get_source_attribution_vs_competitor` RPC:
+   - Query `domain_attribution_by_brokerage` for target rows and competitor rows
+   - FULL OUTER JOIN on domain
+   - LEFT JOIN `lovable_domains` for category
+   - Return: `domain`, `target_pct`, `competitor_pct`, `category`
 
-- Progress simulation: The bar advances through steps on a timer. It pauses at ~95% until the actual data finishes loading, then jumps to 100% and the loading screen unmounts naturally (since `isLoading` becomes false).
-- No actual progress tracking needed -- the steps are cosmetic/simulated to give the user visual feedback during the real data fetch.
-- Uses existing `framer-motion` for `AnimatePresence` and `motion.div` transitions.
-- Uses existing Tailwind animation utilities (`animate-pulse`, custom keyframes) plus the project's color palette (`primary`, `muted-foreground`, `status-success`).
+2. **New hook** in `useDashboardData.ts` -- `useSourceAttributionVsCompetitor(targetBrokerage, competitorBrokerage)`:
+   - Calls the new RPC
+   - Only enabled when both brokerages are set
+
+3. **Update `SourceAttribution` type** in `types/dashboard.ts`:
+   - Add `competitor_pct` field (optional, for when competitor is selected)
+   - Remove `peer_avg_pct`, `diff_pct`, `peer_avg_rank` (no longer needed)
+
+4. **Update `MissedOpportunities.tsx`** (Source Attribution card):
+   - Add competitor state and searchable combobox using existing brokerage list
+   - Remove "Peer Avg" and "Diff" table columns
+   - Add "Competitor %" column when a competitor is selected
+   - Update the `SourceTable` component accordingly
+   - Update own-domain pinned card to show competitor % instead of peer avg
+   - Switch data source: use original `useSourceAttribution` when no competitor, use new hook when competitor selected
+
+5. **Update `Dashboard.tsx`**:
+   - Pass `brokerages` list to `MissedOpportunities` so the competitor selector can search it
+   - Wire up the new competitor-specific source attribution hook
+
