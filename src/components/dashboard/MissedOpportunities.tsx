@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import type { GapMarket, SourceAttribution, BrokerageMentionTotal } from "@/types/dashboard";
 import { useMemo, useState } from "react";
 
@@ -295,19 +295,20 @@ export function MissedOpportunities({
                   </div>
                 )}
 
-                {/* Collapsible category sections */}
-                <div className="max-h-[220px] overflow-y-auto space-y-1">
-                  {groupedCategories.map(([cat, items]) => (
-                    <Collapsible key={cat}>
-                      <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
-                        <span>{cat} ({items.length})</span>
-                        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SourceTable items={items} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
-                      </CollapsibleContent>
-                    </Collapsible>
-                  ))}
+                {/* Accordion category sections */}
+                <div className="max-h-[280px] overflow-y-auto">
+                  <Accordion type="single" collapsible className="space-y-1">
+                    {groupedCategories.map(([cat, items]) => (
+                      <AccordionItem key={cat} value={cat} className="border-none">
+                        <AccordionTrigger className="rounded-md px-3 py-2.5 text-base font-bold hover:bg-muted/50 hover:no-underline transition-colors">
+                          {cat} ({items.length})
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <SourceTable items={items} showCompetitor={showCompetitor} competitorName={competitorBrokerage} />
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
                 </div>
               </div>
             )}
