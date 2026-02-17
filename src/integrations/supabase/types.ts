@@ -76,18 +76,21 @@ export type Database = {
       }
       lovable_domains: {
         Row: {
+          category: string | null
           created_at: string | null
           domain: string
           id: string
           prompt_hash: string
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           domain: string
           id?: string
           prompt_hash: string
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           domain?: string
           id?: string
