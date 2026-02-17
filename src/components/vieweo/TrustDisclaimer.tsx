@@ -25,12 +25,6 @@ export function TrustDisclaimer() {
                 <p className="flex items-start gap-3 text-muted-foreground">
                   <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                   <span>
-                    This is an analysis of <strong className="text-foreground">AI representation</strong>—revealing who AI trusts, who it omits, and where visibility gaps exist.
-                  </span>
-                </p>
-                <p className="flex items-start gap-3 text-muted-foreground">
-                  <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span>
                     Visibility metrics reflect current AI system outputs based on training data and are not an endorsement of any specific broker or brokerage.
                   </span>
                 </p>
