@@ -88,7 +88,9 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                 <tbody>
                   {topMarkets.map((item) => (
                     <tr key={item.market} className="border-b border-border/50 hover:bg-muted/30">
-                      <td className="py-3 px-2 font-medium">{item.market}</td>
+                      <td className="py-3 px-2 font-medium" title={item.market}>
+                        {item.market.length > 14 ? item.market.slice(0, 12) + "…" : item.market}
+                      </td>
                       <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
                       <td className="py-3 px-2 text-right">{item.marketSharePct.toFixed(1)}%</td>
                       <td className="py-3 px-2 text-right">
