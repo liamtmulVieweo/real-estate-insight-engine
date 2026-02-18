@@ -309,48 +309,6 @@ export function MissedOpportunities({
               </p>
             ) : (
               <div className="space-y-3">
-                {/* Own domain pinned at top — aggregate Brokerage Website category */}
-                {(() => {
-                  const bwCategory = groupedCategories.find(([cat]) => cat === "Brokerage Website");
-                  const bwItems = bwCategory ? bwCategory[1] : [];
-                  const targetAgg = bwItems.reduce((s, i) => s + (i.target_pct ?? 0), 0);
-                  const competitorAgg = bwItems.reduce((s, i) => s + (i.competitor_pct ?? 0), 0);
-                  const diff = targetAgg - competitorAgg;
-
-                  if (ownDomain || bwItems.length > 0) {
-                    return (
-                      <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
-                        <div className="flex items-center justify-between text-sm flex-wrap gap-2">
-                          <div>
-                            <span className="font-semibold">
-                              {ownDomain ? ownDomain.domain : "Brokerage Website"}
-                            </span>
-                            <Badge variant="outline" className="ml-2 text-xs">Brokerage Website</Badge>
-                          </div>
-                          <div className="flex gap-4 text-xs">
-                            <span>You: <strong>{targetAgg.toFixed(1)}%</strong></span>
-                            {showCompetitor && (
-                              <>
-                                <span>{competitorBrokerage}: {competitorAgg.toFixed(1)}%</span>
-                                <span className={diff >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                                  {diff > 0 ? "+" : ""}{diff.toFixed(1)}%
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div className="rounded-md border border-muted bg-muted/30 p-3">
-                      <p className="text-sm text-muted-foreground">
-                        No brokerage website found in the sources
-                      </p>
-                    </div>
-                  );
-                })()}
 
                 {/* Accordion category sections */}
                 <Accordion type="single" collapsible className="space-y-1">
