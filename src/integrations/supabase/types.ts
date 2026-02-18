@@ -342,24 +342,60 @@ export type Database = {
           co_mentions: number
         }[]
       }
-      get_competitive_rankings: {
-        Args: { market_filter?: string; target_brokerage: string }
-        Returns: {
-          brokerage: string
-          is_target: boolean
-          mentions: number
-          rank: number
-          vs_target_diff: number
-        }[]
-      }
-      get_cre_dashboard_bootstrap: {
-        Args: { market_filter?: string; target_brokerage?: string }
-        Returns: Json
-      }
-      get_dashboard_summary: {
-        Args: { target_brokerage: string; target_market?: string }
-        Returns: Json
-      }
+      get_competitive_rankings:
+        | {
+            Args: { market_filter?: string; target_brokerage: string }
+            Returns: {
+              brokerage: string
+              is_target: boolean
+              mentions: number
+              rank: number
+              vs_target_diff: number
+            }[]
+          }
+        | {
+            Args: {
+              market_filter?: string
+              property_type_filter?: string
+              role_filter?: string
+              target_brokerage: string
+            }
+            Returns: {
+              brokerage: string
+              is_target: boolean
+              mentions: number
+              rank: number
+              vs_target_diff: number
+            }[]
+          }
+      get_cre_dashboard_bootstrap:
+        | {
+            Args: { market_filter?: string; target_brokerage?: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              market_filter?: string
+              property_type_filter?: string
+              role_filter?: string
+              target_brokerage?: string
+            }
+            Returns: Json
+          }
+      get_dashboard_summary:
+        | {
+            Args: { target_brokerage: string; target_market?: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              property_type_filter?: string
+              role_filter?: string
+              target_brokerage: string
+              target_market?: string
+            }
+            Returns: Json
+          }
       get_missed_market_opportunities: {
         Args: { target_brokerage: string }
         Returns: {

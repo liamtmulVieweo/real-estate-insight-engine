@@ -81,14 +81,16 @@ export function useDashboardSummary(targetBrokerage: string, targetMarket?: stri
   });
 }
 
-export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: string, enabled = true) {
+export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string, roleFilter?: string, enabled = true) {
   return useQuery({
-    queryKey: ["competitive-rankings", targetBrokerage, marketFilter],
+    queryKey: ["competitive-rankings", targetBrokerage, marketFilter, propertyTypeFilter, roleFilter],
     queryFn: async (): Promise<Competitor[]> => {
       const { data, error } = await supabase.rpc("get_competitive_rankings", {
         target_brokerage: targetBrokerage,
         market_filter: marketFilter || null,
-      });
+        property_type_filter: propertyTypeFilter || null,
+        role_filter: roleFilter || null,
+      } as any);
 
       if (error) throw error;
       return data || [];
