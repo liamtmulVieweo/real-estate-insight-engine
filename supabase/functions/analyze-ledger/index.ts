@@ -17,7 +17,7 @@ serve(async (req) => {
 
     const ledgerSummary = results.map((r: any) => `${r.label}: ${r.answer}`).join("\n");
 
-    const prompt = `You are an AI visibility analyst for commercial real estate brokerages. Analyze this brokerage's digital presence and produce a comprehensive SALT framework analysis.
+    const prompt = `You are an AI visibility analyst for commercial real estate brokerages. Analyze this brokerage's digital presence and produce a comprehensive SALT framework analysis. Pay special attention to their social media presence (Instagram, Facebook, YouTube, LinkedIn, Google Business Profile) and how their online identity (canonical name, aliases, legal entity) affects discoverability.
 
 Brokerage: ${brokerage_name}
 Website: ${website_url}
