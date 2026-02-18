@@ -7,17 +7,20 @@ const corsHeaders = {
 
 const LEDGER_KEYS = [
   { key: "brokerage_name", label: "Brokerage Name" },
-  { key: "headquarters", label: "Headquarters" },
+  { key: "aliases", label: "Aliases / DBAs" },
+  { key: "legal_suffix", label: "Legal Suffix" },
   { key: "markets_served", label: "Markets Served" },
   { key: "property_types", label: "Property Types" },
   { key: "services", label: "Services Offered" },
-  { key: "notable_deals", label: "Notable Deals / Transactions" },
-  { key: "team_size", label: "Team Size" },
-  { key: "specializations", label: "Specializations" },
+  { key: "social_instagram", label: "Instagram" },
+  { key: "social_facebook", label: "Facebook" },
+  { key: "social_youtube", label: "YouTube" },
+  { key: "social_linkedin", label: "LinkedIn" },
+  { key: "social_gbp", label: "Google Business Profile" },
+  { key: "headquarters", label: "Headquarters" },
   { key: "year_founded", label: "Year Founded" },
+  { key: "team_size", label: "Team Size" },
   { key: "website_description", label: "Website Description / Tagline" },
-  { key: "certifications", label: "Certifications / Affiliations" },
-  { key: "target_clients", label: "Target Clients" },
 ];
 
 serve(async (req) => {
@@ -30,12 +33,31 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const prompt = `You are a commercial real estate brokerage analyst. Given a brokerage website URL, extract key facts about the firm.
+    const prompt = `You are a commercial real estate research analyst with access to web search. Given a brokerage website URL, search the web to find real, current, accurate information about this company.
 
 URL: ${url}
 
-Extract these fields from your knowledge of this brokerage (use "Not found" if unknown):
+Use the URL as a starting point to identify the canonical entity (the real legal/brand name of the brokerage). Then search the web thoroughly to gather the following information. For social media profiles, find the actual profile URLs (not just "yes they have one").
+
+Extract these fields (use "Not found" if you cannot verify the information):
 ${LEDGER_KEYS.map(k => `- ${k.label} (key: ${k.key})`).join("\n")}
+
+Field-specific guidance:
+- brokerage_name: The canonical/official brand name of the brokerage
+- aliases: Other names they operate under, DBAs, former names (comma-separated)
+- legal_suffix: The legal entity suffix (Inc., LLC, LP, Ltd., etc.)
+- markets_served: Geographic markets/cities/regions they operate in (comma-separated)
+- property_types: CRE property types they handle (Office, Industrial, Retail, Multifamily, etc.)
+- services: Services offered (Leasing, Sales, Property Management, Investment Sales, etc.)
+- social_instagram: Full Instagram profile URL (e.g. https://instagram.com/companyname)
+- social_facebook: Full Facebook page URL
+- social_youtube: Full YouTube channel URL
+- social_linkedin: Full LinkedIn company page URL
+- social_gbp: Google Business Profile URL if available
+- headquarters: City, State of HQ
+- year_founded: Year the company was founded
+- team_size: Approximate number of employees/agents
+- website_description: Their tagline or meta description from their website
 
 Return a JSON object with this exact structure:
 {
@@ -58,7 +80,7 @@ Return ONLY valid JSON, no markdown or explanation.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a helpful assistant that returns only valid JSON." },
+          { role: "system", content: "You are a helpful research assistant with web search capabilities. Search the web to find real, verified information. Return only valid JSON." },
           { role: "user", content: prompt },
         ],
       }),
