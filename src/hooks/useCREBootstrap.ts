@@ -15,14 +15,18 @@ interface CREBootstrapData {
 
 export function useCREBootstrap(
   targetBrokerage: string,
-  marketFilter?: string
+  marketFilter?: string,
+  propertyTypeFilter?: string,
+  roleFilter?: string
 ) {
   return useQuery({
-    queryKey: ["cre-bootstrap", targetBrokerage, marketFilter],
+    queryKey: ["cre-bootstrap", targetBrokerage, marketFilter, propertyTypeFilter, roleFilter],
     queryFn: async (): Promise<CREBootstrapData> => {
       const { data, error } = await supabase.rpc("get_cre_dashboard_bootstrap", {
         target_brokerage: targetBrokerage || null,
         market_filter: marketFilter || null,
+        property_type_filter: propertyTypeFilter || null,
+        role_filter: roleFilter || null,
       } as any);
 
       if (error) throw error;

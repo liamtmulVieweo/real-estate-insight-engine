@@ -53,11 +53,15 @@ export default function Dashboard() {
   }, [brokerages, selectedBrokerage]);
 
   const marketFilter = filters.market !== "All" ? filters.market : undefined;
+  const propertyTypeFilter = filters.propertyType !== "All" ? filters.propertyType : undefined;
+  const roleFilter = filters.role !== "All" ? filters.role : undefined;
 
   // Tier 1: Single bootstrap RPC for filters + summary + market data + property types
   const { data: bootstrap, isLoading: loadingBootstrap } = useCREBootstrap(
     selectedBrokerage,
-    marketFilter
+    marketFilter,
+    propertyTypeFilter,
+    roleFilter
   );
 
   // Extract bootstrap data
@@ -77,6 +81,8 @@ export default function Dashboard() {
   const { data: competitors = [], isLoading: loadingCompetitors } = useCompetitiveRankings(
     selectedBrokerage,
     marketFilter,
+    propertyTypeFilter,
+    roleFilter,
     tier1Ready
   );
 
