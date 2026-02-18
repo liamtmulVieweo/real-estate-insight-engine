@@ -1,74 +1,76 @@
 
 
-## Plan: Enhance Prompt Peers & Prompt Intelligence Sections
+# Enhanced AI Visibility Ledger - Web Search Integration
 
-### 1. Rename "Competitors" to "Prompt Peers"
-- Update `CompetitorsList.tsx`: Change the `CardTitle` from "Competitors" to "Prompt Peers" and update the description text accordingly.
+## Overview
+Upgrade the `gemini-lookup` edge function to perform a real web search (via Gemini's grounding/search capability) using the brokerage URL as the starting point. Expand the ledger fields to include aliases, legal suffix, social media profiles, and more. The user flow remains the same: scan -> review/edit -> run analysis.
 
-### 2. Enrich Prompt Peers with Expandable Row Details
-Currently each competitor row only shows brokerage name and shared prompt count. We'll add an expandable dropdown for each row showing:
+## Changes
 
-- **Markets they appear in**: Which markets this peer brokerage is mentioned in (from prompts they share with the selected brokerage)
-- **Shared prompts preview**: The actual prompt text snippets they co-appear in (first few)
+### 1. Update Ledger Fields (types + edge function)
 
-**Database change required**: Create a new RPC `get_co_mention_details` that, given a target brokerage and a peer brokerage, returns:
-- The shared prompt texts (with market, property type, broker role)
-- Limited to ~10 prompts for performance
+Expand the `LEDGER_KEYS` in `gemini-lookup/index.ts` and the corresponding types to include:
 
-```text
-get_co_mention_details(target_brokerage, peer_brokerage)
-  -> prompt_hash, prompt, market, property_type, broker_role
-```
+| Field | Key | Description |
+|-------|-----|-------------|
+| Brokerage Name | `brokerage_name` | Canonical entity name |
+| Aliases | `aliases` | Other names / DBAs |
+| Legal Suffix | `legal_suffix` | Inc., LLC, LP, etc. |
+| Markets Served | `markets_served` | Geographic markets |
+| Property Types | `property_types` | Office, Industrial, Retail, etc. |
+| Services Offered | `services` | Leasing, Sales, PM, etc. |
+| Instagram | `social_instagram` | Instagram profile URL |
+| Facebook | `social_facebook` | Facebook page URL |
+| YouTube | `social_youtube` | YouTube channel URL |
+| LinkedIn | `social_linkedin` | LinkedIn company page URL |
+| Google Business Profile | `social_gbp` | Google Business Profile URL |
+| Headquarters | `headquarters` | HQ location |
+| Year Founded | `year_founded` | Founding year |
+| Team Size | `team_size` | Approx. team size |
+| Website Description | `website_description` | Tagline / description |
 
-**UI changes to `CompetitorsList.tsx`**:
-- Convert each table row into a clickable/expandable row using Collapsible
-- When expanded, show:
-  - A list of markets (as badges) derived from the shared prompts
-  - A scrollable list of shared prompt snippets (truncated text)
-- Fetch details lazily only when a row is expanded (using a new hook `useCoMentionDetails`)
+Old fields like `notable_deals`, `specializations`, `certifications`, `target_clients` will be removed to keep the ledger focused.
 
-### 3. Make Prompt Intelligence Accordion Fully Functional
-The accordion expand/collapse already works (it uses `expandedId` state). The improvements:
+### 2. Update `gemini-lookup` Edge Function
 
-- The expanded section already shows Market, Property Type, Role, Brokerages Mentioned, and Sources
-- These are all functional based on the data from `get_prompt_intelligence` RPC
-- **Verify and fix**: Ensure the click handler and expanded content render correctly; the current code looks functional but we'll confirm no issues exist
+- Update the prompt to instruct Gemini to use its web search/grounding capability to find real, current information about the brokerage from the provided URL
+- Explicitly ask for social media profile URLs
+- Ask it to identify the canonical entity name and any aliases
+- Keep returning the same JSON structure (`ScanResult` with `results` array)
 
-**If the accordion visually appears broken**, it may be a styling issue -- we'll ensure the button click properly toggles, and the expanded content animates smoothly.
+### 3. Update `LedgerEditor` Component
 
-### Technical Summary
+- Group fields visually into sections:
+  - **Identity** (Name, Aliases, Legal Suffix)
+  - **Operations** (Markets, Property Types, Services, HQ, Year Founded, Team Size)
+  - **Social Profiles** (Instagram, Facebook, YouTube, LinkedIn, Google Business Profile)
+  - **Other** (Website Description)
+- Social profile fields render as clickable links when populated
+- Empty/not-found fields highlighted as before
 
-| Task | Files Changed |
-|------|---------------|
-| Rename to "Prompt Peers" | `CompetitorsList.tsx` |
-| New RPC for co-mention details | New migration |
-| Expandable peer rows with details | `CompetitorsList.tsx`, `useDashboardData.ts` |
-| Prompt Intelligence verification | `PromptIntelligence.tsx` (minor fixes if needed) |
+### 4. Update `analyze-ledger` Edge Function
 
-### New Database Function
+- Pass the expanded ledger data (including social profiles) into the analysis prompt
+- The SALT analysis prompt already receives all ledger fields as a summary string, so new fields will automatically flow into the analysis context
+- No structural changes needed to the analysis output format
 
-```sql
-CREATE OR REPLACE FUNCTION public.get_co_mention_details(
-  target_brokerage text, peer_brokerage text
-)
-RETURNS TABLE(
-  prompt_hash text, prompt text, market text, 
-  property_type text, broker_role text
-)
-```
+### 5. Update Types
 
-This finds prompts where both the target and peer brokerage appear together, returning up to 10 shared prompts with their metadata.
+- No changes to `LedgerItem` interface (it's already generic key/label/answer)
+- No changes to `ScanResult` or `AnalysisResult` types
 
-### Updated CompetitorsList UI
+## Technical Details
 
-Each row becomes expandable:
-```text
-#  Brokerage Name     Shared Prompts: 42
-   [expanded]
-   Markets: [Dallas] [NYC] [Chicago]
-   Shared Prompts:
-     - "Who are the top office brokers in Dallas?"
-     - "Best industrial brokerages in Chicago..."
-     - ...
-```
+### Files to modify:
+1. **`supabase/functions/gemini-lookup/index.ts`** - Update `LEDGER_KEYS` array and prompt text to request web-grounded search with new fields
+2. **`src/components/brokerage/LedgerEditor.tsx`** - Add section groupings and social link rendering
+3. **`supabase/functions/analyze-ledger/index.ts`** - Minor prompt update to mention social profiles in the analysis context
+
+### Files unchanged:
+- `src/types/brokerage.ts` - Generic `LedgerItem` type works as-is
+- `src/hooks/useBrokerageScan.ts` - No changes needed
+- `src/pages/AIVisibility.tsx` - No changes needed
+
+### Edge function deployment:
+Both `gemini-lookup` and `analyze-ledger` will be redeployed automatically.
 
