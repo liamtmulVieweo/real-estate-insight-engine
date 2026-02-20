@@ -78,23 +78,46 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Dashboard Previews - Side by Side */}
-        <div className="mt-16 mb-8 grid lg:grid-cols-2 gap-6 items-start">
-          <div className="w-full overflow-hidden sm:overflow-visible">
-            <div className="sm:aspect-auto aspect-[3/4] overflow-hidden rounded-xl sm:rounded-none sm:overflow-visible">
-              <div className="origin-top-left scale-[0.85] sm:scale-100 w-[118%] sm:w-full">
-                <LeaderboardPreview />
+        {/* Dashboard Previews */}
+        <motion.div
+          initial={{ opacity: 0, y: 40, rotateX: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+          transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+          className="mt-8 md:mt-10 mb-8"
+          style={{ perspective: 1000 }}
+        >
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            whileHover={{ scale: 1.02, y: -12 }}
+          >
+            <div className="grid lg:grid-cols-2 gap-6 items-start">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-white/30" />
+                  <div className="w-3 h-3 rounded-full bg-white/30" />
+                  <div className="w-3 h-3 rounded-full bg-white/30" />
+                </div>
+                <div className="overflow-hidden">
+                  <LeaderboardPreview />
+                </div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-white/30" />
+                  <div className="w-3 h-3 rounded-full bg-white/30" />
+                  <div className="w-3 h-3 rounded-full bg-white/30" />
+                </div>
+                <div className="overflow-hidden">
+                  <BrokerageDashboardPreview />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="w-full overflow-hidden sm:overflow-visible">
-            <div className="sm:aspect-auto aspect-[3/4] overflow-hidden rounded-xl sm:rounded-none sm:overflow-visible">
-              <div className="origin-top-left scale-[0.85] sm:scale-100 w-[118%] sm:w-full">
-                <BrokerageDashboardPreview />
-              </div>
-            </div>
-          </div>
-        </div>
+          </motion.div>
+          <p className="text-center text-white/60 mt-4 text-sm">
+            Real-time visibility metrics across markets, property types, and broker roles
+          </p>
+        </motion.div>
       </div>
 
       {/* Background decoration */}
