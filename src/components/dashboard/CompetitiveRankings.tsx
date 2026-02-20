@@ -168,12 +168,12 @@ export function CompetitiveRankings({ competitors, isLoading }: CompetitiveRanki
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="hidden sm:table-header-group">
+            <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-3 font-medium text-muted-foreground w-16">Rank</th>
-                <th className="text-left py-3 px-3 font-medium text-muted-foreground">Brokerage</th>
-                <th className="text-right py-3 px-3 font-medium text-muted-foreground">Mentions</th>
-                <th className="text-right py-3 px-3 font-medium text-muted-foreground">vs Target</th>
+                <th className="text-left py-2 px-3 font-medium text-muted-foreground text-[11px] sm:text-xs w-16">Rank</th>
+                <th className="text-left py-2 px-3 font-medium text-muted-foreground text-[11px] sm:text-xs">Brokerage</th>
+                <th className="text-right py-2 px-3 font-medium text-muted-foreground text-[11px] sm:text-xs">Mentions</th>
+                <th className="text-right py-2 px-3 font-medium text-muted-foreground text-[11px] sm:text-xs whitespace-nowrap">vs You</th>
               </tr>
             </thead>
             <tbody>
