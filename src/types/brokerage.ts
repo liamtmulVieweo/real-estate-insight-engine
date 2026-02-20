@@ -4,10 +4,16 @@ export interface LedgerItem {
   answer: string;
 }
 
+export interface PropertyTypeSelection {
+  type: string;
+  subtypes: string[];
+}
+
 export interface ScanResult {
   brokerage_name: string;
   website_url: string;
   results: LedgerItem[];
+  property_type_selections?: PropertyTypeSelection[];
 }
 
 // SALT pillars: Semantic, Authority, Location, Trust

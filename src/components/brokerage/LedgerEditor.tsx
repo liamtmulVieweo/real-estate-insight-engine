@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ScanResult, LedgerItem } from "@/types/brokerage";
+import { PropertyTypeSelector } from "./PropertyTypeSelector";
 
 interface LedgerEditorProps {
   scanResult: ScanResult;
@@ -18,7 +19,7 @@ const SECTIONS = [
   },
   {
     title: "Operations",
-    keys: ["markets_served", "property_types", "services", "headquarters", "year_founded", "team_size"],
+    keys: ["markets_served", "services", "headquarters", "year_founded", "team_size"],
   },
   {
     title: "Social Profiles",
@@ -41,6 +42,24 @@ export function LedgerEditor({ scanResult, onSave, isAnalyzing }: LedgerEditorPr
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
+  // Initialize property type selections from existing ledger item
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<Record<string, string[]>>(() => {
+    const ptItem = scanResult.results.find((i) => i.key === "property_types");
+    if (!ptItem || !ptItem.answer || ptItem.answer === "Not found" || ptItem.answer === "N/A") return {};
+    const result: Record<string, string[]> = {};
+    // Parse "Office (Class A, Medical Office), Industrial (Warehouse/Distribution)" format
+    const parts = ptItem.answer.split(/\),?\s*/).filter(Boolean);
+    for (const part of parts) {
+      const match = part.match(/^([^(]+?)(?:\s*\((.+))?$/);
+      if (match) {
+        const type = match[1].trim();
+        const subs = match[2] ? match[2].split(",").map((s) => s.trim()).filter(Boolean) : [];
+        result[type] = subs;
+      }
+    }
+    return result;
+  });
+
   const startEdit = (item: LedgerItem) => {
     setEditingKey(item.key);
     setEditValue(item.answer);
@@ -56,7 +75,22 @@ export function LedgerEditor({ scanResult, onSave, isAnalyzing }: LedgerEditorPr
   const cancelEdit = () => setEditingKey(null);
 
   const handleSaveMapping = () => {
-    onSave({ ...scanResult, results: items });
+    // Serialize property type selections into the property_types ledger item
+    const serialized = Object.entries(selectedPropertyTypes)
+      .filter(([, subs]) => true) // keep all selected types even without subtypes
+      .map(([type, subs]) => subs.length > 0 ? `${type} (${subs.join(", ")})` : type)
+      .join(", ");
+
+    const updatedItems = items.map((item) =>
+      item.key === "property_types" ? { ...item, answer: serialized || "Not found" } : item
+    );
+    // If no property_types item exists, add one
+    const hasItem = updatedItems.some((i) => i.key === "property_types");
+    const finalItems = hasItem
+      ? updatedItems
+      : [...updatedItems, { key: "property_types", label: "Property Types", answer: serialized || "Not found" }];
+
+    onSave({ ...scanResult, results: finalItems });
   };
 
   const isEmpty = (answer: string) => !answer || answer === "Not found" || answer === "N/A";
@@ -82,7 +116,7 @@ export function LedgerEditor({ scanResult, onSave, isAnalyzing }: LedgerEditorPr
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {SECTIONS.map((section) => {
+        {SECTIONS.map((section, idx) => {
           const sectionItems = section.keys
             .map((key) => itemMap.get(key))
             .filter(Boolean) as LedgerItem[];
@@ -147,6 +181,21 @@ export function LedgerEditor({ scanResult, onSave, isAnalyzing }: LedgerEditorPr
                   </div>
                 ))}
               </div>
+              {/* Insert Property Types section after Operations */}
+              {section.title === "Operations" && (
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Property Types
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Select the property types you work with. Check a type to reveal its subtypes.
+                  </p>
+                  <PropertyTypeSelector
+                    selectedTypes={selectedPropertyTypes}
+                    onChange={setSelectedPropertyTypes}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
