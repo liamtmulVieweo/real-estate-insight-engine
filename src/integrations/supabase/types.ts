@@ -448,15 +448,25 @@ export type Database = {
             }
             Returns: Json
           }
-      get_missed_market_opportunities: {
-        Args: { target_brokerage: string }
-        Returns: {
-          market: string
-          peer_count: number
-          top_peers: string[]
-          total_peer_mentions: number
-        }[]
-      }
+      get_missed_market_opportunities:
+        | {
+            Args: { target_brokerage: string }
+            Returns: {
+              market: string
+              peer_count: number
+              top_peers: string[]
+              total_peer_mentions: number
+            }[]
+          }
+        | {
+            Args: { state_filter?: string; target_brokerage: string }
+            Returns: {
+              market: string
+              peer_count: number
+              top_peers: string[]
+              total_peer_mentions: number
+            }[]
+          }
       get_primary_markets_for_brokerage: {
         Args: { target_brokerage: string }
         Returns: {

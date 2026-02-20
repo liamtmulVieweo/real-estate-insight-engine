@@ -61,6 +61,7 @@ interface DashboardHeaderProps {
   onBrokerageChange: (brokerage: string) => void;
   onFilterChange: (key: keyof Filters, value: string) => void;
   originalNames?: string[];
+  filteredTotalMentions?: number;
 }
 
 export function DashboardHeader({
@@ -73,6 +74,7 @@ export function DashboardHeader({
   onBrokerageChange,
   onFilterChange,
   originalNames = [],
+  filteredTotalMentions,
 }: DashboardHeaderProps) {
   const [brokerageOpen, setBrokerageOpen] = useState(false);
 
@@ -160,7 +162,10 @@ export function DashboardHeader({
               {selectedBrokerageData && (
                 <div className="flex gap-2 mt-1 flex-wrap">
                   <Badge variant="secondary" className="text-xs">
-                    {selectedBrokerageData.total_mentions.toLocaleString()} total mentions
+                    {(filteredTotalMentions ?? selectedBrokerageData.total_mentions).toLocaleString()} total mentions
+                    {filteredTotalMentions !== undefined && filteredTotalMentions !== selectedBrokerageData.total_mentions && (
+                      <span className="ml-1 opacity-60">(filtered)</span>
+                    )}
                   </Badge>
                 </div>
               )}

@@ -136,7 +136,8 @@ export default function Dashboard() {
 
   const { data: missedMarkets = [], isLoading: loadingMissedMarkets } = useMissedMarketOpportunities(
     selectedBrokerage,
-    tier1Ready
+    tier1Ready,
+    stateAbbr,
   );
 
   const { data: underIndexed = [], isLoading: loadingUnderIndexed } = useUnderIndexSegments(
@@ -215,6 +216,7 @@ export default function Dashboard() {
         onBrokerageChange={setSelectedBrokerage}
         onFilterChange={handleFilterChange}
         originalNames={originalNames}
+        filteredTotalMentions={summary?.total_mentions}
       />
 
       {/* Main content */}
