@@ -1,69 +1,87 @@
 
-# Add Property Type & Sub-Property Selector to Ledger Editor
+
+# Implement Grounded Backend for AI Visibility Dashboard
 
 ## Overview
-Add an interactive property type selector with expandable sub-property types to the Ledger Editor on the AI Visibility page. When a user selects a property type card, a panel expands below showing the relevant subtypes as checkable items. The selections replace the current flat text field for "property_types" in the ledger.
-
-## What It Looks Like
-- A new "Property Types" section in the Ledger Editor (between the Operations and Social Profiles sections)
-- 6 property type cards in a 3-column grid (2-column on mobile): Office, Industrial, Retail, Multifamily, Hospitality, Land/Development
-- Each card has an icon, name, and a checkbox
-- Clicking a card toggles it and reveals a sub-property panel below with checkable subtypes
-- Selected types/subtypes are passed to the analysis as structured data
+Apply the new signal-grounded architecture: create the `scan-website` edge function for deterministic site analysis, replace `analyze-ledger` with anchored AI prompts, update the frontend hook and components to support the new data flow. The existing `gemini-lookup` function continues to serve as the ledger data source.
 
 ## Changes
 
-### 1. Create `src/components/brokerage/PropertyTypeSelector.tsx` (NEW)
-- New component with the property type taxonomy:
-  - **Office**: Class A, Class B, Creative/Flex, Medical Office, Co-Working/Flex, Government/GSA
-  - **Industrial**: Warehouse/Distribution, Manufacturing, Cold Storage, Data Center, Flex/R&D, Last-Mile Logistics
-  - **Retail**: Strip Center, Power Center, Regional Mall, Single-Tenant NNN, Restaurant/QSR, Mixed-Use Retail
-  - **Multifamily**: Garden Style, Mid-Rise, High-Rise, Student Housing, Senior/55+, Affordable/LIHTC
-  - **Hospitality**: Full-Service Hotel, Select-Service, Extended Stay, Resort, Boutique/Lifestyle
-  - **Land/Development**: Entitled Land, Raw Land, Infill/Redevelopment, Master-Planned, Special Purpose
-- Each property type is a clickable card with a checkbox in the top-right corner
-- Selecting a type reveals a sub-property panel with individually checkable subtypes
-- Props: `selectedTypes` (map of type to selected subtypes), `onChange` callback
-- Uses existing UI components: Card-like styling with Tailwind, Checkbox from radix
+### 1. Create `supabase/functions/scan-website/index.ts` (NEW)
+- Deterministic HTML scanner using `deno_dom` WASM parser
+- Fetches brokerage URL, extracts ~25 measurable signals (word count, heading count, schema.org, author/date signals, link ratios, YMYL risk, ad hints, spam patterns)
+- Computes Page Quality (PQ) score 0-100 with no AI
+- Returns structured signals object with red flags, positives, and content excerpt
+- Handler wrapped in `serve()` with CORS headers
 
-### 2. Update `src/components/brokerage/LedgerEditor.tsx`
-- Add local state `selectedPropertyTypes: Record<string, string[]>` to track selections
-- Initialize from the existing `property_types` ledger item (parse comma-separated string if present)
-- Insert `<PropertyTypeSelector>` as a new section between Operations and Social Profiles
-- When saving, serialize selections back into the `property_types` ledger item as a structured string (e.g., "Office (Class A, Medical Office), Industrial (Warehouse/Distribution)")
-- Remove `property_types` from the Operations section keys so it doesn't show as a plain text field
+### 2. Replace `supabase/functions/analyze-ledger/index.ts`
+- Accepts new optional `site_signals` parameter alongside existing fields
+- Adds `computeSaltAnchor()` to derive deterministic SALT scores from signals
+- Adds `buildFactBlock()` and `buildAnalysisPrompt()` for grounded AI prompts
+- AI constrained to +/-15 deviation from anchors, must cite signal values
+- Returns `_measured_signals` metadata for frontend transparency
+- Gracefully degrades when `site_signals` is not provided
 
-### 3. Update `src/types/brokerage.ts`
-- Add `PropertyTypeSelection` interface: `{ type: string; subtypes: string[] }`
-- Add optional `property_type_selections?: PropertyTypeSelection[]` to `ScanResult` for structured data pass-through
+### 3. Replace `src/hooks/useBrokerageScan.ts`
+- `scan()` now takes `(url: string)` -- extracts brokerage name from `gemini-lookup` response (keeping existing UX)
+- Runs `scan-website` and `gemini-lookup` in parallel via `Promise.allSettled`
+- `scan-website` failure is non-fatal (graceful degradation)
+- `analyze()` now passes `site_signals` to the backend
+- Stores `site_signals` in `scanResult`
+
+### 4. Update `src/types/brokerage.ts`
+- Add `SiteSignals` interface
+- Add `site_signals?: SiteSignals | null` to `ScanResult`
+- Add optional `confidence` to `SALTPillarScore`
+- Add optional `evidence_quote` to `RecommendedAction`, make `id` optional
+- Add optional `why` to `IntentCoverage`, make `intent_id` optional
+- Update `AnalysisSummary`: add `top_blockers?: string[]`, `quick_wins?: string[]` (keep `fix_categories` for backward compat), allow `visibility_snapshot` as `string | string[]`
+- Make `market_opportunity` and `summary` optional in `AnalysisResult`
+- Add `_measured_signals` optional field to `AnalysisResult`
+
+### 5. Update `src/components/brokerage/AnalysisView.tsx`
+- Make `MarketOpportunitySection` and `SummarySection` rendering handle missing data gracefully (new prompt doesn't always return `market_opportunity` or `summary`)
+- Pass `analysis_summary` to SummarySection with fallback data
+
+### 6. Update `src/components/brokerage/analysis/SummarySection.tsx`
+- Handle `visibility_snapshot` as `string | string[]`
+- Use `top_blockers` as fallback for `blocking_issues`, `quick_wins` for `key_unlocks`
+- Keep backward compat with old `fix_categories` field
+
+### 7. Update `src/components/brokerage/analysis/RecommendedActions.tsx`
+- Display `evidence_quote` when present (new grounded field)
+- Handle missing `id` (use title as key -- already doing this)
+
+### 8. Update `src/components/brokerage/analysis/IntentMonitoring.tsx`
+- Display `why` field when present
+
+### 9. Update `src/pages/AIVisibility.tsx`
+- Adapt to hook changes (no more `setScanResult` in destructuring)
+
+### 10. Update `supabase/config.toml` -- NOT NEEDED
+- Config.toml is auto-managed. The scan-website function will be auto-configured.
 
 ## Technical Details
 
-### Property Type Taxonomy
-```text
-Office           -> Class A, Class B, Creative/Flex, Medical Office, Co-Working/Flex, Government/GSA
-Industrial       -> Warehouse/Distribution, Manufacturing, Cold Storage, Data Center, Flex/R&D, Last-Mile Logistics
-Retail           -> Strip Center, Power Center, Regional Mall, Single-Tenant NNN, Restaurant/QSR, Mixed-Use Retail
-Multifamily      -> Garden Style, Mid-Rise, High-Rise, Student Housing, Senior/55+, Affordable/LIHTC
-Hospitality      -> Full-Service Hotel, Select-Service, Extended Stay, Resort, Boutique/Lifestyle
-Land/Development -> Entitled Land, Raw Land, Infill/Redevelopment, Master-Planned, Special Purpose
-```
+### Compatibility Strategy
+All new fields are optional so both old cached results and new results render. Key mappings:
+- `summary.blocking_issues` falls back to `analysis_summary.top_blockers`
+- `summary.key_unlocks` falls back to `analysis_summary.quick_wins`
+- `visibility_snapshot` handles both `string` and `string[]`
 
-### Component Structure
-- Cards use a 3-column grid (`grid-cols-3`, `grid-cols-2` on mobile)
-- Sub-property panel slides in below the grid row with a left accent border and warm background
-- Subtypes rendered as checkbox items in an auto-fill grid (`grid-template-columns: repeat(auto-fill, minmax(185px, 1fr))`)
-- Uses existing Tailwind theme colors and `Checkbox` component
-
-### Data Flow
-- User selects property types and subtypes in the Ledger Editor
-- On "Run Analysis", the selections are serialized into the `property_types` ledger item answer string
-- The analyze-ledger edge function receives this structured info as part of the ledger results
-- No backend changes needed -- the property types flow through as ledger data
+### Hook Flow
+The hook keeps the same single-URL entry point. `gemini-lookup` extracts the brokerage name (as it does today). The new `scan-website` runs in parallel for signals. If it fails, analysis proceeds without grounding (scores default to 50).
 
 ### Files to Create
-1. `src/components/brokerage/PropertyTypeSelector.tsx`
+1. `supabase/functions/scan-website/index.ts`
 
 ### Files to Modify
-1. `src/components/brokerage/LedgerEditor.tsx` - Add PropertyTypeSelector section, manage state
-2. `src/types/brokerage.ts` - Add PropertyTypeSelection interface
+1. `supabase/functions/analyze-ledger/index.ts` (replace)
+2. `src/hooks/useBrokerageScan.ts` (replace)
+3. `src/types/brokerage.ts` (update interfaces)
+4. `src/pages/AIVisibility.tsx` (minor)
+5. `src/components/brokerage/AnalysisView.tsx` (handle optional sections)
+6. `src/components/brokerage/analysis/SummarySection.tsx` (new fields)
+7. `src/components/brokerage/analysis/RecommendedActions.tsx` (evidence_quote)
+8. `src/components/brokerage/analysis/IntentMonitoring.tsx` (why field)
+
