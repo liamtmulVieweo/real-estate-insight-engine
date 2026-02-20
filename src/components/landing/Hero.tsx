@@ -91,7 +91,7 @@ export function Hero() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
             whileHover={{ scale: 1.02, y: -12 }}
           >
-            <div className="grid lg:grid-cols-2 gap-6 items-start">
+            <div className="grid md:grid-cols-2 gap-6 items-start">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-white/30" />
