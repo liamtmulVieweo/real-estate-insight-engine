@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import VieweoDashboard from "./pages/VieweoDashboard";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import Methodology from "./pages/Methodology";
+import FAQ from "./pages/FAQ";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import Import from "./pages/Import";
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/vieweo" element={<VieweoDashboard />} />
             <Route path="/subscribe" element={<SubscriptionPage />} />
             <Route path="/methodology" element={<Methodology />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfUse />} />
             <Route path="/auth" element={<Auth />} />
