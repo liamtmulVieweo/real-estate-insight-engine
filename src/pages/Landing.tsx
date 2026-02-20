@@ -1,4 +1,4 @@
-import { Hero, WhySection, MethodologySection, Features, EmailSignup } from '@/components/landing';
+import { Hero, WhySection, MethodologySection, Features, FAQPreview, EmailSignup } from '@/components/landing';
 import vieweoLogoWhite from '@/assets/vieweo-logo-white.png';
 import { Link } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ export default function Landing() {
         <WhySection />
         <MethodologySection />
         <Features />
+        <FAQPreview />
         <EmailSignup />
       </main>
 
@@ -24,6 +25,9 @@ export default function Landing() {
           <div className="flex items-center justify-center gap-6">
             <Link to="/methodology" className="text-white/60 hover:text-white/80 text-sm transition-colors">
               Methodology
+            </Link>
+            <Link to="/faq" className="text-white/60 hover:text-white/80 text-sm transition-colors">
+              FAQ
             </Link>
             <Link to="/privacy" className="text-white/60 hover:text-white/80 text-sm transition-colors">
               Privacy Policy
