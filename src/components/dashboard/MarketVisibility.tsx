@@ -88,11 +88,11 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
                           <span className="text-[13px]">
                             <span className="text-muted-foreground text-[11px]">Share: </span>
                             {item.marketSharePct.toFixed(1)}%
-                            <span className="text-muted-foreground text-[11px] ml-2">
-                              {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
-                            </span>
+                            <span className="text-muted-foreground text-[11px] ml-2">Percentile: </span>
+                            {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
                           </span>
                           <span className="text-right text-[13px]">
+                            <span className="text-muted-foreground text-[11px]">Rank: </span>
                             <span className="font-semibold">#{item.rank}</span>
                             <span className="text-muted-foreground text-[11px] ml-1">of {item.totalBrokerages}</span>
                           </span>

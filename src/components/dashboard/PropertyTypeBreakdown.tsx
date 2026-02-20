@@ -3,6 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import type { PropertyTypeBreakdown as PropertyTypeData } from "@/types/dashboard";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+function toTitleCase(str: string): string {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 interface PropertyTypeBreakdownProps {
   data: PropertyTypeData[];
   isLoading: boolean;
@@ -60,7 +64,7 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
                   {isMobile ? (
                     <td colSpan={4} className="py-3 px-2">
                       <div className="grid grid-cols-2 gap-y-1">
-                        <span className="font-medium text-foreground text-[13px]">{item.property_type}</span>
+                        <span className="font-medium text-foreground text-[13px]">{toTitleCase(item.property_type)}</span>
                         <span className="text-right text-[13px]">
                           <span className="text-muted-foreground text-[11px]">Mentions: </span>
                           {item.mentions.toLocaleString()}
@@ -70,6 +74,7 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
                           {totalMentions > 0 ? ((item.mentions / totalMentions) * 100).toFixed(1) : 0}%
                         </span>
                         <span className="text-right text-[13px]">
+                          <span className="text-muted-foreground text-[11px]">Rank: </span>
                           <span className="font-semibold">#{item.rank}</span>
                           <span className="text-muted-foreground text-[11px] ml-1">of {item.total_brokerages}</span>
                         </span>
@@ -77,7 +82,7 @@ export function PropertyTypeBreakdown({ data, isLoading, selectedMarket }: Prope
                     </td>
                   ) : (
                     <>
-                      <td className="py-3 px-2 font-medium">{item.property_type}</td>
+                      <td className="py-3 px-2 font-medium">{toTitleCase(item.property_type)}</td>
                       <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
                       <td className="py-3 px-2 text-right">
                         {totalMentions > 0 ? ((item.mentions / totalMentions) * 100).toFixed(1) : 0}%
