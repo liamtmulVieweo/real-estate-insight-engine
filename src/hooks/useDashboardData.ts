@@ -166,7 +166,8 @@ export function usePromptIntelligence(filters: {
           model_filter: filters.model || null,
           page_limit: pageSize,
           page_offset: offset,
-        });
+          state_filter: filters.state || null,
+        } as any);
 
         if (error) throw error;
 
@@ -427,15 +428,16 @@ export interface BrokerTeamData {
   total_brokers: number;
 }
 
-export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string, enabled = true) {
+export function useBrokerTeamBreakdown(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string, enabled = true, stateFilter?: string) {
   return useQuery({
-    queryKey: ["broker-team-breakdown", targetBrokerage, marketFilter, propertyTypeFilter],
+    queryKey: ["broker-team-breakdown", targetBrokerage, marketFilter, propertyTypeFilter, stateFilter],
     queryFn: async (): Promise<BrokerTeamData[]> => {
       const { data, error } = await supabase.rpc("get_broker_team_breakdown", {
         target_brokerage: targetBrokerage,
         market_filter: marketFilter || null,
         property_type_filter: propertyTypeFilter || null,
-      });
+        state_filter: stateFilter || null,
+      } as any);
 
       if (error) throw error;
       return (data || []).map((d: { broker_name: string; property_types: string[]; mentions: number; global_rank: number; total_brokers: number }) => ({

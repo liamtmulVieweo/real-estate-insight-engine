@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   DashboardHeader,
   KPICards,
@@ -31,6 +31,23 @@ import { useCREBootstrap } from "@/hooks/useCREBootstrap";
 import type { Filters } from "@/types/dashboard";
 import { DashboardLoadingScreen } from "@/components/ui/DashboardLoadingScreen";
 
+// Full state name → abbreviation (used to pass state abbr to RPCs)
+const STATE_TO_ABBR: Record<string, string> = {
+  Alabama: "AL", Alaska: "AK", Arizona: "AZ", Arkansas: "AR",
+  California: "CA", Colorado: "CO", Connecticut: "CT", Delaware: "DE",
+  Florida: "FL", Georgia: "GA", Hawaii: "HI", Idaho: "ID",
+  Illinois: "IL", Indiana: "IN", Iowa: "IA", Kansas: "KS",
+  Kentucky: "KY", Louisiana: "LA", Maine: "ME", Maryland: "MD",
+  Massachusetts: "MA", Michigan: "MI", Minnesota: "MN", Mississippi: "MS",
+  Missouri: "MO", Montana: "MT", Nebraska: "NE", Nevada: "NV",
+  "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY",
+  "North Carolina": "NC", "North Dakota": "ND", Ohio: "OH", Oklahoma: "OK",
+  Oregon: "OR", Pennsylvania: "PA", "Rhode Island": "RI", "South Carolina": "SC",
+  "South Dakota": "SD", Tennessee: "TN", Texas: "TX", Utah: "UT",
+  Vermont: "VT", Virginia: "VA", Washington: "WA", "West Virginia": "WV",
+  Wisconsin: "WI", Wyoming: "WY", "District of Columbia": "DC",
+};
+
 export default function Dashboard() {
   const [selectedBrokerage, setSelectedBrokerage] = useState<string>("");
   const [competitorBrokerage, setCompetitorBrokerage] = useState<string>("");
@@ -44,25 +61,31 @@ export default function Dashboard() {
   });
 
   // Brokerage list (fast, pre-aggregated view)
-  const { data: brokerages = [], isLoading: loadingBrokerages } = useBrokerageList();
+  const { data: allBrokerages = [], isLoading: loadingBrokerages } = useBrokerageList();
 
   // Auto-select first brokerage
   useEffect(() => {
-    if (brokerages.length > 0 && !selectedBrokerage) {
-      setSelectedBrokerage(brokerages[0].brokerage);
+    if (allBrokerages.length > 0 && !selectedBrokerage) {
+      setSelectedBrokerage(allBrokerages[0].brokerage);
     }
-  }, [brokerages, selectedBrokerage]);
+  }, [allBrokerages, selectedBrokerage]);
 
   const marketFilter = filters.market !== "All" ? filters.market : undefined;
   const propertyTypeFilter = filters.propertyType !== "All" ? filters.propertyType : undefined;
   const roleFilter = filters.role !== "All" ? filters.role : undefined;
+  // Convert full state name → abbreviation for RPC calls; only when no specific market is selected
+  const stateAbbr = useMemo(() => {
+    if (filters.state === "All" || filters.market !== "All") return undefined;
+    return STATE_TO_ABBR[filters.state] || undefined;
+  }, [filters.state, filters.market]);
 
   // Tier 1: Single bootstrap RPC for filters + summary + market data + property types
   const { data: bootstrap, isLoading: loadingBootstrap } = useCREBootstrap(
     selectedBrokerage,
     marketFilter,
     propertyTypeFilter,
-    roleFilter
+    roleFilter,
+    stateAbbr,
   );
 
   // Extract bootstrap data
@@ -75,6 +98,21 @@ export default function Dashboard() {
   const propertyTypeData = bootstrap?.propertyTypeBreakdown || [];
   const primaryMarkets = bootstrap?.primaryMarkets || [];
 
+  // Filter brokerage list to only those present in the selected state's markets
+  const brokerages = useMemo(() => {
+    if (filters.state === "All" || filters.market !== "All") return allBrokerages;
+    // Markets for this state are already scoped by the bootstrap; use marketData as the signal
+    // We filter brokerages based on state from brokerage_market_rankings via bootstrap markets
+    const abbr = STATE_TO_ABBR[filters.state];
+    if (!abbr) return allBrokerages;
+    const stateSuffix = `, ${abbr}`;
+    // Use the full markets list from bootstrap (which is unfiltered) to check which markets belong to this state
+    // Instead, filter allBrokerages by checking if they appear in markets ending with the state abbr
+    // Since we can't easily do this client-side without extra data, we keep the full list
+    // but we leverage the competitive rankings (which IS state-filtered) to determine relevant brokerages
+    return allBrokerages;
+  }, [allBrokerages, filters.state, filters.market]);
+
   // Tier 1 ready flag
   const tier1Ready = !loadingBrokerages && !loadingBootstrap;
 
@@ -84,8 +122,17 @@ export default function Dashboard() {
     marketFilter,
     propertyTypeFilter,
     roleFilter,
-    tier1Ready
+    tier1Ready,
+    stateAbbr,
   );
+
+  // Derive brokerages list filtered to state using competitive rankings data
+  const brokeragesForState = useMemo(() => {
+    if (filters.state === "All" || filters.market !== "All") return allBrokerages;
+    if (competitors.length === 0) return allBrokerages;
+    const stateSet = new Set(competitors.map((c) => c.brokerage));
+    return allBrokerages.filter((b) => stateSet.has(b.brokerage));
+  }, [allBrokerages, competitors, filters.state, filters.market]);
 
   const { data: missedMarkets = [], isLoading: loadingMissedMarkets } = useMissedMarketOpportunities(
     selectedBrokerage,
@@ -104,6 +151,7 @@ export default function Dashboard() {
     brokerRole: filters.role !== "All" ? filters.role : undefined,
     fetchAll: true,
     enabled: tier1Ready,
+    state: stateAbbr,
   });
 
   const { data: sourceDataBase = [], isLoading: loadingSourceBase } = useSourceAttribution(
@@ -128,7 +176,7 @@ export default function Dashboard() {
   const brokerTeamPropertyTypeFilter = brokerTeamPropertyFilter !== "All" ? brokerTeamPropertyFilter : undefined;
 
   const { data: brokerTeamData = [], isLoading: loadingBrokerTeam } = useBrokerTeamBreakdown(
-    selectedBrokerage, marketFilter, brokerTeamPropertyTypeFilter, tier1Ready
+    selectedBrokerage, marketFilter, brokerTeamPropertyTypeFilter, tier1Ready, stateAbbr
   );
 
   const { data: originalNames = [] } = useOriginalBrokerageNames(selectedBrokerage, tier1Ready);
@@ -153,12 +201,13 @@ export default function Dashboard() {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with brokerage selector and filters */}
       <DashboardHeader
         selectedBrokerage={selectedBrokerage}
-        brokerages={brokerages}
+        brokerages={brokeragesForState}
         markets={markets}
         propertyTypes={propertyTypes}
         roles={roles}
@@ -181,7 +230,7 @@ export default function Dashboard() {
             submarketsLoading={loadingSubmarkets}
             totalTrackedMarkets={markets.length}
             totalTrackedSubmarkets={allSubmarkets.length}
-            totalBrokerages={brokerages.length}
+            totalBrokerages={brokeragesForState.length}
             missedMarkets={missedMarkets}
             missedMarketsLoading={loadingMissedMarkets}
           />
@@ -207,7 +256,7 @@ export default function Dashboard() {
             isLoadingSource={loadingSource}
             selectedBrokerage={selectedBrokerage}
             brokerageMatchedDomain={matchedDomain ?? undefined}
-            brokerages={brokerages}
+            brokerages={brokeragesForState}
             competitorBrokerage={competitorBrokerage}
             onCompetitorChange={setCompetitorBrokerage}
           />
