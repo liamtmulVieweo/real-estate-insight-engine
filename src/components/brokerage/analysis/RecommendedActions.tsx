@@ -96,6 +96,13 @@ export function RecommendedActions({ actions }: RecommendedActionsProps) {
 
               {isExpanded && (
                 <div className="px-4 pb-4 space-y-4 border-t pt-4">
+                  {a.evidence_quote && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Evidence</p>
+                      <p className="text-sm font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded">{a.evidence_quote}</p>
+                    </div>
+                  )}
+
                   {a.affected_urls && a.affected_urls.length > 0 && (
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground">Affected Pages</p>

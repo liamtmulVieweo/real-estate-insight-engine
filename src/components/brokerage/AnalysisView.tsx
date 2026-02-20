@@ -39,7 +39,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </div>
         {analysis.prompt_coverage && <PromptCoverageSection coverage={analysis.prompt_coverage} />}
         {analysis.market_opportunity && <MarketOpportunitySection opportunity={analysis.market_opportunity} />}
-        {analysis.summary && analysis.analysis_summary && <SummarySection summary={analysis.summary} analysisSummary={analysis.analysis_summary} />}
+        {analysis.analysis_summary && <SummarySection summary={analysis.summary} analysisSummary={analysis.analysis_summary} />}
       </div>
 
       <hr className="border-border" />

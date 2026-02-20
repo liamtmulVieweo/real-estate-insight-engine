@@ -73,6 +73,13 @@ export function IntentMonitoring({ intents }: IntentMonitoringProps) {
 
             <CollapsibleContent>
               <div className="px-4 py-3 space-y-4">
+                {intent.why && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Why</p>
+                    <p className="text-sm text-muted-foreground">{intent.why}</p>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">Example Prompts</p>
                   <div className="space-y-1">

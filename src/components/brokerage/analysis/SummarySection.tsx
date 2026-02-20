@@ -5,7 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, AlertCircle, Unlock } from "lucide-react";
 
 interface SummarySectionProps {
-  summary: {
+  summary?: {
     blocking_issues: string[];
     key_unlocks: string[];
   };
@@ -16,6 +16,17 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
   const [issuesOpen, setIssuesOpen] = useState(false);
   const [unlocksOpen, setUnlocksOpen] = useState(false);
   const [conclusionOpen, setConclusionOpen] = useState(false);
+
+  // Use summary fields with fallbacks from analysis_summary
+  const blockingIssues = summary?.blocking_issues ?? analysisSummary.top_blockers ?? [];
+  const keyUnlocks = summary?.key_unlocks ?? analysisSummary.quick_wins ?? [];
+
+  // Handle visibility_snapshot as string or string[]
+  const visibilitySnapshot = Array.isArray(analysisSummary.visibility_snapshot)
+    ? analysisSummary.visibility_snapshot
+    : analysisSummary.visibility_snapshot
+      ? [analysisSummary.visibility_snapshot]
+      : [];
 
   return (
     <div className="space-y-4">
@@ -32,7 +43,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
                     <span className="font-medium text-sm">Key Issues</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">{summary.blocking_issues.length}</span>
+                    <span className="text-sm text-muted-foreground">{blockingIssues.length}</span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
@@ -41,7 +52,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
             <CollapsibleContent>
               <CardContent>
                 <div className="space-y-2">
-                  {(summary.blocking_issues || []).map((issue, i) => (
+                  {blockingIssues.map((issue, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
                       <span className="text-muted-foreground">•</span>
                       <span>{issue}</span>
@@ -63,7 +74,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
                     <span className="font-medium text-sm">Key Wins</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">{summary.key_unlocks.length}</span>
+                    <span className="text-sm text-muted-foreground">{keyUnlocks.length}</span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
@@ -72,7 +83,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
             <CollapsibleContent>
               <CardContent>
                 <div className="space-y-2">
-                  {(summary.key_unlocks || []).map((unlock, i) => (
+                  {keyUnlocks.map((unlock, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
                       <span className="text-status-success">✓</span>
                       <span>{unlock}</span>
@@ -102,7 +113,7 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">Current Visibility</p>
                 <div className="space-y-1">
-                  {(analysisSummary.visibility_snapshot || []).map((item, i) => (
+                  {visibilitySnapshot.map((item, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
                       <span className="text-muted-foreground">•</span>
                       <span>{item}</span>
@@ -111,17 +122,19 @@ export function SummarySection({ summary, analysisSummary }: SummarySectionProps
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Focus Areas</p>
-                <div className="space-y-1">
-                  {(analysisSummary.fix_categories || []).map((item, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm">
-                      <span className="text-muted-foreground">•</span>
-                      <span>{item}</span>
-                    </div>
-                  ))}
+              {(analysisSummary.fix_categories || []).length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">Focus Areas</p>
+                  <div className="space-y-1">
+                    {(analysisSummary.fix_categories || []).map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm">
+                        <span className="text-muted-foreground">•</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">Bottom Line</p>
