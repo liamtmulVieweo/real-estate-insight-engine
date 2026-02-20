@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MarketData } from "@/types/dashboard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const STATE_ABBR: Record<string, string> = {
   "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
@@ -47,6 +48,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
     );
   }
 
+  const isMobile = useIsMobile();
   const topMarkets = data.slice(0, 10);
 
   return (
@@ -58,7 +60,7 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="hidden sm:table-header-group">
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-2 font-medium text-muted-foreground">Market</th>
                 <th className="text-right py-3 px-2 font-medium text-muted-foreground">Mentions</th>
@@ -73,22 +75,47 @@ export function MarketVisibility({ data, isLoading }: MarketVisibilityProps) {
               <tbody>
                 {topMarkets.map((item) => (
                   <tr key={item.market} className="border-b border-border/50 hover:bg-muted/30">
-                    <td className="py-3 px-2 font-medium" title={item.market}>
-                      {abbreviateMarket(item.market)}
-                    </td>
-                    <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
-                    <td className="py-3 px-2 text-right">{item.marketSharePct.toFixed(1)}%</td>
-                    <td className="py-3 px-2 text-right">
-                      <span className="font-semibold">#{item.rank}</span>
-                      <span className="text-muted-foreground text-xs ml-1">
-                        of {item.totalBrokerages}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 text-right">
-                      <span className="text-xs font-medium">
-                        {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
-                      </span>
-                    </td>
+                    {isMobile ? (
+                      <td colSpan={5} className="py-3 px-2">
+                        <div className="grid grid-cols-2 gap-y-1">
+                          <span className="font-medium text-foreground text-[13px]" title={item.market}>
+                            {abbreviateMarket(item.market)}
+                          </span>
+                          <span className="text-right text-[13px]">
+                            <span className="text-muted-foreground text-[11px]">Mentions: </span>
+                            {item.mentions.toLocaleString()}
+                          </span>
+                          <span className="text-[13px]">
+                            <span className="text-muted-foreground text-[11px]">Share: </span>
+                            {item.marketSharePct.toFixed(1)}%
+                            <span className="text-muted-foreground text-[11px] ml-2">
+                              {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
+                            </span>
+                          </span>
+                          <span className="text-right text-[13px]">
+                            <span className="font-semibold">#{item.rank}</span>
+                            <span className="text-muted-foreground text-[11px] ml-1">of {item.totalBrokerages}</span>
+                          </span>
+                        </div>
+                      </td>
+                    ) : (
+                      <>
+                        <td className="py-3 px-2 font-medium" title={item.market}>
+                          {abbreviateMarket(item.market)}
+                        </td>
+                        <td className="py-3 px-2 text-right">{item.mentions.toLocaleString()}</td>
+                        <td className="py-3 px-2 text-right">{item.marketSharePct.toFixed(1)}%</td>
+                        <td className="py-3 px-2 text-right">
+                          <span className="font-semibold">#{item.rank}</span>
+                          <span className="text-muted-foreground text-xs ml-1">of {item.totalBrokerages}</span>
+                        </td>
+                        <td className="py-3 px-2 text-right">
+                          <span className="text-xs font-medium">
+                            {item.percentile >= 99 ? "99th" : `${Math.round(item.percentile)}th`}
+                          </span>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
