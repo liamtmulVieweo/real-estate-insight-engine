@@ -80,8 +80,20 @@ export function Hero() {
 
         {/* Dashboard Previews - Side by Side */}
         <div className="mt-16 mb-8 grid lg:grid-cols-2 gap-6 items-start">
-          <LeaderboardPreview />
-          <BrokerageDashboardPreview />
+          <div className="w-full overflow-hidden sm:overflow-visible">
+            <div className="sm:aspect-auto aspect-[3/4] overflow-hidden rounded-xl sm:rounded-none sm:overflow-visible">
+              <div className="origin-top-left scale-[0.85] sm:scale-100 w-[118%] sm:w-full">
+                <LeaderboardPreview />
+              </div>
+            </div>
+          </div>
+          <div className="w-full overflow-hidden sm:overflow-visible">
+            <div className="sm:aspect-auto aspect-[3/4] overflow-hidden rounded-xl sm:rounded-none sm:overflow-visible">
+              <div className="origin-top-left scale-[0.85] sm:scale-100 w-[118%] sm:w-full">
+                <BrokerageDashboardPreview />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
