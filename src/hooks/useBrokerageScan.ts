@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { ScanResult, AnalysisResult } from "@/types/brokerage";
+import type { ScanResult, AnalysisResult, SiteSignals } from "@/types/brokerage";
 
 export function useBrokerageScan() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -16,14 +16,34 @@ export function useBrokerageScan() {
     setAnalysisResult(null);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("gemini-lookup", {
-        body: { url },
+      // Run scan-website and gemini-lookup in parallel
+      const [signalResult, ledgerResult] = await Promise.allSettled([
+        supabase.functions.invoke("scan-website", { body: { url } }),
+        supabase.functions.invoke("gemini-lookup", { body: { url } }),
+      ]);
+
+      // scan-website is non-fatal
+      let siteSignals: SiteSignals | null = null;
+      if (signalResult.status === "fulfilled" && !signalResult.value.error && signalResult.value.data && !signalResult.value.data.error) {
+        siteSignals = signalResult.value.data as SiteSignals;
+      } else {
+        console.warn("scan-website failed (non-fatal):", signalResult);
+      }
+
+      // gemini-lookup is required
+      if (ledgerResult.status === "rejected") {
+        throw new Error("Failed to fetch brokerage data");
+      }
+      const { data: ledgerData, error: ledgerError } = ledgerResult.value;
+      if (ledgerError) throw new Error(ledgerError.message);
+      if (!ledgerData || ledgerData.error) throw new Error(ledgerData?.error || "Scan failed");
+
+      setScanResult({
+        brokerage_name: ledgerData.brokerage_name,
+        website_url: ledgerData.website_url || url,
+        results: ledgerData.results,
+        site_signals: siteSignals,
       });
-
-      if (fnError) throw new Error(fnError.message);
-      if (!data || data.error) throw new Error(data?.error || "Scan failed");
-
-      setScanResult(data as ScanResult);
     } catch (e: any) {
       setError(e.message || "Failed to scan brokerage");
     } finally {
@@ -41,6 +61,7 @@ export function useBrokerageScan() {
           brokerage_name: editedResult.brokerage_name,
           website_url: editedResult.website_url,
           results: editedResult.results,
+          site_signals: editedResult.site_signals ?? undefined,
         },
       });
 
