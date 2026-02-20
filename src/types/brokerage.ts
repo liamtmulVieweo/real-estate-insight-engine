@@ -51,77 +51,44 @@ export interface ScanResult {
   site_signals?: SiteSignals | null;
 }
 
-// SALT pillars: Semantic, Authority, Location, Trust
-export interface SALTPillarScore {
-  pillar: "Semantic" | "Authority" | "Location" | "Trust";
+// ── Broker-friendly analysis result types ──
+
+export interface DealLost {
+  scenario: string;
+  why_you_lose: string;
+  who_wins_instead: string;
+}
+
+export interface BrokerSaltScore {
+  pillar: string;
+  internal_pillar: string;
   score: number;
-  confidence?: string;
-  summary: string;
-  details: string[];
+  headline: string;
+  what_it_means: string;
+  evidence: string;
 }
 
-export interface RecommendedAction {
-  id?: string;
-  title: string;
-  pillar: "Semantic" | "Authority" | "Location" | "Trust";
-  priority: "high" | "medium" | "low";
-  evidence_quote?: string;
-  affected_urls?: string[];
-  issue: string;
-  why_it_matters: string;
-  what_to_do: string[];
-  how_to_know_done: string[];
+export interface TopFix {
+  fix_title: string;
+  the_problem: string;
+  the_fix: string;
+  example?: string;
+  who_does_this: string;
+  time_to_complete: string;
+  cost_estimate: string;
+  what_changes: string;
+  priority: string;
 }
 
-export interface IntentCoverage {
-  intent_id?: string;
-  intent_name: string;
-  status: "Eligible" | "Needs Work" | "Not Yet Eligible";
-  why?: string;
-  prompts: string[];
-  solution_fixes: {
-    fix_name: string;
-    description: string;
-  }[];
+export interface CompetitorContext {
+  what_winning_firms_do_differently: string[];
+  your_advantage: string;
 }
 
-export interface HyperspecificInstruction {
-  id?: string;
-  title: string;
-  deliverable: string;
-  impact: "high" | "medium" | "low";
-  effort: "high" | "medium" | "low";
-  salt_points: number;
-  target_intent: string;
-  target_url: string;
-  suggested_title: string;
-  action_items: string[];
-  avoid: string[];
-  good_example?: string;
-  effect: string;
-  dependency?: string;
-}
-
-export interface PromptCoverage {
-  supported: string[];
-  missing: string[];
-  blocked: string[];
-}
-
-export interface MarketOpportunity {
-  submarket: string;
-  suggested_title: string;
-  headings_description: string;
-  required_content: string[];
-  avoid: string[];
-}
-
-export interface AnalysisSummary {
-  visibility_snapshot: string | string[];
-  fix_categories?: string[];
-  top_blockers?: string[];
-  quick_wins?: string[];
-  conclusion: string;
+export interface ActionPlanWeek {
+  week: number;
+  actions: string[];
+  expected_result: string;
 }
 
 export interface MeasuredSignals {
@@ -130,34 +97,26 @@ export interface MeasuredSignals {
   word_count_mc: number | string;
   has_author: boolean | string;
   has_schema_org: boolean | string;
+  has_contact_link: boolean | string;
+  has_about_link: boolean | string;
   salt_anchor: Record<string, number>;
 }
 
 export interface AnalysisResult {
-  overall_score: number;
-  salt_scores: SALTPillarScore[];
-  recommended_actions: RecommendedAction[];
-  intent_coverage: IntentCoverage[];
-  hyperspecific_instructions: HyperspecificInstruction[];
-  prompt_coverage: PromptCoverage;
-  market_opportunity?: MarketOpportunity;
-  summary?: {
-    blocking_issues: string[];
-    key_unlocks: string[];
-  };
-  analysis_summary: AnalysisSummary;
+  plain_english_summary: string;
+  visibility_grade: string;
+  visibility_grade_reason: string;
+  what_ai_thinks_you_do: string;
+  what_you_actually_do: string;
+  the_gap: string;
+  deals_you_are_losing: DealLost[];
+  salt_scores: BrokerSaltScore[];
+  top_fixes: TopFix[];
+  quick_wins: string[];
+  what_is_working: string[];
+  competitor_context: CompetitorContext;
+  ai_recommends_you_for: string[];
+  ai_does_not_recommend_you_for: string[];
+  "30_day_action_plan": ActionPlanWeek[];
   _measured_signals?: MeasuredSignals;
-}
-
-// Keep legacy type for backwards compatibility during migration
-export interface FactorScore {
-  factor: string;
-  score: number;
-  why: string;
-}
-
-export interface FixLibraryItem {
-  name: string;
-  target_url_pattern: string;
-  definition_of_done: string[];
 }

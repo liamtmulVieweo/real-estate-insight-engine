@@ -67,7 +67,7 @@ export function useBrokerageScan() {
 
       if (fnError) throw new Error(fnError.message);
       if (!data || data.error) throw new Error(data?.error || "Analysis failed");
-      if (typeof data.overall_score !== "number") throw new Error("Analysis returned incomplete data. Please try again.");
+      if (!data.plain_english_summary) throw new Error("Analysis returned incomplete data. Please try again.");
 
       setAnalysisResult(data as AnalysisResult);
     } catch (e: any) {

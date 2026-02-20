@@ -1,18 +1,97 @@
-import type { AnalysisResult } from "@/types/brokerage";
-import { OverallScore } from "./analysis/OverallScore";
-import { RecommendedActions } from "./analysis/RecommendedActions";
-import { PromptCoverageSection } from "./analysis/PromptCoverageSection";
-import { MarketOpportunitySection } from "./analysis/MarketOpportunitySection";
-import { SummarySection } from "./analysis/SummarySection";
-import { HyperspecificInstructions } from "./analysis/HyperspecificInstructions";
-import { IntentMonitoring } from "./analysis/IntentMonitoring";
+import type { AnalysisResult, MeasuredSignals } from "@/types/brokerage";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckCircle2, XCircle, AlertCircle, Clock, DollarSign,
+  User, TrendingUp, TrendingDown, Zap, Calendar,
+} from "lucide-react";
 
 interface AnalysisViewProps {
   analysis: AnalysisResult;
 }
 
+function gradeColor(grade: string) {
+  switch (grade) {
+    case "A": return "text-green-600 bg-green-50 border-green-200";
+    case "B": return "text-blue-600 bg-blue-50 border-blue-200";
+    case "C": return "text-yellow-600 bg-yellow-50 border-yellow-200";
+    case "D": return "text-orange-600 bg-orange-50 border-orange-200";
+    case "F": return "text-red-600 bg-red-50 border-red-200";
+    default: return "text-muted-foreground bg-muted border-border";
+  }
+}
+
+function ScoreBar({ score }: { score: number }) {
+  const color = score >= 70 ? "bg-green-500" : score >= 50 ? "bg-yellow-500" : "bg-red-500";
+  return (
+    <div className="w-full bg-muted rounded-full h-2">
+      <div className={`${color} h-2 rounded-full transition-all`} style={{ width: `${Math.min(100, score)}%` }} />
+    </div>
+  );
+}
+
+function PriorityBadge({ priority }: { priority: string }) {
+  if (priority === "Do this week") return <Badge variant="destructive">🔥 Do this week</Badge>;
+  if (priority === "Do this month") return <Badge variant="secondary">📅 This month</Badge>;
+  return <Badge variant="outline">When you have time</Badge>;
+}
+
+function WhoIcon({ who }: { who: string }) {
+  if (who.toLowerCase().includes("you personally")) return <span className="flex items-center gap-1 text-sm text-muted-foreground"><User className="h-3.5 w-3.5" /> You</span>;
+  if (who.toLowerCase().includes("admin") || who.toLowerCase().includes("assistant")) return <span className="flex items-center gap-1 text-sm text-muted-foreground"><User className="h-3.5 w-3.5" /> Your assistant</span>;
+  return <span className="flex items-center gap-1 text-sm text-muted-foreground"><User className="h-3.5 w-3.5" /> Web developer</span>;
+}
+
+function SignalDiagnostics({ signals }: { signals: MeasuredSignals }) {
+  const items = [
+    {
+      label: "Does AI understand what you do?",
+      ok: Number(signals.word_count_mc) >= 500,
+      detail: Number(signals.word_count_mc) < 500 ? "Your site doesn't say enough" : "Enough content detected",
+    },
+    {
+      label: "Can AI tell who runs this firm?",
+      ok: Boolean(signals.has_author),
+      detail: !signals.has_author ? "No named person found on site" : "Named broker found",
+    },
+    {
+      label: "Does your site look credible to AI?",
+      ok: Boolean(signals.has_contact_link) && Boolean(signals.has_about_link),
+      detail: (!signals.has_contact_link || !signals.has_about_link) ? "Missing contact or about page" : "Contact and about page found",
+    },
+    {
+      label: "Is AI getting clean signals from your site?",
+      ok: Boolean(signals.has_schema_org),
+      detail: !signals.has_schema_org ? "No structured business data found" : "Business data tags found",
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Website Health Check</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <div className="mt-0.5">
+              {item.ok
+                ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                : <XCircle className="h-5 w-5 text-red-500" />}
+            </div>
+            <div>
+              <p className="text-sm font-medium">{item.label}</p>
+              <p className="text-xs text-muted-foreground">{item.detail}</p>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function AnalysisView({ analysis }: AnalysisViewProps) {
-  if (!analysis || typeof analysis.overall_score !== "number") {
+  if (!analysis?.plain_english_summary) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Analysis data is incomplete. Please try running the analysis again.</p>
@@ -21,34 +100,273 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
   }
 
   return (
-    <div className="space-y-10">
-      <OverallScore score={analysis.overall_score} saltScores={analysis.salt_scores || []} />
+    <div className="space-y-8">
+      {/* 1. The Verdict */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
+            <div className={`flex flex-col items-center justify-center rounded-xl border-2 px-6 py-4 ${gradeColor(analysis.visibility_grade)}`}>
+              <span className="text-5xl font-bold">{analysis.visibility_grade}</span>
+              <span className="text-xs font-medium mt-1">AI Visibility</span>
+            </div>
+            <div className="flex-1 space-y-2">
+              <p className="text-base leading-relaxed">{analysis.plain_english_summary}</p>
+              <p className="text-sm text-muted-foreground">{analysis.visibility_grade_reason}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <hr className="border-border" />
+      {/* 2. The Gap */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-orange-500" />
+            The Core Problem
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-lg bg-muted/50 p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-1">What AI thinks you do</p>
+              <p className="text-sm">{analysis.what_ai_thinks_you_do}</p>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-1">What you actually do</p>
+              <p className="text-sm">{analysis.what_you_actually_do}</p>
+            </div>
+          </div>
+          <p className="text-sm font-medium text-orange-700 dark:text-orange-400">{analysis.the_gap}</p>
+        </CardContent>
+      </Card>
 
-      <RecommendedActions actions={analysis.recommended_actions || []} />
+      {/* 3. Deals Being Lost */}
+      {analysis.deals_you_are_losing?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingDown className="h-5 w-5 text-red-500" />
+                Leads Going to Competitors Right Now
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">These are real queries your prospects type. You're not showing up.</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {analysis.deals_you_are_losing.map((deal, i) => (
+              <div key={i} className="rounded-lg border p-4 space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-sm font-semibold text-red-600 dark:text-red-400">"{deal.scenario}"</span>
+                </div>
+                <p className="text-sm text-muted-foreground"><span className="font-medium">Why you lose:</span> {deal.why_you_lose}</p>
+                <p className="text-sm text-muted-foreground"><span className="font-medium">Who wins instead:</span> {deal.who_wins_instead}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
-      <hr className="border-border" />
+      {/* 4. Quick Wins */}
+      {analysis.quick_wins?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-500" />
+              Do These Today (Under 1 Hour Each)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {analysis.quick_wins.map((win, i) => (
+              <div key={i} className="flex items-start gap-2 py-2">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                <p className="text-sm">{win}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-lg font-semibold">Visibility Analysis</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Detailed breakdown of your AI visibility across different dimensions
-          </p>
+      {/* 5. SALT Scores */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">How AI Evaluates Your Firm</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {(analysis.salt_scores || []).map((s) => (
+            <Card key={s.internal_pillar}>
+              <CardContent className="pt-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{s.pillar}</span>
+                  <span className={`text-lg font-bold ${s.score >= 70 ? "text-green-600" : s.score >= 50 ? "text-yellow-600" : "text-red-500"}`}>
+                    {s.score}
+                  </span>
+                </div>
+                <ScoreBar score={s.score} />
+                <p className="text-sm font-medium">{s.headline}</p>
+                <p className="text-xs text-muted-foreground">{s.what_it_means}</p>
+                {s.evidence && (
+                  <p className="text-xs text-muted-foreground italic border-l-2 border-border pl-3">{s.evidence}</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        {analysis.prompt_coverage && <PromptCoverageSection coverage={analysis.prompt_coverage} />}
-        {analysis.market_opportunity && <MarketOpportunitySection opportunity={analysis.market_opportunity} />}
-        {analysis.analysis_summary && <SummarySection summary={analysis.summary} analysisSummary={analysis.analysis_summary} />}
       </div>
 
-      <hr className="border-border" />
+      {/* 6. Top Fixes */}
+      {analysis.top_fixes?.length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">Your Fix List</h2>
+            <p className="text-sm text-muted-foreground">Sorted by impact. Each fix tells you exactly what to do and how long it takes.</p>
+          </div>
+          <div className="space-y-4">
+            {analysis.top_fixes.map((fix, i) => (
+              <Card key={i}>
+                <CardContent className="pt-5 space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="text-sm font-semibold">{fix.fix_title}</h3>
+                    <PriorityBadge priority={fix.priority} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{fix.the_problem}</p>
 
-      <HyperspecificInstructions instructions={analysis.hyperspecific_instructions || []} />
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium">What to do</p>
+                    <p className="text-sm">{fix.the_fix}</p>
+                    {fix.example && (
+                      <div className="mt-2 rounded bg-muted/50 p-3">
+                        <p className="text-xs text-muted-foreground">{fix.example}</p>
+                      </div>
+                    )}
+                  </div>
 
-      <hr className="border-border" />
+                  <div className="flex flex-wrap items-center gap-4 text-xs">
+                    <WhoIcon who={fix.who_does_this} />
+                    <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3.5 w-3.5" /> {fix.time_to_complete}</span>
+                    <span className="flex items-center gap-1 text-muted-foreground"><DollarSign className="h-3.5 w-3.5" /> {fix.cost_estimate}</span>
+                  </div>
 
-      <IntentMonitoring intents={analysis.intent_coverage || []} />
+                  <div className="text-xs text-muted-foreground border-t border-border pt-2">
+                    <span className="font-medium">Result:</span> {fix.what_changes}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 7. AI Recommends / Skips */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-green-500" /> AI Recommends You For
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(analysis.ai_recommends_you_for || []).map((item, i) => (
+              <div key={i} className="flex items-start gap-2 py-1.5">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                <span className="text-sm">{item}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-red-500" /> AI Skips You For
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(analysis.ai_does_not_recommend_you_for || []).map((item, i) => (
+              <div key={i} className="flex items-start gap-2 py-1.5">
+                <XCircle className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
+                <span className="text-sm">{item}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 8. Competitor Context */}
+      {analysis.competitor_context && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">How You Compare to Firms AI Recommends</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">What firms AI recommends typically do differently</p>
+              <div className="space-y-1.5">
+                {analysis.competitor_context.what_winning_firms_do_differently.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 mt-0.5 text-orange-500 shrink-0" />
+                    <span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {analysis.competitor_context.your_advantage && (
+              <div className="rounded-lg bg-green-50 dark:bg-green-950/30 p-4">
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Your Potential Advantage</p>
+                <p className="text-sm">{analysis.competitor_context.your_advantage}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 9. 30-Day Action Plan */}
+      {analysis["30_day_action_plan"]?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Your 30-Day Action Plan
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {analysis["30_day_action_plan"].map((week) => (
+                <div key={week.week} className="space-y-2">
+                  <h4 className="text-sm font-semibold">Week {week.week}</h4>
+                  <div className="space-y-1 pl-4">
+                    {week.actions.map((action, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="text-muted-foreground">→</span>
+                        <span className="text-sm">{action}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground italic pl-4">{week.expected_result}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 10. What's Working */}
+      {analysis.what_is_working?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">What's Already Working</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {analysis.what_is_working.map((item, i) => (
+              <div key={i} className="flex items-start gap-2 py-1.5">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                <span className="text-sm">{item}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 11. Website Health Check */}
+      {analysis._measured_signals && (
+        <SignalDiagnostics signals={analysis._measured_signals} />
+      )}
     </div>
   );
 }
