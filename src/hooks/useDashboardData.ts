@@ -139,7 +139,15 @@ export function usePromptIntelligence(filters: {
   enabled?: boolean;
 }) {
   return useQuery({
-    queryKey: ["prompt-intelligence", filters],
+    queryKey: [
+      "prompt-intelligence",
+      filters.brokerage,
+      filters.market,
+      filters.propertyType,
+      filters.brokerRole,
+      filters.model,
+      filters.fetchAll,
+    ],
     queryFn: async (): Promise<PromptIntelligence[]> => {
       const pageSize = 100; // Max allowed by RPC
       const allResults: PromptIntelligence[] = [];
