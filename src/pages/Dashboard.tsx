@@ -40,6 +40,7 @@ export default function Dashboard() {
     propertyType: "All",
     role: "All",
     brokerage: "",
+    state: "All",
   });
 
   // Brokerage list (fast, pre-aggregated view)

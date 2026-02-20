@@ -110,4 +110,5 @@ export interface Filters {
   propertyType: string;
   role: string;
   brokerage: string;
+  state: string;
 }

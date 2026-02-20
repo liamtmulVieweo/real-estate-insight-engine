@@ -1,6 +1,30 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Filter, Check, ChevronsUpDown, Eye, ArrowLeft } from "lucide-react";
+import { Building2, Filter, Check, ChevronsUpDown, Eye, ArrowLeft, MapPin } from "lucide-react";
+
+// Abbreviation → full state name map
+const ABBR_TO_STATE: Record<string, string> = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas",
+  CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware",
+  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho",
+  IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas",
+  KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi",
+  MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada",
+  NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
+  NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma",
+  OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah",
+  VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia",
+  WI: "Wisconsin", WY: "Wyoming", DC: "District of Columbia",
+};
+
+function extractStateFromMarket(market: string): string | null {
+  const parts = market.split(",");
+  if (parts.length < 2) return null;
+  const raw = parts[parts.length - 1].trim();
+  return ABBR_TO_STATE[raw] ?? raw;
+}
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,6 +79,22 @@ export function DashboardHeader({
   const selectedBrokerageData = brokerages.find(
     (b) => b.brokerage === selectedBrokerage
   );
+
+  // Derive sorted unique states from markets list
+  const states = useMemo(() => {
+    const stateSet = new Set<string>();
+    markets.forEach((m) => {
+      const s = extractStateFromMarket(m);
+      if (s) stateSet.add(s);
+    });
+    return [...stateSet].sort();
+  }, [markets]);
+
+  // Filter markets based on selected state
+  const filteredMarkets = useMemo(() => {
+    if (!filters.state || filters.state === "All") return markets;
+    return markets.filter((m) => extractStateFromMarket(m) === filters.state);
+  }, [markets, filters.state]);
 
   return (
     <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -134,6 +174,30 @@ export function DashboardHeader({
               <span className="text-sm font-medium">Filters:</span>
             </div>
 
+            {/* State filter */}
+            <Select
+              value={filters.state}
+              onValueChange={(v) => {
+                onFilterChange("state", v);
+                // Reset market when state changes
+                onFilterChange("market", "All");
+              }}
+            >
+              <SelectTrigger className="w-[140px] h-9 text-sm bg-background">
+                <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="All States" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px] z-50 bg-popover">
+                <SelectItem value="All">All States</SelectItem>
+                {states.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Market filter — narrows based on selected state */}
             <Select
               value={filters.market}
               onValueChange={(v) => onFilterChange("market", v)}
@@ -143,7 +207,7 @@ export function DashboardHeader({
               </SelectTrigger>
               <SelectContent className="max-h-[300px] z-50 bg-popover">
                 <SelectItem value="All">All Markets</SelectItem>
-                {markets.slice(0, 50).map((m) => (
+                {filteredMarkets.map((m) => (
                   <SelectItem key={m} value={m}>
                     {m}
                   </SelectItem>
