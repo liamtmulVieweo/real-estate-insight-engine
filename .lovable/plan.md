@@ -1,87 +1,99 @@
 
 
-# Implement Grounded Backend for AI Visibility Dashboard
+# Update AI Visibility Dashboard to Broker-Friendly Output
 
 ## Overview
-Apply the new signal-grounded architecture: create the `scan-website` edge function for deterministic site analysis, replace `analyze-ledger` with anchored AI prompts, update the frontend hook and components to support the new data flow. The existing `gemini-lookup` function continues to serve as the ledger data source.
+The analyze-ledger prompt and output schema are being completely redesigned for a broker audience. No more technical jargon -- everything is written in plain business language about deals, leads, and competitors. The AnalysisView component gets a full rewrite to match.
 
-## Changes
+`scan-website` stays exactly as-is. No changes needed there.
 
-### 1. Create `supabase/functions/scan-website/index.ts` (NEW)
-- Deterministic HTML scanner using `deno_dom` WASM parser
-- Fetches brokerage URL, extracts ~25 measurable signals (word count, heading count, schema.org, author/date signals, link ratios, YMYL risk, ad hints, spam patterns)
-- Computes Page Quality (PQ) score 0-100 with no AI
-- Returns structured signals object with red flags, positives, and content excerpt
-- Handler wrapped in `serve()` with CORS headers
+## What Changes
 
-### 2. Replace `supabase/functions/analyze-ledger/index.ts`
-- Accepts new optional `site_signals` parameter alongside existing fields
-- Adds `computeSaltAnchor()` to derive deterministic SALT scores from signals
-- Adds `buildFactBlock()` and `buildAnalysisPrompt()` for grounded AI prompts
-- AI constrained to +/-15 deviation from anchors, must cite signal values
-- Returns `_measured_signals` metadata for frontend transparency
-- Gracefully degrades when `site_signals` is not provided
+### 1. Replace `supabase/functions/analyze-ledger/index.ts`
+- New `buildFactBlock()` that translates raw signals into plain-English interpretations (e.g., "CRITICAL: Almost no content" instead of "word_count_mc: 180")
+- New `buildPrompt()` replacing `buildAnalysisPrompt()` with broker-audience rules: never use schema.org, E-E-A-T, YMYL, etc. Every finding must answer "What business am I losing?"
+- New system message: "You are a commercial real estate business advisor"
+- Completely new output JSON schema with broker-friendly fields:
+  - `plain_english_summary`, `visibility_grade` (A-F), `what_ai_thinks_you_do`, `the_gap`
+  - `deals_you_are_losing` (specific prospect queries they miss)
+  - `salt_scores` with renamed pillars: Specialty Clarity, Proof of Expertise, Market Specificity, Credibility Signals
+  - `top_fixes` with who_does_this, time_to_complete, cost_estimate
+  - `quick_wins`, `what_is_working`, `competitor_context`
+  - `ai_recommends_you_for` / `ai_does_not_recommend_you_for`
+  - `30_day_action_plan` (week-by-week)
+- Validation changes from `overall_score` check to `plain_english_summary` check
+- `_measured_signals` now also includes `has_contact_link` and `has_about_link`
+- Fallback signals use `false`/`0` instead of `"unknown"` for boolean/numeric fields
+- `computeSaltAnchor()` stays identical
 
-### 3. Replace `src/hooks/useBrokerageScan.ts`
-- `scan()` now takes `(url: string)` -- extracts brokerage name from `gemini-lookup` response (keeping existing UX)
-- Runs `scan-website` and `gemini-lookup` in parallel via `Promise.allSettled`
-- `scan-website` failure is non-fatal (graceful degradation)
-- `analyze()` now passes `site_signals` to the backend
-- Stores `site_signals` in `scanResult`
+### 2. Update `src/types/brokerage.ts`
+- Replace `AnalysisResult` with new broker-friendly interface matching the new schema
+- Remove old interfaces no longer needed: `SALTPillarScore`, `RecommendedAction`, `IntentCoverage`, `HyperspecificInstruction`, `PromptCoverage`, `MarketOpportunity`, `AnalysisSummary`, `FactorScore`, `FixLibraryItem`
+- Add new interfaces: `DealLost`, `BrokerSaltScore`, `TopFix`, `CompetitorContext`, `ActionPlanWeek`, `MeasuredSignals` (updated)
+- Keep `LedgerItem`, `PropertyTypeSelection`, `SiteSignals`, `ScanResult` unchanged
 
-### 4. Update `src/types/brokerage.ts`
-- Add `SiteSignals` interface
-- Add `site_signals?: SiteSignals | null` to `ScanResult`
-- Add optional `confidence` to `SALTPillarScore`
-- Add optional `evidence_quote` to `RecommendedAction`, make `id` optional
-- Add optional `why` to `IntentCoverage`, make `intent_id` optional
-- Update `AnalysisSummary`: add `top_blockers?: string[]`, `quick_wins?: string[]` (keep `fix_categories` for backward compat), allow `visibility_snapshot` as `string | string[]`
-- Make `market_opportunity` and `summary` optional in `AnalysisResult`
-- Add `_measured_signals` optional field to `AnalysisResult`
+### 3. Replace `src/components/brokerage/AnalysisView.tsx`
+Complete UI rewrite. No more sub-component imports (OverallScore, RecommendedActions, etc.). All rendering inline in one file with these sections:
+1. **The Verdict** -- Letter grade (A-F) with color coding + plain English summary
+2. **The Gap** -- What AI thinks vs what you actually do
+3. **Deals Being Lost** -- Specific prospect queries going to competitors
+4. **Quick Wins** -- Actions doable in under 1 hour
+5. **SALT Scores** -- 4 pillars with score bars, headlines, and evidence
+6. **Top Fixes** -- Fix list with priority badges, who does it, time/cost estimates
+7. **AI Recommends / Skips** -- Side-by-side cards
+8. **Competitor Context** -- What winning firms do differently
+9. **30-Day Action Plan** -- Week-by-week timeline
+10. **What's Working** -- Positive signals
+11. **Website Health Check** -- Measured signals as plain-English diagnostic items
 
-### 5. Update `src/components/brokerage/AnalysisView.tsx`
-- Make `MarketOpportunitySection` and `SummarySection` rendering handle missing data gracefully (new prompt doesn't always return `market_opportunity` or `summary`)
-- Pass `analysis_summary` to SummarySection with fallback data
+### 4. Update `src/hooks/useBrokerageScan.ts`
+- The hook's analyze() validation changes: remove `overall_score` check since the new schema uses `plain_english_summary` as the validity marker
+- Keep the existing scan flow (gemini-lookup + scan-website in parallel) -- do NOT use the stub `fetchLedgerItems` from the provided code
+- Keep current scan() signature `(url: string)` since gemini-lookup extracts brokerage name
+- Keep `setScanResult` export and `analyze(editedResult: ScanResult)` signature for LedgerEditor compatibility
 
-### 6. Update `src/components/brokerage/analysis/SummarySection.tsx`
-- Handle `visibility_snapshot` as `string | string[]`
-- Use `top_blockers` as fallback for `blocking_issues`, `quick_wins` for `key_unlocks`
-- Keep backward compat with old `fix_categories` field
+### 5. Update `src/pages/AIVisibility.tsx`
+- No changes needed -- the page just passes data between hook and components
 
-### 7. Update `src/components/brokerage/analysis/RecommendedActions.tsx`
-- Display `evidence_quote` when present (new grounded field)
-- Handle missing `id` (use title as key -- already doing this)
-
-### 8. Update `src/components/brokerage/analysis/IntentMonitoring.tsx`
-- Display `why` field when present
-
-### 9. Update `src/pages/AIVisibility.tsx`
-- Adapt to hook changes (no more `setScanResult` in destructuring)
-
-### 10. Update `supabase/config.toml` -- NOT NEEDED
-- Config.toml is auto-managed. The scan-website function will be auto-configured.
+### 6. Analysis sub-components become unused
+The following files under `src/components/brokerage/analysis/` will no longer be imported but can be left in place (no breaking impact):
+- OverallScore.tsx, RecommendedActions.tsx, PromptCoverageSection.tsx, MarketOpportunitySection.tsx, SummarySection.tsx, HyperspecificInstructions.tsx, IntentMonitoring.tsx
 
 ## Technical Details
 
-### Compatibility Strategy
-All new fields are optional so both old cached results and new results render. Key mappings:
-- `summary.blocking_issues` falls back to `analysis_summary.top_blockers`
-- `summary.key_unlocks` falls back to `analysis_summary.quick_wins`
-- `visibility_snapshot` handles both `string` and `string[]`
-
-### Hook Flow
-The hook keeps the same single-URL entry point. `gemini-lookup` extracts the brokerage name (as it does today). The new `scan-website` runs in parallel for signals. If it fails, analysis proceeds without grounding (scores default to 50).
-
-### Files to Create
-1. `supabase/functions/scan-website/index.ts`
-
 ### Files to Modify
-1. `supabase/functions/analyze-ledger/index.ts` (replace)
-2. `src/hooks/useBrokerageScan.ts` (replace)
-3. `src/types/brokerage.ts` (update interfaces)
-4. `src/pages/AIVisibility.tsx` (minor)
-5. `src/components/brokerage/AnalysisView.tsx` (handle optional sections)
-6. `src/components/brokerage/analysis/SummarySection.tsx` (new fields)
-7. `src/components/brokerage/analysis/RecommendedActions.tsx` (evidence_quote)
-8. `src/components/brokerage/analysis/IntentMonitoring.tsx` (why field)
+1. `supabase/functions/analyze-ledger/index.ts` -- Replace prompt + output schema + handler
+2. `src/types/brokerage.ts` -- Replace AnalysisResult and related interfaces
+3. `src/components/brokerage/AnalysisView.tsx` -- Complete rewrite with broker-friendly UI
+4. `src/hooks/useBrokerageScan.ts` -- Update analyze() validation check
+
+### New AnalysisResult Interface (key fields)
+```text
+plain_english_summary: string
+visibility_grade: "A" | "B" | "C" | "D" | "F"
+visibility_grade_reason: string
+what_ai_thinks_you_do: string
+what_you_actually_do: string
+the_gap: string
+deals_you_are_losing: Array<{ scenario, why_you_lose, who_wins_instead }>
+salt_scores: Array<{ pillar, internal_pillar, score, headline, what_it_means, evidence }>
+top_fixes: Array<{ fix_title, the_problem, the_fix, example, who_does_this, time_to_complete, cost_estimate, what_changes, priority }>
+quick_wins: string[]
+what_is_working: string[]
+competitor_context: { what_winning_firms_do_differently: string[], your_advantage: string }
+ai_recommends_you_for: string[]
+ai_does_not_recommend_you_for: string[]
+30_day_action_plan: Array<{ week, actions, expected_result }>
+_measured_signals?: MeasuredSignals
+```
+
+### Grade Color Mapping
+- A = green, B = blue, C = yellow, D = orange, F = red
+
+### Website Health Check (from _measured_signals)
+4 plain-English diagnostic items:
+- "Does AI understand what you do?" (word_count >= 500)
+- "Can AI tell who runs this firm?" (has_author)
+- "Does your site look credible to AI?" (has_contact + has_about)
+- "Is AI getting clean signals from your site?" (has_schema_org)
 
