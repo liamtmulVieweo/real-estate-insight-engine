@@ -100,13 +100,14 @@ export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: s
   });
 }
 
-export function useMissedMarketOpportunities(targetBrokerage: string, enabled = true) {
+export function useMissedMarketOpportunities(targetBrokerage: string, enabled = true, stateFilter?: string) {
   return useQuery({
-    queryKey: ["missed-opportunities", targetBrokerage],
+    queryKey: ["missed-opportunities", targetBrokerage, stateFilter],
     queryFn: async (): Promise<GapMarket[]> => {
       const { data, error } = await supabase.rpc("get_missed_market_opportunities", {
         target_brokerage: targetBrokerage,
-      });
+        state_filter: stateFilter || null,
+      } as any);
 
       if (error) throw error;
       return data || [];
