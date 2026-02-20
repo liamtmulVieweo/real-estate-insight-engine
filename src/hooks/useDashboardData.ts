@@ -81,15 +81,16 @@ export function useDashboardSummary(targetBrokerage: string, targetMarket?: stri
   });
 }
 
-export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string, roleFilter?: string, enabled = true) {
+export function useCompetitiveRankings(targetBrokerage: string, marketFilter?: string, propertyTypeFilter?: string, roleFilter?: string, enabled = true, stateFilter?: string) {
   return useQuery({
-    queryKey: ["competitive-rankings", targetBrokerage, marketFilter, propertyTypeFilter, roleFilter],
+    queryKey: ["competitive-rankings", targetBrokerage, marketFilter, propertyTypeFilter, roleFilter, stateFilter],
     queryFn: async (): Promise<Competitor[]> => {
       const { data, error } = await supabase.rpc("get_competitive_rankings", {
         target_brokerage: targetBrokerage,
         market_filter: marketFilter || null,
         property_type_filter: propertyTypeFilter || null,
         role_filter: roleFilter || null,
+        state_filter: stateFilter || null,
       } as any);
 
       if (error) throw error;
@@ -137,6 +138,7 @@ export function usePromptIntelligence(filters: {
   model?: string;
   fetchAll?: boolean;
   enabled?: boolean;
+  state?: string;
 }) {
   return useQuery({
     queryKey: [
@@ -147,6 +149,7 @@ export function usePromptIntelligence(filters: {
       filters.brokerRole,
       filters.model,
       filters.fetchAll,
+      filters.state,
     ],
     queryFn: async (): Promise<PromptIntelligence[]> => {
       const pageSize = 100; // Max allowed by RPC

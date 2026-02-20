@@ -311,20 +311,36 @@ export type Database = {
       }
     }
     Functions: {
-      get_broker_team_breakdown: {
-        Args: {
-          market_filter?: string
-          property_type_filter?: string
-          target_brokerage: string
-        }
-        Returns: {
-          broker_name: string
-          global_rank: number
-          mentions: number
-          property_types: string[]
-          total_brokers: number
-        }[]
-      }
+      get_broker_team_breakdown:
+        | {
+            Args: {
+              market_filter?: string
+              property_type_filter?: string
+              target_brokerage: string
+            }
+            Returns: {
+              broker_name: string
+              global_rank: number
+              mentions: number
+              property_types: string[]
+              total_brokers: number
+            }[]
+          }
+        | {
+            Args: {
+              market_filter?: string
+              property_type_filter?: string
+              state_filter?: string
+              target_brokerage: string
+            }
+            Returns: {
+              broker_name: string
+              global_rank: number
+              mentions: number
+              property_types: string[]
+              total_brokers: number
+            }[]
+          }
       get_co_mention_details: {
         Args: { peer_brokerage: string; target_brokerage: string }
         Returns: {
@@ -368,6 +384,22 @@ export type Database = {
               vs_target_diff: number
             }[]
           }
+        | {
+            Args: {
+              market_filter?: string
+              property_type_filter?: string
+              role_filter?: string
+              state_filter?: string
+              target_brokerage: string
+            }
+            Returns: {
+              brokerage: string
+              is_target: boolean
+              mentions: number
+              rank: number
+              vs_target_diff: number
+            }[]
+          }
       get_cre_dashboard_bootstrap:
         | {
             Args: { market_filter?: string; target_brokerage?: string }
@@ -382,6 +414,16 @@ export type Database = {
             }
             Returns: Json
           }
+        | {
+            Args: {
+              market_filter?: string
+              property_type_filter?: string
+              role_filter?: string
+              state_filter?: string
+              target_brokerage?: string
+            }
+            Returns: Json
+          }
       get_dashboard_summary:
         | {
             Args: { target_brokerage: string; target_market?: string }
@@ -391,6 +433,16 @@ export type Database = {
             Args: {
               property_type_filter?: string
               role_filter?: string
+              target_brokerage: string
+              target_market?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              property_type_filter?: string
+              role_filter?: string
+              state_filter?: string
               target_brokerage: string
               target_market?: string
             }
@@ -411,29 +463,54 @@ export type Database = {
           primary_market: string
         }[]
       }
-      get_prompt_intelligence: {
-        Args: {
-          broker_name_filter?: string
-          broker_role_filter?: string
-          brokerage_filter?: string
-          market_filter?: string
-          model_filter?: string
-          page_limit?: number
-          page_offset?: number
-          property_type_filter?: string
-        }
-        Returns: {
-          broker_role: string
-          citation_count: number
-          market: string
-          mentioned_entities: Json
-          model: string
-          prompt: string
-          prompt_hash: string
-          property_type: string
-          source_domains: string[]
-        }[]
-      }
+      get_prompt_intelligence:
+        | {
+            Args: {
+              broker_name_filter?: string
+              broker_role_filter?: string
+              brokerage_filter?: string
+              market_filter?: string
+              model_filter?: string
+              page_limit?: number
+              page_offset?: number
+              property_type_filter?: string
+            }
+            Returns: {
+              broker_role: string
+              citation_count: number
+              market: string
+              mentioned_entities: Json
+              model: string
+              prompt: string
+              prompt_hash: string
+              property_type: string
+              source_domains: string[]
+            }[]
+          }
+        | {
+            Args: {
+              broker_name_filter?: string
+              broker_role_filter?: string
+              brokerage_filter?: string
+              market_filter?: string
+              model_filter?: string
+              page_limit?: number
+              page_offset?: number
+              property_type_filter?: string
+              state_filter?: string
+            }
+            Returns: {
+              broker_role: string
+              citation_count: number
+              market: string
+              mentioned_entities: Json
+              model: string
+              prompt: string
+              prompt_hash: string
+              property_type: string
+              source_domains: string[]
+            }[]
+          }
       get_property_type_breakdown:
         | {
             Args: { target_brokerage: string }
@@ -445,6 +522,19 @@ export type Database = {
           }
         | {
             Args: { market_filter?: string; target_brokerage: string }
+            Returns: {
+              mentions: number
+              property_type: string
+              rank: number
+              total_brokerages: number
+            }[]
+          }
+        | {
+            Args: {
+              market_filter?: string
+              state_filter?: string
+              target_brokerage: string
+            }
             Returns: {
               mentions: number
               property_type: string
