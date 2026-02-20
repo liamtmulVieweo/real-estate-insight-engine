@@ -17,10 +17,13 @@ const authSchema = z.object({
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isResetMode, setIsResetMode] = useState(false);
+  const [isUpdatePasswordMode, setIsUpdatePasswordMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; newPassword?: string; confirmPassword?: string }>({});
   
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -29,10 +32,36 @@ const Auth = () => {
   const redirectTo = searchParams.get('redirect') || '/';
 
   useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'update-password') {
+      setIsUpdatePasswordMode(true);
+      return;
+    }
     if (user) {
       navigate(redirectTo);
     }
-  }, [user, navigate, redirectTo]);
+  }, [user, navigate, redirectTo, searchParams]);
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: typeof errors = {};
+    if (newPassword.length < 6) newErrors.newPassword = "Password must be at least 6 characters";
+    if (newPassword !== confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    setErrors({});
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) { toast.error(error.message); return; }
+      toast.success("Password updated successfully!");
+      setIsUpdatePasswordMode(false);
+      navigate('/import');
+    } catch {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const validateForm = () => {
     const result = authSchema.safeParse({ email, password });
@@ -105,6 +134,52 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  if (isUpdatePasswordMode) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Set New Password</CardTitle>
+            <CardDescription>Enter your new password below</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isLoading}
+                  className={errors.newPassword ? "border-destructive" : ""}
+                />
+                {errors.newPassword && <p className="text-sm text-destructive">{errors.newPassword}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  className={errors.confirmPassword ? "border-destructive" : ""}
+                />
+                {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Updating..." : "Update Password"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
