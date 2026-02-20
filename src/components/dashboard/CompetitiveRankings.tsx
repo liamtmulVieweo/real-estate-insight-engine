@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import type { Competitor } from "@/types/dashboard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CompetitiveRankingsProps {
   competitors: Competitor[];
@@ -12,35 +13,28 @@ interface CompetitiveRankingsProps {
 
 export function CompetitiveRankings({ competitors, isLoading }: CompetitiveRankingsProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const isMobile = useIsMobile();
 
   const filteredCompetitors = competitors.filter((c) =>
     c.brokerage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Find the target brokerage and determine display logic
   const displayData = useMemo(() => {
     if (searchTerm) {
-      // When searching, show filtered results
       return { competitors: filteredCompetitors.slice(0, 20), showContextWindow: false };
     }
 
     const targetIndex = competitors.findIndex((c) => c.is_target);
     const targetRank = targetIndex !== -1 ? competitors[targetIndex].rank : null;
 
-    // If target is in top 20, show top 20
     if (targetRank === null || targetRank <= 20) {
       return { competitors: competitors.slice(0, 20), showContextWindow: false };
     }
 
-    // Target is outside top 20 - show top 10 + context window around target
     const top10 = competitors.slice(0, 10);
-    
-    // Get 5 above and 5 below target (including target)
     const windowStart = Math.max(0, targetIndex - 5);
     const windowEnd = Math.min(competitors.length, targetIndex + 6);
     const contextWindow = competitors.slice(windowStart, windowEnd);
-
-    // Check if there's a gap between top 10 and context window
     const hasGap = windowStart > 10;
 
     return {
@@ -72,55 +66,96 @@ export function CompetitiveRankings({ competitors, isLoading }: CompetitiveRanki
         competitor.is_target ? "bg-primary/5" : ""
       }`}
     >
-      <td className="py-3 px-3">
-        <span
-          className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-            competitor.rank <= 3
-              ? "bg-amber-100 text-amber-700"
-              : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {competitor.rank}
-        </span>
-      </td>
-      <td className="py-3 px-3">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{competitor.brokerage}</span>
-          {competitor.is_target && (
-            <Badge variant="default" className="text-xs">
-              You
-            </Badge>
-          )}
-        </div>
-      </td>
-      <td className="py-3 px-3 text-right font-medium">
-        {competitor.mentions.toLocaleString()}
-      </td>
-      <td className="py-3 px-3 text-right">
-        <span
-          className={`font-medium ${
-            competitor.vs_target_diff > 0
-              ? "text-green-600"
-              : competitor.vs_target_diff < 0
-              ? "text-red-600"
-              : "text-muted-foreground"
-          }`}
-        >
-          {competitor.vs_target_diff > 0 ? "+" : ""}
-          {competitor.vs_target_diff.toLocaleString()}
-        </span>
-      </td>
+      {isMobile ? (
+        <td colSpan={4} className="py-2 px-2">
+          <div className="grid grid-cols-2 gap-y-1">
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
+                  competitor.rank <= 3
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {competitor.rank}
+              </span>
+              <span className="font-medium text-[13px] truncate">{competitor.brokerage}</span>
+              {competitor.is_target && (
+                <Badge variant="default" className="text-[10px] px-1 py-0">You</Badge>
+              )}
+            </div>
+            <span className="text-right text-[13px]">
+              <span className="text-muted-foreground text-[11px]">Mentions: </span>
+              {competitor.mentions.toLocaleString()}
+            </span>
+            <span className="text-[13px]" />
+            <span className="text-right text-[13px]">
+              <span
+                className={`font-medium ${
+                  competitor.vs_target_diff > 0
+                    ? "text-green-600"
+                    : competitor.vs_target_diff < 0
+                    ? "text-red-600"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {competitor.vs_target_diff > 0 ? "+" : ""}
+                {competitor.vs_target_diff.toLocaleString()}
+              </span>
+            </span>
+          </div>
+        </td>
+      ) : (
+        <>
+          <td className="py-3 px-3">
+            <span
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                competitor.rank <= 3
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {competitor.rank}
+            </span>
+          </td>
+          <td className="py-3 px-3">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{competitor.brokerage}</span>
+              {competitor.is_target && (
+                <Badge variant="default" className="text-xs">You</Badge>
+              )}
+            </div>
+          </td>
+          <td className="py-3 px-3 text-right font-medium">
+            {competitor.mentions.toLocaleString()}
+          </td>
+          <td className="py-3 px-3 text-right">
+            <span
+              className={`font-medium ${
+                competitor.vs_target_diff > 0
+                  ? "text-green-600"
+                  : competitor.vs_target_diff < 0
+                  ? "text-red-600"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {competitor.vs_target_diff > 0 ? "+" : ""}
+              {competitor.vs_target_diff.toLocaleString()}
+            </span>
+          </td>
+        </>
+      )}
     </tr>
   );
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
         <div>
           <CardTitle>Brokerage Competitive Rankings</CardTitle>
           <CardDescription>Compare your visibility against direct competitors</CardDescription>
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search brokerages..."
@@ -133,7 +168,7 @@ export function CompetitiveRankings({ competitors, isLoading }: CompetitiveRanki
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="hidden sm:table-header-group">
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-3 font-medium text-muted-foreground w-16">Rank</th>
                 <th className="text-left py-3 px-3 font-medium text-muted-foreground">Brokerage</th>
