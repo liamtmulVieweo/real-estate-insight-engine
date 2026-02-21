@@ -109,6 +109,17 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
               <span className="text-5xl font-bold">{analysis.visibility_grade}</span>
               <span className="text-xs font-medium mt-1">AI Visibility</span>
             </div>
+            {analysis._measured_signals?.salt_anchor?.overall != null && (
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-border px-6 py-4 bg-muted/30">
+                <span className={`text-5xl font-bold ${
+                  analysis._measured_signals.salt_anchor.overall >= 70 ? "text-green-600" :
+                  analysis._measured_signals.salt_anchor.overall >= 50 ? "text-yellow-600" : "text-red-500"
+                }`}>
+                  {Math.round(analysis._measured_signals.salt_anchor.overall)}
+                </span>
+                <span className="text-xs font-medium mt-1 text-muted-foreground">SALT Score</span>
+              </div>
+            )}
             <div className="flex-1 space-y-2">
               <p className="text-base leading-relaxed">{analysis.plain_english_summary}</p>
               <p className="text-sm text-muted-foreground">{analysis.visibility_grade_reason}</p>
