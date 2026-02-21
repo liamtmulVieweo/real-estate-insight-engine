@@ -253,6 +253,24 @@ OUTPUT: Return ONLY valid JSON. No markdown. No preamble.
       "actions": ["<Specific action>"],
       "expected_result": "<What changes after this week>"
     }
+  ],
+
+  "platform_scores": [
+    {
+      "platform": "ChatGPT",
+      "score": <0-100 estimated visibility score>,
+      "reason": "<One sentence explaining the score. ChatGPT weighs content depth, authority signals, and named expertise heavily.>"
+    },
+    {
+      "platform": "Gemini",
+      "score": <0-100 estimated visibility score>,
+      "reason": "<One sentence. Gemini weighs web presence breadth, structured data, and content freshness.>"
+    },
+    {
+      "platform": "Google AI Overviews",
+      "score": <0-100 estimated visibility score>,
+      "reason": "<One sentence. Google AI Overviews weighs traditional quality signals, credibility markers, and market specificity.>"
+    }
   ]
 }`;
 }

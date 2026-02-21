@@ -102,6 +102,12 @@ export interface MeasuredSignals {
   salt_anchor: Record<string, number>;
 }
 
+export interface PlatformScore {
+  platform: string;
+  score: number;
+  reason: string;
+}
+
 export interface AnalysisResult {
   plain_english_summary: string;
   visibility_grade: string;
@@ -118,5 +124,6 @@ export interface AnalysisResult {
   ai_recommends_you_for: string[];
   ai_does_not_recommend_you_for: string[];
   "30_day_action_plan": ActionPlanWeek[];
+  platform_scores?: PlatformScore[];
   _measured_signals?: MeasuredSignals;
 }
