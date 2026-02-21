@@ -1,24 +1,19 @@
 import type { AnalysisResult, MeasuredSignals } from "@/types/brokerage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   CheckCircle2, XCircle, AlertCircle, Clock, DollarSign,
-  User, TrendingUp, TrendingDown, Zap, Calendar,
+  User, TrendingUp, TrendingDown, Zap, Calendar, ChevronDown,
 } from "lucide-react";
+import { useState } from "react";
 
 interface AnalysisViewProps {
   analysis: AnalysisResult;
 }
 
-function gradeColor(grade: string) {
-  switch (grade) {
-    case "A": return "text-green-600 bg-green-50 border-green-200";
-    case "B": return "text-blue-600 bg-blue-50 border-blue-200";
-    case "C": return "text-yellow-600 bg-yellow-50 border-yellow-200";
-    case "D": return "text-orange-600 bg-orange-50 border-orange-200";
-    case "F": return "text-red-600 bg-red-50 border-red-200";
-    default: return "text-muted-foreground bg-muted border-border";
-  }
+function scoreColor(score: number) {
+  return score >= 70 ? "text-green-600" : score >= 50 ? "text-yellow-600" : "text-red-500";
 }
 
 function ScoreBar({ score }: { score: number }) {
@@ -26,6 +21,19 @@ function ScoreBar({ score }: { score: number }) {
   return (
     <div className="w-full bg-muted rounded-full h-2">
       <div className={`${color} h-2 rounded-full transition-all`} style={{ width: `${Math.min(100, score)}%` }} />
+    </div>
+  );
+}
+
+function MiniScoreBar({ score, label }: { score: number; label: string }) {
+  const color = score >= 70 ? "bg-green-500" : score >= 50 ? "bg-yellow-500" : "bg-red-500";
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-muted-foreground w-20 shrink-0">{label}</span>
+      <span className={`text-xs font-bold w-6 text-right ${scoreColor(score)}`}>{score}</span>
+      <div className="flex-1 bg-muted rounded-full h-1.5">
+        <div className={`${color} h-1.5 rounded-full transition-all`} style={{ width: `${Math.min(100, score)}%` }} />
+      </div>
     </div>
   );
 }
@@ -91,6 +99,8 @@ function SignalDiagnostics({ signals }: { signals: MeasuredSignals }) {
 }
 
 export function AnalysisView({ analysis }: AnalysisViewProps) {
+  const [saltDetailsOpen, setSaltDetailsOpen] = useState(false);
+
   if (!analysis?.plain_english_summary) {
     return (
       <div className="text-center py-12">
@@ -99,25 +109,31 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
     );
   }
 
+  const saltAnchor = analysis._measured_signals?.salt_anchor;
+  const overallScore = saltAnchor?.overall;
+
   return (
     <div className="space-y-8">
       {/* 1. The Verdict */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            <div className={`flex flex-col items-center justify-center rounded-xl border-2 px-6 py-4 ${gradeColor(analysis.visibility_grade)}`}>
-              <span className="text-5xl font-bold">{analysis.visibility_grade}</span>
-              <span className="text-xs font-medium mt-1">AI Visibility</span>
-            </div>
-            {analysis._measured_signals?.salt_anchor?.overall != null && (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-border px-6 py-4 bg-muted/30">
-                <span className={`text-5xl font-bold ${
-                  analysis._measured_signals.salt_anchor.overall >= 70 ? "text-green-600" :
-                  analysis._measured_signals.salt_anchor.overall >= 50 ? "text-yellow-600" : "text-red-500"
-                }`}>
-                  {Math.round(analysis._measured_signals.salt_anchor.overall)}
-                </span>
-                <span className="text-xs font-medium mt-1 text-muted-foreground">SALT Score</span>
+            {/* SALT Score + Pillar Breakdown */}
+            {overallScore != null && (
+              <div className="flex flex-col items-center gap-3 min-w-[180px]">
+                <div className="flex flex-col items-center justify-center rounded-xl border-2 border-border px-6 py-4 bg-muted/30 w-full">
+                  <span className={`text-5xl font-bold ${scoreColor(overallScore)}`}>
+                    {Math.round(overallScore)}
+                  </span>
+                  <span className="text-xs font-medium mt-1 text-muted-foreground">SALT Score</span>
+                </div>
+                {/* Pillar mini-bars */}
+                <div className="w-full space-y-1.5">
+                  <MiniScoreBar label="Semantic" score={saltAnchor.semantic ?? 0} />
+                  <MiniScoreBar label="Authority" score={saltAnchor.authority ?? 0} />
+                  <MiniScoreBar label="Location" score={saltAnchor.location ?? 0} />
+                  <MiniScoreBar label="Trust" score={saltAnchor.trust ?? 0} />
+                </div>
               </div>
             )}
             <div className="flex-1 space-y-2">
@@ -127,6 +143,59 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Platform Visibility Scores */}
+      {analysis.platform_scores?.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Visibility by Platform</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {analysis.platform_scores.map((ps) => (
+                <div key={ps.platform} className="rounded-lg border p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{ps.platform}</span>
+                    <span className={`text-lg font-bold ${scoreColor(ps.score)}`}>{ps.score}</span>
+                  </div>
+                  <ScoreBar score={ps.score} />
+                  <p className="text-xs text-muted-foreground">{ps.reason}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* SALT Pillar Details (collapsible) */}
+      {(analysis.salt_scores || []).length > 0 && (
+        <Collapsible open={saltDetailsOpen} onOpenChange={setSaltDetailsOpen}>
+          <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold hover:underline cursor-pointer w-full">
+            <ChevronDown className={`h-4 w-4 transition-transform ${saltDetailsOpen ? "rotate-180" : ""}`} />
+            SALT Score Details
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(analysis.salt_scores || []).map((s) => (
+                <Card key={s.internal_pillar}>
+                  <CardContent className="pt-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{s.pillar}</span>
+                      <span className={`text-lg font-bold ${scoreColor(s.score)}`}>{s.score}</span>
+                    </div>
+                    <ScoreBar score={s.score} />
+                    <p className="text-sm font-medium">{s.headline}</p>
+                    <p className="text-xs text-muted-foreground">{s.what_it_means}</p>
+                    {s.evidence && (
+                      <p className="text-xs text-muted-foreground italic border-l-2 border-border pl-3">{s.evidence}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
 
       {/* 2. The Gap */}
       <Card>
@@ -197,32 +266,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </Card>
       )}
 
-      {/* 5. SALT Scores */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">How AI Evaluates Your Firm</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {(analysis.salt_scores || []).map((s) => (
-            <Card key={s.internal_pillar}>
-              <CardContent className="pt-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{s.pillar}</span>
-                  <span className={`text-lg font-bold ${s.score >= 70 ? "text-green-600" : s.score >= 50 ? "text-yellow-600" : "text-red-500"}`}>
-                    {s.score}
-                  </span>
-                </div>
-                <ScoreBar score={s.score} />
-                <p className="text-sm font-medium">{s.headline}</p>
-                <p className="text-xs text-muted-foreground">{s.what_it_means}</p>
-                {s.evidence && (
-                  <p className="text-xs text-muted-foreground italic border-l-2 border-border pl-3">{s.evidence}</p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* 6. Top Fixes */}
+      {/* 5. Top Fixes */}
       {analysis.top_fixes?.length > 0 && (
         <div className="space-y-4">
           <div>
@@ -238,7 +282,6 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
                     <PriorityBadge priority={fix.priority} />
                   </div>
                   <p className="text-sm text-muted-foreground">{fix.the_problem}</p>
-
                   <div className="space-y-1">
                     <p className="text-xs font-medium">What to do</p>
                     <p className="text-sm">{fix.the_fix}</p>
@@ -248,13 +291,11 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
                       </div>
                     )}
                   </div>
-
                   <div className="flex flex-wrap items-center gap-4 text-xs">
                     <WhoIcon who={fix.who_does_this} />
                     <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3.5 w-3.5" /> {fix.time_to_complete}</span>
                     <span className="flex items-center gap-1 text-muted-foreground"><DollarSign className="h-3.5 w-3.5" /> {fix.cost_estimate}</span>
                   </div>
-
                   <div className="text-xs text-muted-foreground border-t border-border pt-2">
                     <span className="font-medium">Result:</span> {fix.what_changes}
                   </div>
@@ -265,7 +306,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </div>
       )}
 
-      {/* 7. AI Recommends / Skips */}
+      {/* 6. AI Recommends / Skips */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
@@ -299,7 +340,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </Card>
       </div>
 
-      {/* 8. Competitor Context */}
+      {/* 7. Competitor Context */}
       {analysis.competitor_context && (
         <Card>
           <CardHeader>
@@ -327,7 +368,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </Card>
       )}
 
-      {/* 9. 30-Day Action Plan */}
+      {/* 8. 30-Day Action Plan */}
       {analysis["30_day_action_plan"]?.length > 0 && (
         <Card>
           <CardHeader>
@@ -357,7 +398,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </Card>
       )}
 
-      {/* 10. What's Working */}
+      {/* 9. What's Working */}
       {analysis.what_is_working?.length > 0 && (
         <Card>
           <CardHeader>
@@ -374,7 +415,7 @@ export function AnalysisView({ analysis }: AnalysisViewProps) {
         </Card>
       )}
 
-      {/* 11. Website Health Check */}
+      {/* 10. Website Health Check */}
       {analysis._measured_signals && (
         <SignalDiagnostics signals={analysis._measured_signals} />
       )}
