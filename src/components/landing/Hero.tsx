@@ -91,24 +91,24 @@ export function Hero() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
             whileHover={{ scale: 1.02, y: -12 }}
           >
-            <div className="grid lg:grid-cols-2 gap-6 items-start">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+            <div className="grid lg:grid-cols-2 gap-6 items-stretch">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden flex flex-col">
+                <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2 shrink-0">
                   <div className="w-3 h-3 rounded-full bg-white/30" />
                   <div className="w-3 h-3 rounded-full bg-white/30" />
                   <div className="w-3 h-3 rounded-full bg-white/30" />
                 </div>
-                <div className="overflow-hidden">
+                <div className="overflow-hidden flex-1">
                   <LeaderboardPreview />
                 </div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden flex flex-col">
+                <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2 shrink-0">
                   <div className="w-3 h-3 rounded-full bg-white/30" />
                   <div className="w-3 h-3 rounded-full bg-white/30" />
                   <div className="w-3 h-3 rounded-full bg-white/30" />
                 </div>
-                <div className="overflow-hidden">
+                <div className="overflow-hidden flex-1">
                   <BrokerageDashboardPreview />
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function Hero() {
 
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent/20 via-transparent to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
       <div className="absolute top-1/4 -right-64 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl" />
     </section>
   );
